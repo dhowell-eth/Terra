@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Terra</string>
+
+
+    <string name="azimuth_label">Azimuth (Degrees):</string>
+    <string name="compass_accuracy_label">Accuracy</string>
+    <string name="dip_label">Dip (Degrees):</string>
+
+    <!-- TODO: TESTING ONLY STRING RESOURCES -->
+    <string name="test_no_compass_value">NO READING</string>
+
+</resources>
