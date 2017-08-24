@@ -20,7 +20,21 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
     private Cursor mCursor;
     private Context mContext;
 
-    public SessionCursorAdapter(Context mContext) { this.mContext = mContext;}
+    private int idIndex;
+    private int nameIndex;
+    private int notesIndex;
+    private int updatedIndex;
+
+    final private SessionAdapterOnClickHandler mClickHandler;
+
+    public interface SessionAdapterOnClickHandler {
+        void onClick(int sessionId);
+    }
+
+    public SessionCursorAdapter(Context mContext, SessionAdapterOnClickHandler clickHandler) {
+        this.mContext = mContext;
+        mClickHandler = clickHandler;
+    }
 
     @Override
     public SessionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -32,10 +46,10 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
     @Override
     public void onBindViewHolder(SessionViewHolder holder, int position) {
 
-        int idIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
-        int nameIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
-        int notesIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
-        int updatedIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
+        idIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
+        nameIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
+        notesIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
+        updatedIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
 
         mCursor.moveToPosition(position);
 
@@ -74,7 +88,9 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
         return temp;
     }
 
-    class SessionViewHolder extends RecyclerView.ViewHolder {
+    // TODO: add onclick listener logic here
+
+    class SessionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView tvSessionName;
         TextView tvSessionDate;
         TextView tvSessionNotes;
@@ -84,6 +100,16 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
             tvSessionName = (TextView) itemView.findViewById(R.id.tv_session_name);
             tvSessionDate = (TextView) itemView.findViewById(R.id.tv_session_updated);
             tvSessionNotes = (TextView) itemView.findViewById(R.id.tv_session_description);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            itemView.setSelected(true);
+            int adapterPosition = getAdapterPosition();
+            mCursor.moveToPosition(adapterPosition);
+            int sessionId = mCursor.getInt(idIndex);
+            mClickHandler.onClick(sessionId);
         }
     }
 

@@ -26,6 +26,9 @@
     <!-- Open Existing Project Screen Stuff         -->
     <string name="open_existing_heading">Open an Existing Project:</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <!-- Session Recycler View Stuff (Nothing here for now) -->
 
 

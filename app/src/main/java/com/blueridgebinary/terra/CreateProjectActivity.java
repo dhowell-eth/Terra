@@ -25,7 +25,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class CreateProjectActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CreateProjectActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        SessionCursorAdapter.SessionAdapterOnClickHandler
+{
 
     private static final String TAG = CreateProjectActivity.class.getSimpleName();
     private static final int SESSION_LOADER_ID = 0;
@@ -45,12 +48,18 @@ public class CreateProjectActivity extends AppCompatActivity implements LoaderMa
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_test_session);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new SessionCursorAdapter(this);
+        mAdapter = new SessionCursorAdapter(this,this);
         mRecyclerView.setAdapter(mAdapter);
 
         // Initialize Loader for Session/Project Data
         // adding the below code to the button function for  testing
         getSupportLoaderManager().initLoader(SESSION_LOADER_ID, null, this);
+    }
+
+
+    @Override
+    public void onClick(int sessionId) {
+        return;
     }
 
     @Override

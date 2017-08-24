@@ -1,5 +1,6 @@
 package com.blueridgebinary.terra;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -14,7 +15,10 @@ import android.widget.EditText;
 import com.blueridgebinary.terra.adapters.SessionCursorAdapter;
 import com.blueridgebinary.terra.data.TerraDbContract;
 
-public class OpenProjectActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class OpenProjectActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        SessionCursorAdapter.SessionAdapterOnClickHandler
+{
 
 
     private static final String TAG = CreateProjectActivity.class.getSimpleName();
@@ -34,7 +38,7 @@ public class OpenProjectActivity extends AppCompatActivity implements LoaderMana
         // Get the recycler view and hook it up to the Adapter
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_open_sessions);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new SessionCursorAdapter(this);
+        mAdapter = new SessionCursorAdapter(this, this);
         mRecyclerView.setAdapter(mAdapter);
 
 
@@ -136,8 +140,11 @@ public class OpenProjectActivity extends AppCompatActivity implements LoaderMana
         mAdapter.swapCursor(null);
     }
 
-
-
-
-
+    @Override
+    public void onClick(int sessionId) {
+        Intent intent = new Intent(OpenProjectActivity.this,com.blueridgebinary.terra.MainActivity.class);
+        intent.putExtra("sessionId",sessionId);
+        startActivity(intent);
+        OpenProjectActivity.this.finish(); // Remove this activity from the backstack
+    }
 }
