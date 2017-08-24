@@ -9,4 +9,24 @@
     <!-- TODO: TESTING ONLY STRING RESOURCES -->
     <string name="test_no_compass_value">NO READING</string>
 
+
+    <!-- Welcome Screen Stuff         -->
+    <string name="welcome_header">Welcome! Select an option below to begin.</string>
+    <string name="welcome_new_button_text">New Project…</string>
+    <string name="welcome_open_button_text">Open Existing…</string>
+
+    <!-- New Project Screen Stuff         -->
+    <string name="new_project_heading">Create a New Project:</string>
+    <string name="new_project_name_label">Project Name:</string>
+    <string name="new_project_name_hint">Enter name…</string>
+    <string name="new_project_description_label">Description:</string>
+    <string name="new_project_description_hint">Enter a description… (Optional)</string>
+    <string name="new_project_button_text">Create</string>
+
+    <!-- Open Existing Project Screen Stuff         -->
+    <string name="open_existing_heading">Open an Existing Project:</string>
+
+    <!-- Session Recycler View Stuff (Nothing here for now) -->
+
+
 </resources>

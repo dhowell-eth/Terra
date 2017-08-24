@@ -42,8 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
         tvGpsValues = (TextView) findViewById(R.id.tv_gps_values);
 
-        Intent intent = new Intent(this, com.blueridgebinary.terra.CreateProjectActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this, com.blueridgebinary.terra.WelcomeActivity.class);
+        //startActivity(intent);
+        //Intent intent = new Intent(this, com.blueridgebinary.terra.CreateProjectActivity.class);
+        //startActivity(intent);
+
         // TESTING -----------
         // Have to wrap calls in logic for handling the "dangerous" fine locaction permission
 /*
