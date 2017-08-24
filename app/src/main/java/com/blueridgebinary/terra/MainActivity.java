@@ -46,6 +46,8 @@ public class MainActivity extends FragmentActivity implements OnTerraFragmentInt
     BottomNavigationView mBottomNavView;
     final List<MenuItem> items=new ArrayList<>();
     final int OVERVIEW_PAGE = 1;
+    public int sessionId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public class MainActivity extends FragmentActivity implements OnTerraFragmentInt
         setContentView(R.layout.activity_main_2);
 
         // Get sessionId from Intent Extras
-        int sessionId = getIntent().getIntExtra("sessionId",0);
+        sessionId = getIntent().getIntExtra("sessionId",0);
 
         // Get ViewPager
         mViewPager = (ViewPager) findViewById(R.id.vp_home);
@@ -101,4 +103,12 @@ public class MainActivity extends FragmentActivity implements OnTerraFragmentInt
     public void onFragmentInteraction(String tag, String data) {
         return;
     }
+
+
+
+    public String getSessionName(int id) {
+        // TODO: implement a helper method for querying session name given a sessionId
+            return "Not Implemented...";
+    }
+
 }

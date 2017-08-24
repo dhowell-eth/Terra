@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 
 import java.util.ArrayList;
@@ -75,6 +77,16 @@ public class HomeScreenOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
+
+        // TODO: Set Project Name Text
+
+        // TODO: Pre-set Current Locality
+
+        // TODO: Load and populate Locality details
+
+        // TODO: Get Buttons and set onclick listeners
+
+        // Populate Spinner
         mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
         setSpinnerAdapter(mSpinner);
         return v;
