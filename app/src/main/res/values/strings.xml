@@ -26,10 +26,17 @@
     <!-- Open Existing Project Screen Stuff         -->
     <string name="open_existing_heading">Open an Existing Project:</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <!-- Session Recycler View Stuff (Nothing here for now) -->
 
+    <!-- Home Screen Overview Stuff         -->
+    <string name="home_overview_title">Home:</string>
 
+    <!-- Home Screen Bottom Menu Stuff         -->
+    <string name="main_bottom_menu_home">Overview</string>
+    <string name="main_bottom_menu_map">Map</string>
+    <string name="main_bottom_menu_list">List</string>
+    <string name="title_activity_testing_bottom_nav_actiity">TestingBottomNavActiity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

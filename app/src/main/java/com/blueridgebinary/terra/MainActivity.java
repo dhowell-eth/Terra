@@ -1,6 +1,7 @@
 package com.blueridgebinary.terra;
 
 
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
@@ -36,20 +37,64 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends FragmentActivity implements OnTerraFragmentInteractionListener<String> {
 
     ViewPager mViewPager;
+    BottomNavigationView mBottomNavView;
+    final List<MenuItem> items=new ArrayList<>();
+    final int OVERVIEW_PAGE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_2);
 
-
+        // Get sessionId from Intent Extras
         int sessionId = getIntent().getIntExtra("sessionId",0);
+
+        // Get ViewPager
         mViewPager = (ViewPager) findViewById(R.id.vp_home);
+        // Get Bottom Menu Widget
+        mBottomNavView = (BottomNavigationView) findViewById(R.id.navigation_home);
+        //  Add Menu items to a list for getting their index below
+        Menu menu = mBottomNavView.getMenu();
+        for(int i=0; i<menu.size(); i++){
+            items.add(menu.getItem(i));
+        }
+        // Connect adapter to view pager (this feeds the relevant Fragments to it)
         mViewPager.setAdapter(new HomeScreenPagerAdapter(getSupportFragmentManager()));
-        mViewPager.setCurrentItem(1);
+        // Set the default page to the center page [0 -- (1) -- 2]
+        mViewPager.setCurrentItem(OVERVIEW_PAGE);
+        // Set the menu item to match current page
+        mBottomNavView.setSelectedItemId(R.id.menu_home_overview);
+        // Create Listener for Bottom Menu that changes the ViewPager accordingly
+        mBottomNavView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int position=items.indexOf(item);
+                mViewPager.setCurrentItem(position);
+                return true;
+            }
+        });
+        // Create listener to update bottom menu if page is  swiped
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()  {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+            // When a new page is selected, change the nav menu to the corresponding item
+            @Override
+            public void onPageSelected(int position) {
+                if (position < items.size()) {
+                    mBottomNavView.setSelectedItemId(items.get(position).getItemId());
+                }
+            }
+        });
     }
 
     @Override

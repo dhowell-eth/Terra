@@ -4,11 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.blueridgebinary.terra.R;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,6 +34,9 @@ public class HomeScreenOverviewFragment extends Fragment {
     private String mParam2;
 
     private OnTerraFragmentInteractionListener mListener;
+
+    private Spinner mSpinner;
+
 
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
@@ -59,13 +67,17 @@ public class HomeScreenOverviewFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
+        View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
+        mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
+        setSpinnerAdapter(mSpinner);
+        return v;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,17 +102,57 @@ public class HomeScreenOverviewFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mSpinner.setAdapter(null);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    private void setSpinnerAdapter(Spinner s) {
+        ArrayList<LocalitySpinnerItem> localities = new ArrayList<>();
 
+        // TODO: Hook this up to a query that is written in the main activity
+        for (int i=0;i<10;i++){
+            localities.add(new LocalitySpinnerItem(Integer.toString(i),i));
+        }
+
+        ArrayAdapter<LocalitySpinnerItem> adapter =
+                new ArrayAdapter<LocalitySpinnerItem>(this.getActivity(),R.layout.support_simple_spinner_dropdown_item,
+                localities);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        s.setAdapter(adapter);
+
+    }
+
+    // --------------- Class for each Spinner Entry-----------------------
+    private class LocalitySpinnerItem {
+        private String localityName;
+        private int localityId;
+
+        public LocalitySpinnerItem() {
+        }
+
+        public LocalitySpinnerItem(String localityName, int localityId) {
+            this.localityName = localityName;
+            this.localityId = localityId;
+        }
+
+        public String getLocalityName() {
+            return localityName;
+        }
+
+        public void setLocalityName(String localityName) {
+            this.localityName = localityName;
+        }
+
+        public int getLocalityId() {
+            return localityId;
+        }
+
+        public void setLocalityId(int localityId) {
+            this.localityId = localityId;
+        }
+
+        @Override
+        public String toString() {
+            return localityName;
+        }
+    }
 }
