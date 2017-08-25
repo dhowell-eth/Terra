@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.blueridgebinary.terra.R;
+import com.blueridgebinary.terra.data.CurrentDataset;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,7 +19,7 @@ import com.blueridgebinary.terra.R;
  * Use the {@link HomeScreenMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenMapFragment extends Fragment {
+public class HomeScreenMapFragment extends HomeScreenFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -91,6 +92,11 @@ public class HomeScreenMapFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void refreshFragmentData(CurrentDataset cd) {
+
     }
 
     /**

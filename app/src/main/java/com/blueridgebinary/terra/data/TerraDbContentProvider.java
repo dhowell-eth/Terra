@@ -15,6 +15,8 @@ import android.util.Log;
 
 import com.blueridgebinary.terra.data.TerraDbContract;
 
+import java.util.Arrays;
+
 
 /**
  * Created by dorra on 8/22/2017.
@@ -37,7 +39,7 @@ public class TerraDbContentProvider extends ContentProvider {
     private TerraDbHelper mTerraDbHelper;
 
 
-    // TODO: need to implement methods for working with the DB
+    // TODO: need to implement  update and delete methods
 
     public static UriMatcher buildUriMatcher() {
         // This is a helper method for registering all of the table/row URIs with a matcher
@@ -79,13 +81,48 @@ public class TerraDbContentProvider extends ContentProvider {
 
         // Query for the tasks directory and write a default case
         String queryTableName;
+        String rowId;
         switch (match) {
             // Query for the tasks directory
             case SESSIONS:
                 queryTableName = TerraDbContract.SessionEntry.TABLE_NAME;
                 break;
+            case SESSION_WITH_ID:
+                queryTableName = TerraDbContract.SessionEntry.TABLE_NAME;
+                rowId = uri.getPathSegments().get(1);
+                // Append id to where clause for query
+                if (selection == null) {
+                    selection = TerraDbContract.SessionEntry._ID + " = ?";
+                } else {
+                selection = selection + " AND " + TerraDbContract.SessionEntry._ID + " = ?";
+                }
+                if (selectionArgs != null) {
+                    selectionArgs = Arrays.copyOf(selectionArgs, selectionArgs.length+1);
+                    selectionArgs[selectionArgs.length - 1] = rowId;
+                }
+                else {
+                    selectionArgs = new String[] {rowId};
+                }
+                break;
             case LOCALITIES:
                 queryTableName = TerraDbContract.LocalityEntry.TABLE_NAME;
+                break;
+            case LOCALITY_WITH_ID:
+                queryTableName = TerraDbContract.LocalityEntry.TABLE_NAME;
+                rowId = uri.getPathSegments().get(1);
+                // Append id to where clause for query
+                if (selection == null) {
+                    selection = TerraDbContract.LocalityEntry._ID + " = ?";
+                } else {
+                    selection = selection + " AND " + TerraDbContract.LocalityEntry._ID + " = ?";
+                }
+                if (selectionArgs != null) {
+                    selectionArgs = Arrays.copyOf(selectionArgs, selectionArgs.length+1);
+                    selectionArgs[selectionArgs.length - 1] = rowId;
+                }
+                else {
+                    selectionArgs = new String[] {rowId};
+                }
                 break;
             case COMPASS_MEASUREMENTS:
                 queryTableName = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
@@ -116,23 +153,32 @@ public class TerraDbContentProvider extends ContentProvider {
         final SQLiteDatabase db = mTerraDbHelper.getWritableDatabase();
         int match = sUriMatcher.match(uri);
         Uri returnUri;
-
+        Uri contentUri;
+        String tableName;
         switch (match) {
             case SESSIONS:
-                // Create a new Session Entry
-
-                Log.d("DB_DEBUGGING",values.toString());
-                long id = db.insert(TerraDbContract.SessionEntry.TABLE_NAME,null,values);
-                if (id > 0) {
-                    returnUri = ContentUris.withAppendedId(TerraDbContract.SessionEntry.CONTENT_URI, id);
-                } else {
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
-                }
+                tableName = TerraDbContract.SessionEntry.TABLE_NAME;
+                contentUri = TerraDbContract.SessionEntry.CONTENT_URI;
                 break;
+            case LOCALITIES:
+                tableName = TerraDbContract.LocalityEntry.TABLE_NAME;
+                contentUri = TerraDbContract.LocalityEntry.CONTENT_URI;
+            case COMPASS_MEASUREMENTS:
+                tableName = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
+                contentUri = TerraDbContract.CompassMeasurementEntry.CONTENT_URI;
+            case PICTURES:
+                tableName = TerraDbContract.PictureEntry.TABLE_NAME;
+                contentUri = TerraDbContract.PictureEntry.CONTENT_URI;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
+        long id = db.insert(tableName,null,values);
+        if (id > 0) {
+            returnUri = ContentUris.withAppendedId(contentUri, id);
+        } else {
+            throw new android.database.SQLException("Failed to insert row into " + uri);
+        }
         getContext().getContentResolver().notifyChange(uri,null);
         return returnUri;
         }

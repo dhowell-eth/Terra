@@ -14,6 +14,9 @@ import android.widget.TextView;
 
 import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
+import com.blueridgebinary.terra.data.CurrentDataset;
+import com.blueridgebinary.terra.data.CurrentLocality;
+import com.blueridgebinary.terra.data.CurrentSession;
 
 import java.util.ArrayList;
 
@@ -25,7 +28,7 @@ import java.util.ArrayList;
  * Use the {@link HomeScreenOverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenOverviewFragment extends Fragment {
+public class HomeScreenOverviewFragment extends HomeScreenFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -38,7 +41,7 @@ public class HomeScreenOverviewFragment extends Fragment {
     private OnTerraFragmentInteractionListener mListener;
 
     private Spinner mSpinner;
-
+    private TextView tvSessionName;
 
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
@@ -79,7 +82,7 @@ public class HomeScreenOverviewFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
 
         // TODO: Set Project Name Text
-
+        tvSessionName = (TextView) v.findViewById(R.id.tv_home_overview_title);
         // TODO: Pre-set Current Locality
 
         // TODO: Load and populate Locality details
@@ -132,6 +135,28 @@ public class HomeScreenOverviewFragment extends Fragment {
         s.setAdapter(adapter);
 
     }
+
+    @Override
+    public void refreshFragmentData(CurrentDataset cd) {
+        // If Session Data is being passed in, then update session related views
+        if (cd instanceof CurrentSession) {
+            Log.d("Loader-DEBUG","Refreshing Home Fragment!");
+            CurrentSession currentSession = (CurrentSession) cd;
+            updateSessionUiComponents(currentSession);
+            Log.d("SESSION_FRAG_DEBUG","SESSION IS IN THE FRAG! " + currentSession.getSessionName());
+        }
+    }
+
+
+    private void updateSessionUiComponents(CurrentSession session) {
+        tvSessionName.setText(session.getSessionName());
+    }
+
+    // TODO: implement this
+    private void updateLocalityUiComponents(CurrentLocality locality) {
+
+    }
+
 
     // --------------- Class for each Spinner Entry-----------------------
     private class LocalitySpinnerItem {
