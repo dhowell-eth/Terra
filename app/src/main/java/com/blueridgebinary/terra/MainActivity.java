@@ -59,59 +59,10 @@ public class MainActivity extends FragmentActivity implements
 
     public int sessionId;
 
-    final static int SESSION_LOADER_ID = 10;
-    final static int LOCALITY_LOADER_ID = 20;
     final static int OVERVIEW_PAGE = 1;
 
     public CurrentSession currentSession;
     public CurrentLocality currentLocality;
-
-
-    // Define loader and respective callbacks to be used by this activity
-    // this can eventually get moved out into separate files for organizational purposes
-
-    // <-----   Session Data Loader ----->
-    private LoaderManager.LoaderCallbacks<Cursor> sessionLoaderListener =
-            new LoaderManager.LoaderCallbacks<Cursor>() {
-                @Override
-                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    Uri baseUri;
-                    // sessionId defaults to 0 if no id is passed with the
-                    // intent that creates this activity
-                    if (sessionId != 0) {
-                        // Querying the uri for this specific session (that way listener works properly)
-                        baseUri = Uri.withAppendedPath(TerraDbContract.SessionEntry.CONTENT_URI,Uri.encode(Integer.toString(sessionId)));
-                    } else {
-                        // don't do anything if this activity doesn't have a sessionId
-                        return null;
-                    }
-                    return new CursorLoader(getBaseContext(), baseUri, null,
-                            null,null,null);
-                }
-
-                @Override
-                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                    // Populate current Session object
-
-                    //
-                    Log.d("Loader-DEBUG","called onLoadFinished()!");
-                    sessionCursorToCurrentSession(data);
-
-                    // Force refresh on fragment level
-                    //mViewPager.getAdapter().notifyDataSetChanged();
-                }
-
-                @Override
-                public void onLoaderReset(Loader<Cursor> loader) {
-                    // Clear data for the current session
-                    // TODO: not sure if I also need to store this data in this activity or if it can just sit in the adapter
-                    currentSession = null;
-                    //homeScreenPagerAdapter.setCurrentSession(null);
-                }
-            };
-
-    // <-----   Locality Data Loader ----->
-
 
 
     @Override
@@ -132,7 +83,7 @@ public class MainActivity extends FragmentActivity implements
             items.add(menu.getItem(i));
         }
         // Connect adapter to view pager (this feeds the relevant Fragments to it)
-        homeScreenPagerAdapter = new HomeScreenPagerAdapter(getSupportFragmentManager());
+        homeScreenPagerAdapter = new HomeScreenPagerAdapter(getSupportFragmentManager(),sessionId);
         mViewPager.setAdapter(homeScreenPagerAdapter);
         // Set the default page to the center page [0 -- (1) -- 2]
         mViewPager.setCurrentItem(OVERVIEW_PAGE);
@@ -164,16 +115,8 @@ public class MainActivity extends FragmentActivity implements
             }
         });
 
-        getSupportLoaderManager().initLoader(SESSION_LOADER_ID,null,sessionLoaderListener);
 
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getSupportLoaderManager().restartLoader(SESSION_LOADER_ID, null, sessionLoaderListener);
-    }
-
 
     @Override
     public void onFragmentInteraction(String tag, String data) {
@@ -182,29 +125,6 @@ public class MainActivity extends FragmentActivity implements
 
 
 
-    public void sessionCursorToCurrentSession(Cursor sessionCursor) {
 
-        Log.d("NewURIDEBUG",Integer.toString(sessionCursor.getCount()) + "Records in Cursor");
-        Log.d("NewURIDEBUG","Got cursor and am trying to retrieve data");
-        if (sessionCursor.getCount() != 1) return;
-        sessionCursor.moveToFirst();
-
-        int idIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
-        int nameIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
-        int notesIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
-        int updatedIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
-        int createdIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_CREATED);
-
-        int id = sessionCursor.getInt(idIndex);
-        String name = sessionCursor.getString(nameIndex);
-        String notes = sessionCursor.getString(notesIndex);
-        String updated = sessionCursor.getString(updatedIndex);
-        String created = sessionCursor.getString(createdIndex);
-
-        currentSession = new CurrentSession(id,name,notes,updated,created);
-        Log.d("NewURIDEBUG","Loaded Session:" + currentSession.getSessionName());
-        // TODO: REMOVE
-        //homeScreenPagerAdapter.setCurrentSession(currentSession);
-    }
 
 }

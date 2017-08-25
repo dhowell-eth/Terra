@@ -3,6 +3,7 @@ package com.blueridgebinary.terra.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
+import com.blueridgebinary.terra.loaders.LoaderIds;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,15 +21,15 @@ import com.blueridgebinary.terra.data.CurrentDataset;
  * Use the {@link HomeScreenDataOverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenDataOverviewFragment extends HomeScreenFragment {
+public class HomeScreenDataOverviewFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_CURRENTSESSIONID = "currentSessionId";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
-    private String mParam2;
+    private int currentSessionId;
 
     private OnTerraFragmentInteractionListener mListener;
 
@@ -44,13 +46,19 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment {
      * @return A new instance of fragment HomeScreenDataOverviewFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeScreenDataOverviewFragment newInstance(String param1, String param2) {
+    public static HomeScreenDataOverviewFragment newInstance(String param1, int currentSessionId) {
         HomeScreenDataOverviewFragment fragment = new HomeScreenDataOverviewFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(ARG_CURRENTSESSIONID, currentSessionId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
     }
 
     @Override
@@ -58,15 +66,9 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
-    }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home_screen_data_overview, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -92,11 +94,6 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void refreshFragmentData(CurrentDataset cd) {
-
     }
 
     /**

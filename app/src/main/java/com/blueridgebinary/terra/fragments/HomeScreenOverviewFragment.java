@@ -1,9 +1,14 @@
 package com.blueridgebinary.terra.fragments;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +22,8 @@ import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
 import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
+import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.loaders.LoaderIds;
 
 import java.util.ArrayList;
 
@@ -28,15 +35,17 @@ import java.util.ArrayList;
  * Use the {@link HomeScreenOverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenOverviewFragment extends HomeScreenFragment {
+public class HomeScreenOverviewFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_CURRENTSESSIONID = "currentSessionId";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
-    private String mParam2;
+    private int currentSessionId;
+
+    CurrentSession currentSession;
 
     private OnTerraFragmentInteractionListener mListener;
 
@@ -47,22 +56,20 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeScreenOverviewFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeScreenOverviewFragment newInstance(String param1, String param2) {
+    public static HomeScreenOverviewFragment newInstance(String param1, int currentSessionId) {
         HomeScreenOverviewFragment fragment = new HomeScreenOverviewFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(ARG_CURRENTSESSIONID, currentSessionId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SESSION_LOADER_ID,null,sessionLoaderListener);
+
     }
 
     @Override
@@ -70,7 +77,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
 
     }
@@ -136,20 +143,8 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     }
 
-    @Override
-    public void refreshFragmentData(CurrentDataset cd) {
-        // If Session Data is being passed in, then update session related views
-        if (cd instanceof CurrentSession) {
-            Log.d("Loader-DEBUG","Refreshing Home Fragment!");
-            CurrentSession currentSession = (CurrentSession) cd;
-            updateSessionUiComponents(currentSession);
-            Log.d("SESSION_FRAG_DEBUG","SESSION IS IN THE FRAG! " + currentSession.getSessionName());
-        }
-    }
-
-
-    private void updateSessionUiComponents(CurrentSession session) {
-        tvSessionName.setText(session.getSessionName());
+    private void updateSessionUiComponents() {
+        tvSessionName.setText(currentSession.getSessionName());
     }
 
     // TODO: implement this
@@ -192,4 +187,75 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             return localityName;
         }
     }
+
+    // Define loader and respective callbacks to be used by this activity
+    // this can eventually get moved out into separate files for organizational purposes
+
+    // <-----   Session Data Loader ----->
+    private LoaderManager.LoaderCallbacks<Cursor> sessionLoaderListener =
+            new LoaderManager.LoaderCallbacks<Cursor>() {
+                @Override
+                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                    Uri baseUri;
+                    // sessionId defaults to 0 if no id is passed with the
+                    // intent that creates this activity
+                    if (currentSessionId != 0) {
+                        // Querying the uri for this specific session (that way listener works properly)
+                        baseUri = Uri.withAppendedPath(TerraDbContract.SessionEntry.CONTENT_URI,Uri.encode(Integer.toString(currentSessionId)));
+                    } else {
+                        // don't do anything if this activity doesn't have a sessionId
+                        return null;
+                    }
+                    return new CursorLoader(getContext(), baseUri, null,
+                            null,null,null);
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                    // Populate current Session object
+
+                    //
+                    Log.d("Loader-DEBUG","called onLoadFinished()!");
+                    sessionCursorToCurrentSession(data);
+                    updateSessionUiComponents();
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+                    // Clear data for the current session
+                    // TODO: not sure if I also need to store this data in this activity or if it can just sit in the adapter
+                    currentSession = null;
+                }
+            };
+
+    // <-----   Locality Data Loader ----->
+    
+
+
+
+    public void sessionCursorToCurrentSession(Cursor sessionCursor) {
+
+        Log.d("NewURIDEBUG",Integer.toString(sessionCursor.getCount()) + "Records in Cursor");
+        Log.d("NewURIDEBUG","Got cursor and am trying to retrieve data");
+        if (sessionCursor.getCount() != 1) return;
+        sessionCursor.moveToFirst();
+
+        int idIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
+        int nameIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
+        int notesIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
+        int updatedIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
+        int createdIndex = sessionCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_CREATED);
+
+        int id = sessionCursor.getInt(idIndex);
+        String name = sessionCursor.getString(nameIndex);
+        String notes = sessionCursor.getString(notesIndex);
+        String updated = sessionCursor.getString(updatedIndex);
+        String created = sessionCursor.getString(createdIndex);
+
+        currentSession = new CurrentSession(id,name,notes,updated,created);
+        Log.d("NewURIDEBUG","Loaded Session:" + currentSession.getSessionName());
+        // TODO: REMOVE
+        //homeScreenPagerAdapter.setCurrentSession(currentSession);
+    }
+
 }
