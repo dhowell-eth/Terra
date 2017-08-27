@@ -39,4 +39,14 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_activity_add_edit_locality">AddEditLocalityMap</string>
+
+    <!-- Add edit Locality Stuff         -->
+    <string name="add_edit_locality_title">My Session Name</string>
+    <string name="add_edit_locality_subheading_add">Add Station:</string>
+    <string name="add_edit_locality_subheading_edit">Edit Station ?:</string>
+    <string name="add_edit_locality_subheading_lat_label">Lat:</string>
+    <string name="add_edit_locality_subheading_long_label">Long:</string>
+    <string name="add_edit_locality_subheading_acc_label">Accuracy (m)</string>
+    <string name="add_edit_locality_ok_button_text">OK</string>
 </resources>

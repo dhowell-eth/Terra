@@ -1,7 +1,9 @@
 package com.blueridgebinary.terra.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,9 +16,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.blueridgebinary.terra.AddEditLocalityActivity;
 import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
@@ -51,6 +55,7 @@ public class HomeScreenOverviewFragment extends Fragment {
 
     private Spinner mSpinner;
     private TextView tvSessionName;
+    private ImageButton imbtToggleGps;
 
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
@@ -95,6 +100,14 @@ public class HomeScreenOverviewFragment extends Fragment {
         // TODO: Load and populate Locality details
 
         // TODO: Get Buttons and set onclick listeners
+        imbtToggleGps = (ImageButton) v.findViewById(R.id.imbt_home_overview_new_station);
+        imbtToggleGps.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         // Populate Spinner
         mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
@@ -188,6 +201,7 @@ public class HomeScreenOverviewFragment extends Fragment {
         }
     }
 
+
     // Define loader and respective callbacks to be used by this activity
     // this can eventually get moved out into separate files for organizational purposes
 
@@ -229,7 +243,7 @@ public class HomeScreenOverviewFragment extends Fragment {
             };
 
     // <-----   Locality Data Loader ----->
-    
+
 
 
 
