@@ -163,12 +163,15 @@ public class TerraDbContentProvider extends ContentProvider {
             case LOCALITIES:
                 tableName = TerraDbContract.LocalityEntry.TABLE_NAME;
                 contentUri = TerraDbContract.LocalityEntry.CONTENT_URI;
+                break;
             case COMPASS_MEASUREMENTS:
                 tableName = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
                 contentUri = TerraDbContract.CompassMeasurementEntry.CONTENT_URI;
+                break;
             case PICTURES:
                 tableName = TerraDbContract.PictureEntry.TABLE_NAME;
                 contentUri = TerraDbContract.PictureEntry.CONTENT_URI;
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

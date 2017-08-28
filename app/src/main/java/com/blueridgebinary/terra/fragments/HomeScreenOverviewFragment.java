@@ -42,11 +42,11 @@ import java.util.ArrayList;
 public class HomeScreenOverviewFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_CURRENTSESSIONNAME = "currentSessionName";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private String currentSessionName;
     private int currentSessionId;
 
     CurrentSession currentSession;
@@ -61,10 +61,10 @@ public class HomeScreenOverviewFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static HomeScreenOverviewFragment newInstance(String param1, int currentSessionId) {
+    public static HomeScreenOverviewFragment newInstance(String currentSessionName, int currentSessionId) {
         HomeScreenOverviewFragment fragment = new HomeScreenOverviewFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_CURRENTSESSIONNAME, currentSessionName);
         args.putInt(ARG_CURRENTSESSIONID, currentSessionId);
         fragment.setArguments(args);
         return fragment;
@@ -81,7 +81,7 @@ public class HomeScreenOverviewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            currentSessionName = getArguments().getString(ARG_CURRENTSESSIONNAME);
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
 
@@ -95,6 +95,7 @@ public class HomeScreenOverviewFragment extends Fragment {
 
         // TODO: Set Project Name Text
         tvSessionName = (TextView) v.findViewById(R.id.tv_home_overview_title);
+        tvSessionName.setText(currentSessionName);
         // TODO: Pre-set Current Locality
 
         // TODO: Load and populate Locality details
@@ -104,6 +105,8 @@ public class HomeScreenOverviewFragment extends Fragment {
         imbtToggleGps.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
+                intent.putExtra("sessionId",currentSessionId);
+                intent.putExtra("sessionName",currentSessionName);
                 startActivity(intent);
             }
         });
@@ -157,7 +160,7 @@ public class HomeScreenOverviewFragment extends Fragment {
     }
 
     private void updateSessionUiComponents() {
-        tvSessionName.setText(currentSession.getSessionName());
+        //
     }
 
     // TODO: implement this

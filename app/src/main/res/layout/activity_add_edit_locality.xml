@@ -4,26 +4,37 @@
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map_add_edit_locality"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="0dp"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="8dp"
-        map:layout_constraintBottom_toBottomOf="parent"
-        map:layout_constraintHorizontal_bias="0.0"
-        map:layout_constraintLeft_toLeftOf="parent"
-        map:layout_constraintRight_toRightOf="parent"
-        map:layout_constraintTop_toBottomOf="@+id/btn_add_edit_locality_ok"
-        tools:context="com.blueridgebinary.terra.AddEditLocalityActivity"
-        map:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_edit_locality_ok">
 
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map_add_edit_locality"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.blueridgebinary.terra.AddEditLocalityActivity" />
+
+        <ImageView
+            android:id="@+id/iv_add_edit_crosshairs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_target_50px" />
+
+    </RelativeLayout>
     <TextView
         android:id="@+id/tv_add_edit_locality_title"
         android:layout_width="wrap_content"
@@ -99,7 +110,8 @@
         android:text="@string/add_edit_locality_ok_button_text"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imbt_add_edit_locality_toggle_edit" />
+        app:layout_constraintTop_toBottomOf="@+id/imbt_add_edit_locality_toggle_edit"
+        android:onClick="saveNewLocation"/>
 
 
     <TextView
