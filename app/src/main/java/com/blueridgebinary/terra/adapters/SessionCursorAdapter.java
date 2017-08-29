@@ -28,7 +28,7 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
     final private SessionAdapterOnClickHandler mClickHandler;
 
     public interface SessionAdapterOnClickHandler {
-        void onClick(int sessionId);
+        void onClick(int sessionId, String sessionName);
     }
 
     public SessionCursorAdapter(Context mContext, SessionAdapterOnClickHandler clickHandler) {
@@ -109,7 +109,8 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
             int sessionId = mCursor.getInt(idIndex);
-            mClickHandler.onClick(sessionId);
+            String sessionName = mCursor.getString(nameIndex);
+            mClickHandler.onClick(sessionId,sessionName);
         }
     }
 

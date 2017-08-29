@@ -21,7 +21,7 @@ public class OpenProjectActivity extends AppCompatActivity implements
 {
 
 
-    private static final String TAG = CreateProjectActivity.class.getSimpleName();
+    private static final String TAG = OpenProjectActivity.class.getSimpleName();
     private static final int SESSION_LOADER_ID = 0;
 
     RecyclerView mRecyclerView;
@@ -141,9 +141,10 @@ public class OpenProjectActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onClick(int sessionId) {
+    public void onClick(int sessionId, String sessionName) {
         Intent intent = new Intent(OpenProjectActivity.this,com.blueridgebinary.terra.MainActivity.class);
         intent.putExtra("sessionId",sessionId);
+        intent.putExtra("sessionName",sessionName);
         startActivity(intent);
         OpenProjectActivity.this.finish(); // Remove this activity from the backstack
     }

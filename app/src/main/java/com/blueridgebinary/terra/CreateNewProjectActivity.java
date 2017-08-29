@@ -51,6 +51,7 @@ public class CreateNewProjectActivity extends AppCompatActivity {
                         // Start up the home activity for this new session
                         Intent intent = new Intent(CreateNewProjectActivity.this,com.blueridgebinary.terra.MainActivity.class);
                         intent.putExtra("sessionId", newSessionId);
+                        intent.putExtra("sessionName",inputName);
                         startActivity(intent);
                         CreateNewProjectActivity.this.finish();
                     }

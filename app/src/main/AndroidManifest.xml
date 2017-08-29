@@ -30,7 +30,6 @@
             android:authorities="com.blueridgebinary.terra"
             android:exported="false" />
 
-        <activity android:name=".CreateProjectActivity" />
         <activity android:name=".OpenProjectActivity" />
         <activity android:name=".CreateNewProjectActivity" />
         <!--

@@ -24,19 +24,21 @@ public class HomeScreenPagerAdapter extends FragmentPagerAdapter {
     private CurrentSession currentSession;
     private CurrentLocality currentLocality;
     private int currentSessionId;
+    private String currentSessionName;
 
-    public HomeScreenPagerAdapter(FragmentManager fm,int id) {
+    public HomeScreenPagerAdapter(FragmentManager fm,int id, String name) {
         super(fm);
         currentSessionId = id;
+        currentSessionName = name;
     }
 
     @Override
     public Fragment getItem(int position) {
       switch (position) {
-          case 0: return HomeScreenMapFragment.newInstance("Map Frag.",currentSessionId);
-          case 1: return HomeScreenOverviewFragment.newInstance("Home Sreen Frag.",currentSessionId);
-          case 2: return HomeScreenDataOverviewFragment.newInstance("Data Overview Frag.",currentSessionId);
-          default: return HomeScreenOverviewFragment.newInstance("Home Screen Default Frag.",currentSessionId);
+          case 0: return HomeScreenMapFragment.newInstance(currentSessionName,currentSessionId);
+          case 1: return HomeScreenOverviewFragment.newInstance(currentSessionName,currentSessionId);
+          case 2: return HomeScreenDataOverviewFragment.newInstance(currentSessionName,currentSessionId);
+          default: return HomeScreenOverviewFragment.newInstance(currentSessionName,currentSessionId);
       }
     }
 

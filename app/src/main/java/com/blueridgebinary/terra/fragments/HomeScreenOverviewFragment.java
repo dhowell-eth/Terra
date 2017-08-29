@@ -11,6 +11,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.blueridgebinary.terra.AddEditLocalityActivity;
@@ -28,8 +31,11 @@ import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.loaders.LoaderIds;
+import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
+import com.blueridgebinary.terra.loaders.SessionLoaderListener;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,7 +45,7 @@ import java.util.ArrayList;
  * Use the {@link HomeScreenOverviewFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenOverviewFragment extends Fragment {
+public class HomeScreenOverviewFragment extends HomeScreenFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_CURRENTSESSIONNAME = "currentSessionName";
@@ -47,15 +53,22 @@ public class HomeScreenOverviewFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String currentSessionName;
-    private int currentSessionId;
+    private Integer currentSessionId;
+    private Integer currentLocalityId;
 
     CurrentSession currentSession;
+    CurrentLocality currentLocality;
 
     private OnTerraFragmentInteractionListener mListener;
 
     private Spinner mSpinner;
     private TextView tvSessionName;
     private ImageButton imbtToggleGps;
+
+    private TextView tvLat;
+    private TextView tvLong;
+    private TextView tvAcc;
+    private TextView tvNotes;
 
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
@@ -73,8 +86,16 @@ public class HomeScreenOverviewFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SESSION_LOADER_ID,null,sessionLoaderListener);
-
+        // Start Session Loader
+        this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SESSION_LOADER_ID,null,new SessionLoaderListener(this,currentSessionId));
+        // Start All Localities Loader
+        this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.LOCALITY_LOADER_ID,
+                null,
+                new LocalityLoaderListener(this,currentSessionId,null));
+        // Start Single Locality Loader
+        this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
+                null,
+                new LocalityLoaderListener(this,currentSessionId,currentLocalityId));
     }
 
     @Override
@@ -92,12 +113,17 @@ public class HomeScreenOverviewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
-
-        // TODO: Set Project Name Text
+        //  Get UI Components
         tvSessionName = (TextView) v.findViewById(R.id.tv_home_overview_title);
-        tvSessionName.setText(currentSessionName);
-        // TODO: Pre-set Current Locality
+        tvLat = (TextView) v.findViewById(R.id.tv_home_overview_lat);
+        tvLong = (TextView) v.findViewById(R.id.tv_home_overview_long);
+        tvAcc = (TextView) v.findViewById(R.id.tv_home_overview_accuracy);
+        tvNotes = (TextView) v.findViewById(R.id.tv_home_overview_desc);
 
+        // Set Project Name Text
+        tvSessionName.setText(currentSessionName);
+        // Pre-set Current Locality
+        currentLocalityId = ((MainActivity) getActivity()).getCurrentLocalityId();
         // TODO: Load and populate Locality details
 
         // TODO: Get Buttons and set onclick listeners
@@ -114,7 +140,6 @@ public class HomeScreenOverviewFragment extends Fragment {
 
         // Populate Spinner
         mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
-        setSpinnerAdapter(mSpinner);
         return v;
     }
 
@@ -143,31 +168,63 @@ public class HomeScreenOverviewFragment extends Fragment {
         mSpinner.setAdapter(null);
     }
 
-    private void setSpinnerAdapter(Spinner s) {
-        ArrayList<LocalitySpinnerItem> localities = new ArrayList<>();
-
-        // TODO: Hook this up to a query that is written in the main activity
-        for (int i=0;i<10;i++){
-            localities.add(new LocalitySpinnerItem(Integer.toString(i),i));
-        }
-
-        ArrayAdapter<LocalitySpinnerItem> adapter =
-                new ArrayAdapter<LocalitySpinnerItem>(this.getActivity(),R.layout.support_simple_spinner_dropdown_item,
-                localities);
-        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        s.setAdapter(adapter);
-
-    }
-
     private void updateSessionUiComponents() {
         //
     }
 
-    // TODO: implement this
-    private void updateLocalityUiComponents(CurrentLocality locality) {
+    // TODO: Remove this function and all references to it (use the one below)
+    private void updateLocalityUiComponents() {
+        if (currentLocality != null) {
+            tvLat.setText(String.format(Locale.US,"%.6f",currentLocality.getLatitude()));
+            tvLong.setText(String.format(Locale.US,"%.6f",currentLocality.getLongitude()));
+            tvAcc.setText(String.format(Locale.US,"%.6f",currentLocality.getAccuracy()));
+            tvNotes.setText(currentLocality.getLocalityNotes());
+        }
+    }
+
+    @Override
+    public void updateLocalityUI() {
+        if (currentLocality != null) {
+            tvLat.setText(String.format(Locale.US,"%.6f",currentLocality.getLatitude()));
+            tvLong.setText(String.format(Locale.US,"%.6f",currentLocality.getLongitude()));
+            tvAcc.setText(String.format(Locale.US,"%.6f",currentLocality.getAccuracy()));
+            tvNotes.setText(currentLocality.getLocalityNotes());
+        }
+    }
+
+    @Override
+    public void handleNewLocalityData(Cursor cursor,boolean isSingleQuery) {
+
+        // If cursor is null, data is no longer available and you need to disconnect any adapters, etc
+        if (cursor == null) {
+            mSpinner.setAdapter(null);
+        }
+        // If the cursor has more than one locality, it is for the spinner
+        if (!isSingleQuery) {
+            SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this.getContext(),
+                    android.R.layout.simple_spinner_item,
+                    cursor,
+                    new String[]{TerraDbContract.LocalityEntry._ID},
+                    new int[] {android.R.id.text1},
+                    0); // Not sure about this
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mSpinner.setAdapter(spinnerAdapter);
+
+            // TODO:  add onItemSelected() listener for Spinner
+
+        }
 
     }
 
+    @Override
+    public void updateSessionUI() {
+
+    }
+
+    @Override
+    public void handleNewSessionData(Cursor cursor) {
+
+    }
 
     // --------------- Class for each Spinner Entry-----------------------
     private class LocalitySpinnerItem {
@@ -208,7 +265,7 @@ public class HomeScreenOverviewFragment extends Fragment {
     // Define loader and respective callbacks to be used by this activity
     // this can eventually get moved out into separate files for organizational purposes
 
-    // <-----   Session Data Loader ----->
+   /* // <-----   Session Data Loader ----->
     private LoaderManager.LoaderCallbacks<Cursor> sessionLoaderListener =
             new LoaderManager.LoaderCallbacks<Cursor>() {
                 @Override
@@ -243,12 +300,7 @@ public class HomeScreenOverviewFragment extends Fragment {
                     // TODO: not sure if I also need to store this data in this activity or if it can just sit in the adapter
                     currentSession = null;
                 }
-            };
-
-    // <-----   Locality Data Loader ----->
-
-
-
+            };*/
 
     public void sessionCursorToCurrentSession(Cursor sessionCursor) {
 
@@ -271,8 +323,35 @@ public class HomeScreenOverviewFragment extends Fragment {
 
         currentSession = new CurrentSession(id,name,notes,updated,created);
         Log.d("NewURIDEBUG","Loaded Session:" + currentSession.getSessionName());
-        // TODO: REMOVE
-        //homeScreenPagerAdapter.setCurrentSession(currentSession);
+    }
+
+    public void localityCursorToCurrentLocality(Cursor localityCursor) {
+
+        Log.d("NewURIDEBUG",Integer.toString(localityCursor.getCount()) + "Records in Cursor");
+        Log.d("NewURIDEBUG","Got cursor and am trying to retrieve data");
+
+        if (localityCursor.getCount() != 1) return;
+        localityCursor.moveToFirst();
+
+        int idIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry._ID);
+        int latIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
+        int longIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
+        int elevationIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_ELEVATION);
+        int accuracyIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_GPSACCURACY);
+        int notesIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_NOTES);
+        int updatedIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_UPDATED);
+        int createdIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_CREATED);
+
+        int id = localityCursor.getInt(idIndex);
+        double lat = localityCursor.getDouble(latIndex);
+        double lon = localityCursor.getDouble(longIndex);
+        double elev = localityCursor.getDouble(elevationIndex);
+        double acc = localityCursor.getDouble(accuracyIndex);
+        String notes = localityCursor.getString(notesIndex);
+        String updated = localityCursor.getString(updatedIndex);
+        String created = localityCursor.getString(createdIndex);
+
+        currentLocality = new CurrentLocality(id,lat,lon,acc,elev,notes,created,updated);
     }
 
 }

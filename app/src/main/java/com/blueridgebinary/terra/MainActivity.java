@@ -57,13 +57,13 @@ public class MainActivity extends FragmentActivity implements
     BottomNavigationView mBottomNavView;
     final List<MenuItem> items=new ArrayList<>();
 
-    public int sessionId;
+    private int sessionId;
+    private int currentLocalityId;
 
     final static int OVERVIEW_PAGE = 1;
 
     public CurrentSession currentSession;
     public CurrentLocality currentLocality;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,8 @@ public class MainActivity extends FragmentActivity implements
 
         // Get sessionId from Intent Extras
         sessionId = getIntent().getIntExtra("sessionId",0);
+        String sessionName = getIntent().getStringExtra("sessionName");
+
 
         // Get ViewPager
         mViewPager = (ViewPager) findViewById(R.id.vp_home);
@@ -83,7 +85,7 @@ public class MainActivity extends FragmentActivity implements
             items.add(menu.getItem(i));
         }
         // Connect adapter to view pager (this feeds the relevant Fragments to it)
-        homeScreenPagerAdapter = new HomeScreenPagerAdapter(getSupportFragmentManager(),sessionId);
+        homeScreenPagerAdapter = new HomeScreenPagerAdapter(getSupportFragmentManager(),sessionId,sessionName);
         mViewPager.setAdapter(homeScreenPagerAdapter);
         // Set the default page to the center page [0 -- (1) -- 2]
         mViewPager.setCurrentItem(OVERVIEW_PAGE);
@@ -123,8 +125,18 @@ public class MainActivity extends FragmentActivity implements
         return;
     }
 
+    public int getCurrentLocalityId() {
+        return currentLocalityId;
+    }
+    public void setCurrentLocalityId(int newId) {
+        currentLocalityId = newId;
+    }
 
+    public int getSessionId() {
+        return sessionId;
+    }
 
-
-
+    public void setSessionId(int sessionId) {
+        this.sessionId = sessionId;
+    }
 }

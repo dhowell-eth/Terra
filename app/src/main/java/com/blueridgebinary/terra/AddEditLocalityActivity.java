@@ -144,7 +144,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         mMap = googleMap;
         // Set Map UI Settings
         mMap.getUiSettings().setZoomGesturesEnabled(true);
-        mMap.getUiSettings().setCompassEnabled(true);
+        //mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setRotateGesturesEnabled(true);
     }
