@@ -97,8 +97,8 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
 
         public SessionViewHolder(View itemView) {
             super(itemView);
-            tvSessionName = (TextView) itemView.findViewById(R.id.tv_session_name);
-            tvSessionDate = (TextView) itemView.findViewById(R.id.tv_session_updated);
+            tvSessionName = (TextView) itemView.findViewById(R.id.tv_locality_list_name);
+            tvSessionDate = (TextView) itemView.findViewById(R.id.tv_locality_list_created);
             tvSessionNotes = (TextView) itemView.findViewById(R.id.tv_session_description);
             itemView.setOnClickListener(this);
         }

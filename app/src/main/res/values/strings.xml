@@ -49,4 +49,13 @@
     <string name="add_edit_locality_subheading_long_label">Long:</string>
     <string name="add_edit_locality_subheading_acc_label">Accuracy (m)</string>
     <string name="add_edit_locality_ok_button_text">OK</string>
+
+    <!-- Locality RecyclerView Stuff         -->
+    <string name="locality_list_item_base">Station </string>
+    <string name="locality_list_created_date_base">Created: </string>
+    <string name="locality_list_updated_date_base">Updated: </string>
+    <string name="locality_list_lat_base">Latitude: </string>
+    <string name="locality_list_long_base">Longitude: </string>
+    <string name="locality_list_elevation_base">Elevation: </string>
+
 </resources>

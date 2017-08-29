@@ -11,7 +11,9 @@ public final class LoaderIds {
     public final static int SINGLE_LOCALITY_LOADER_ID = 21;
 
     public final static int OVERVIEW_MAP_LOCALITY_LOADER_ID = 22;
-    public final static int OVERVIEW_MAP_SINGLE_LOCALITY_LOADER_ID = 22;
+    public final static int OVERVIEW_MAP_SINGLE_LOCALITY_LOADER_ID = 23;
+
+    public final static int LOCALITY_HOME_LIST_LOADER_ID = 24;
 
     private LoaderIds(){throw new AssertionError();}
 }

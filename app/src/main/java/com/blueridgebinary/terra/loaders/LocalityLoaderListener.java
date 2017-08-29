@@ -60,6 +60,7 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             // Pass new data back to the HomeScreenFragment for it to do stuff with it
+            Log.d(TAG,data.toString());
             mContext.handleNewLocalityData(data,mIsSingleQuery);
 
 
