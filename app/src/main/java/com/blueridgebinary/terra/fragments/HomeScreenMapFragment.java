@@ -1,17 +1,34 @@
 package com.blueridgebinary.terra.fragments;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
+import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.loaders.LoaderIds;
+import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,31 +38,28 @@ import com.blueridgebinary.terra.loaders.LoaderIds;
  * Use the {@link HomeScreenMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenMapFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapReadyCallback{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
+    private static final String TAG = HomeScreenMapFragment.class.getSimpleName();
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private int currentSessionId;
 
+
     private OnTerraFragmentInteractionListener mListener;
+
+    private GoogleMap mGoogleMap;
+    private MapView mMapView;
+    private LocalityLoaderListener mLocalityLoaderListener;
+    private Marker[] mMarkers;
 
     public HomeScreenMapFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeScreenMapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static HomeScreenMapFragment newInstance(String param1, int currentSessionId) {
         HomeScreenMapFragment fragment = new HomeScreenMapFragment();
         Bundle args = new Bundle();
@@ -56,29 +70,53 @@ public class HomeScreenMapFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate() called!");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
-
+        mLocalityLoaderListener = new LocalityLoaderListener(this, currentSessionId, null);
     }
 
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(String tag, String fakeData) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(tag, fakeData);
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view= inflater.inflate(R.layout.fragment_home_screen_map, container, false);
+        mMapView = (MapView) view.findViewById(R.id.mapview_home_map);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.onResume();
+
+        MapsInitializer.initialize(getActivity().getApplicationContext());
+        mMapView.getMapAsync(this);
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        if (this.getView() != null) {
+            this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.OVERVIEW_MAP_LOCALITY_LOADER_ID,
+                    null,
+                    mLocalityLoaderListener);
         }
-    }
+        UiSettings settings =  mGoogleMap.getUiSettings();
+        settings.setRotateGesturesEnabled(true);
+        settings.setZoomControlsEnabled(true);
 
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -95,19 +133,72 @@ public class HomeScreenMapFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mLocalityLoaderListener = null;
+
+    }
+
+    public Marker[] addMapMarkersFromLocalityCursor(GoogleMap googleMap, Cursor localityCursor) {
+
+        Marker[] markers;
+        if (localityCursor.getCount() < 1) return null;
+
+        markers = new Marker[localityCursor.getCount()];
+
+        int latIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
+        int longIndex = localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
+        int idIndex = localityCursor.getColumnIndex((TerraDbContract.LocalityEntry._ID));
+        localityCursor.moveToFirst();
+        int i = 0;
+        while (!localityCursor.isAfterLast()) {
+            Log.d(TAG,"ADDING MARKERS for i=" + Integer.toString(i));
+            double lat = localityCursor.getDouble(latIndex);
+            double lon = localityCursor.getDouble(longIndex);
+            int  id = localityCursor.getInt(idIndex);
+
+            MarkerOptions options = new MarkerOptions();
+            options.position(new LatLng(lat,lon)).title(Integer.toString(id));
+            markers[i] = googleMap.addMarker(options);
+            localityCursor.moveToNext();
+            ++i;
+        }
+        return markers;
+    }
+
+    public void setMapExtentToMarkers(GoogleMap map, Marker[] markers, MapView parentView) {
+        //Calculate the markers to get their position
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        for (Marker m : markers) {
+            b.include(m.getPosition());
+        }
+        LatLngBounds bounds = b.build();
+        int width = parentView.getResources().getDisplayMetrics().widthPixels;
+        int height = parentView.getResources().getDisplayMetrics().heightPixels;
+        //Change the padding as per needed
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width,height,(int) Math.round(width*0.25));
+        map.animateCamera(cu);
     }
 
 
+    @Override
+    public void updateLocalityUI() {
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    }
 
+    @Override
+    public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
+        if (cursor != null) {
+            this.mMarkers = this.addMapMarkersFromLocalityCursor(this.mGoogleMap, cursor);
+            if (mMarkers != null) this.setMapExtentToMarkers(mGoogleMap, mMarkers, mMapView);
+        }
+    }
+
+    @Override
+    public void updateSessionUI() {
+
+    }
+
+    @Override
+    public void handleNewSessionData(Cursor cursor) {
+
+    }
 }

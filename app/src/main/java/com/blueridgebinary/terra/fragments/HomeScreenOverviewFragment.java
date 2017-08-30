@@ -198,6 +198,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // If cursor is null, data is no longer available and you need to disconnect any adapters, etc
         if (cursor == null) {
             mSpinner.setAdapter(null);
+            return;
         }
         // If the cursor has more than one locality, it is for the spinner
         if (!isSingleQuery) {
