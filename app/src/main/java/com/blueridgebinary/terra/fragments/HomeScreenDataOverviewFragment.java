@@ -142,6 +142,11 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     }
 
     @Override
+    public void setCurrentLocality(int localityId) {
+
+    }
+
+    @Override
     public void updateLocalityUI() {
 
     }

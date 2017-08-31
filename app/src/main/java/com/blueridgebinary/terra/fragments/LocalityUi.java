@@ -9,4 +9,5 @@ import android.database.Cursor;
 public interface LocalityUi {
     public void updateLocalityUI();
     public void handleNewLocalityData(Cursor cursor,boolean isSingleQuery);
+    public void setCurrentLocality(int localityId);
 }

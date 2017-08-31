@@ -17,11 +17,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.blueridgebinary.terra.AddEditLocalityActivity;
 import com.blueridgebinary.terra.MainActivity;
@@ -33,6 +35,7 @@ import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.loaders.LoaderIds;
 import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
 import com.blueridgebinary.terra.loaders.SessionLoaderListener;
+import com.blueridgebinary.terra.utils.ListenableInteger;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -50,11 +53,14 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_CURRENTSESSIONNAME = "currentSessionName";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
+    private static final String TAG = HomeScreenOverviewFragment.class.getSimpleName();
 
     // TODO: Rename and change types of parameters
     private String currentSessionName;
     private Integer currentSessionId;
-    private Integer currentLocalityId;
+//    private Integer currentLocalityId;
+
+    public ListenableInteger selectedLocalityId;
 
     CurrentSession currentSession;
     CurrentLocality currentLocality;
@@ -95,7 +101,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // Start Single Locality Loader
         this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
                 null,
-                new LocalityLoaderListener(this,currentSessionId,currentLocalityId));
+                new LocalityLoaderListener(this,currentSessionId,selectedLocalityId.getValue()));
     }
 
     @Override
@@ -106,6 +112,16 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
 
+        // Get current locality and add listener
+        selectedLocalityId = ((MainActivity) getActivity()).selectedLocality;
+        selectedLocalityId.addListener(new ListenableInteger.ChangeListener() {
+            @Override
+            public void onChange() {
+                int newId = selectedLocalityId.getValue();
+                setCurrentLocality(newId);
+            }
+        });
+
     }
 
     @Override
@@ -113,6 +129,9 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
+
+        Log.d(TAG,"onCreateView() called!");
+
         //  Get UI Components
         tvSessionName = (TextView) v.findViewById(R.id.tv_home_overview_title);
         tvLat = (TextView) v.findViewById(R.id.tv_home_overview_lat);
@@ -122,9 +141,6 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
         // Set Project Name Text
         tvSessionName.setText(currentSessionName);
-        // Pre-set Current Locality
-        currentLocalityId = ((MainActivity) getActivity()).getCurrentLocalityId();
-        // TODO: Load and populate Locality details
 
         // TODO: Get Buttons and set onclick listeners
         imbtToggleGps = (ImageButton) v.findViewById(R.id.imbt_home_overview_new_station);
@@ -200,7 +216,8 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             mSpinner.setAdapter(null);
             return;
         }
-        // If the cursor has more than one locality, it is for the spinner
+
+        // If the cursor queried all localities, it is for the spinner
         if (!isSingleQuery) {
             SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this.getContext(),
                     android.R.layout.simple_spinner_item,
@@ -210,11 +227,48 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                     0); // Not sure about this
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSpinner.setAdapter(spinnerAdapter);
+            // Default item is the last one (i.e. most recently added station)
+            mSpinner.setSelection(mSpinner.getAdapter().getCount()-1);
 
             // TODO:  add onItemSelected() listener for Spinner
+            mSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getContext(), "CLICKED ITEM: " + Long.toString(id), Toast.LENGTH_SHORT).show();
+                    selectedLocalityId.setValue((int) id);
+                }
 
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+        }
+        else {
+
+            Log.d(TAG,"Received data for a single Locality query, current locality = " + Integer.toString(selectedLocalityId.getValue()));
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                // Otherwise it is the data for the current locality
+                int latIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
+                int lonIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
+                int accIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_GPSACCURACY);
+                int notesIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_NOTES);
+
+                tvLat.setText(String.format(Locale.US, "%.6f", cursor.getDouble(latIndex)));
+                tvLong.setText(String.format(Locale.US, "%.6f", cursor.getDouble(lonIndex)));
+                tvAcc.setText(String.format(Locale.US, "%.1f", cursor.getDouble(accIndex)));
+                tvNotes.setText(cursor.getString(notesIndex));
+            }
         }
 
+    }
+
+    @Override
+    public void setCurrentLocality(int localityId) {
+        // Restart single locality loader using a new listener that has the latest selectedLocalityId
+        this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
+                null,
+                new LocalityLoaderListener(this,currentSessionId,selectedLocalityId.getValue()));
     }
 
     @Override
@@ -263,45 +317,6 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     }
 
 
-    // Define loader and respective callbacks to be used by this activity
-    // this can eventually get moved out into separate files for organizational purposes
-
-   /* // <-----   Session Data Loader ----->
-    private LoaderManager.LoaderCallbacks<Cursor> sessionLoaderListener =
-            new LoaderManager.LoaderCallbacks<Cursor>() {
-                @Override
-                public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                    Uri baseUri;
-                    // sessionId defaults to 0 if no id is passed with the
-                    // intent that creates this activity
-                    if (currentSessionId != 0) {
-                        // Querying the uri for this specific session (that way listener works properly)
-                        baseUri = Uri.withAppendedPath(TerraDbContract.SessionEntry.CONTENT_URI,Uri.encode(Integer.toString(currentSessionId)));
-                    } else {
-                        // don't do anything if this activity doesn't have a sessionId
-                        return null;
-                    }
-                    return new CursorLoader(getContext(), baseUri, null,
-                            null,null,null);
-                }
-
-                @Override
-                public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                    // Populate current Session object
-
-                    //
-                    Log.d("Loader-DEBUG","called onLoadFinished()!");
-                    sessionCursorToCurrentSession(data);
-                    updateSessionUiComponents();
-                }
-
-                @Override
-                public void onLoaderReset(Loader<Cursor> loader) {
-                    // Clear data for the current session
-                    // TODO: not sure if I also need to store this data in this activity or if it can just sit in the adapter
-                    currentSession = null;
-                }
-            };*/
 
     public void sessionCursorToCurrentSession(Cursor sessionCursor) {
 

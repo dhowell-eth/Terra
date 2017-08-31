@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.InterpolatorRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,11 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.loaders.LoaderIds;
 import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
+import com.blueridgebinary.terra.utils.ListenableInteger;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,6 +51,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
     private String mParam1;
     private int currentSessionId;
 
+    public ListenableInteger selectedLocalityId;
 
     private OnTerraFragmentInteractionListener mListener;
 
@@ -78,6 +82,17 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
         mLocalityLoaderListener = new LocalityLoaderListener(this, currentSessionId, null);
+
+        // Get current locality and add listener
+        selectedLocalityId = ((MainActivity) getActivity()).selectedLocality;
+        selectedLocalityId.addListener(new ListenableInteger.ChangeListener() {
+            @Override
+            public void onChange() {
+                int newId = selectedLocalityId.getValue();
+                setCurrentLocality(newId);
+            }
+        });
+
     }
 
 
@@ -87,6 +102,8 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
         mMapView = (MapView) view.findViewById(R.id.mapview_home_map);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
+
+        Log.d(TAG,"onCreateView() called!");
 
         MapsInitializer.initialize(getActivity().getApplicationContext());
         mMapView.getMapAsync(this);
@@ -190,6 +207,11 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
             this.mMarkers = this.addMapMarkersFromLocalityCursor(this.mGoogleMap, cursor);
             if (mMarkers != null) this.setMapExtentToMarkers(mGoogleMap, mMarkers, mMapView);
         }
+    }
+
+    @Override
+    public void setCurrentLocality(int localityId) {
+        Log.d(TAG,"I was notified via listener that the currently selected locality has changed to:  " + Integer.toString(localityId));
     }
 
     @Override

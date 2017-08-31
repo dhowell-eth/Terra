@@ -33,7 +33,9 @@ import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.fragments.HomeScreenOverviewFragment;
+import com.blueridgebinary.terra.fragments.OnLocalitySelectedListener;
 import com.blueridgebinary.terra.fragments.OnTerraFragmentInteractionListener;
+import com.blueridgebinary.terra.utils.ListenableInteger;
 
 import android.util.Log;
 import android.view.Menu;
@@ -49,7 +51,8 @@ import java.util.List;
 // Note: Want to implement a loader on this activity then pass load results to child fragments
 
 public class MainActivity extends FragmentActivity implements
-        OnTerraFragmentInteractionListener<String> {
+        OnTerraFragmentInteractionListener<String>
+         {
 
     ViewPager mViewPager;
     HomeScreenPagerAdapter homeScreenPagerAdapter;
@@ -59,6 +62,8 @@ public class MainActivity extends FragmentActivity implements
 
     private int sessionId;
     private int currentLocalityId;
+
+    public ListenableInteger selectedLocality;
 
     final static int OVERVIEW_PAGE = 1;
 
@@ -74,6 +79,8 @@ public class MainActivity extends FragmentActivity implements
         sessionId = getIntent().getIntExtra("sessionId",0);
         String sessionName = getIntent().getStringExtra("sessionName");
 
+        // Initialize current locality (rest of operations are handled by fragments)
+        selectedLocality = new ListenableInteger(0);
 
         // Get ViewPager
         mViewPager = (ViewPager) findViewById(R.id.vp_home);
@@ -131,12 +138,11 @@ public class MainActivity extends FragmentActivity implements
     public void setCurrentLocalityId(int newId) {
         currentLocalityId = newId;
     }
-
     public int getSessionId() {
         return sessionId;
     }
-
     public void setSessionId(int sessionId) {
         this.sessionId = sessionId;
     }
-}
+
+ }
