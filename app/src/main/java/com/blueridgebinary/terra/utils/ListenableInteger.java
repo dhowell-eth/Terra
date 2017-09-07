@@ -36,4 +36,9 @@ public class ListenableInteger {
         public interface ChangeListener {
             void onChange();
         }
+
+    @Override
+    public String toString() {
+        return mValue.toString();
+    }
 }

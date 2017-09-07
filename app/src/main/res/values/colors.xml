@@ -1,7 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!--?xml version="1.0" encoding="UTF-8"?-->
 <resources>
-    <color name="colorWhite">#FFFFFF</color>
-    <color name="colorPrimary">@color/primary_material_dark</color>
-    <color name="colorPrimaryDark">@color/primary_dark_material_dark</color>
-    <color name="colorAccent">@color/accent_material_dark</color>
+
+  <!--Main theme colors-->
+  <color name="primaryColor">#546e7a</color>
+  <color name="primaryLightColor">#819ca9</color>
+  <color name="primaryDarkColor">#29434e</color>
+  <color name="secondaryColor">#90caf9</color>
+  <color name="secondaryLightColor">#c3fdff</color>
+  <color name="secondaryDarkColor">#5d99c6</color>
+  <color name="primaryTextColor">#ffffff</color>
+  <color name="secondaryTextColor">#000000</color>
+
+  <!--Open activity colors-->
+
+  <!--Project recycler view colors-->
+
+
 </resources>

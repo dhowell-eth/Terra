@@ -106,7 +106,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
         super.onResume();
         Log.d(TAG,"CALLED onResume!");
         if (this.getView() != null) {
-            mLocalityLoaderListener = new LocalityLoaderListener(this, currentSessionId, null);
+            mLocalityLoaderListener = new LocalityLoaderListener(this,this.getActivity(), currentSessionId, null);
             this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.LOCALITY_HOME_LIST_LOADER_ID,
                     null,
                     mLocalityLoaderListener);

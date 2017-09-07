@@ -55,7 +55,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:src="@color/colorAccent"
+        android:src="@color/secondaryColor"
         tools:layout_editor_absoluteY="133dp" />
 
     <TextView

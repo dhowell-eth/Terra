@@ -24,6 +24,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -37,6 +39,7 @@ import com.blueridgebinary.terra.fragments.OnLocalitySelectedListener;
 import com.blueridgebinary.terra.fragments.OnTerraFragmentInteractionListener;
 import com.blueridgebinary.terra.utils.ListenableInteger;
 
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,12 +53,14 @@ import java.util.List;
 
 // Note: Want to implement a loader on this activity then pass load results to child fragments
 
-public class MainActivity extends FragmentActivity implements
-        OnTerraFragmentInteractionListener<String>
-         {
+public class MainActivity extends AppCompatActivity implements
+        OnTerraFragmentInteractionListener<String> {
 
     ViewPager mViewPager;
     HomeScreenPagerAdapter homeScreenPagerAdapter;
+    DrawerLayout mDrawerLayout;
+    ActionBarDrawerToggle mDrawerToggle;
+    Toolbar mToolbar;
 
     BottomNavigationView mBottomNavView;
     final List<MenuItem> items=new ArrayList<>();
@@ -74,6 +79,14 @@ public class MainActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_2);
+
+        //Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_home_screen);
+        //setSupportActionBar(myToolbar);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_main);
+        setupToolbar();
+        // Add whatever stuff you need for populating drawer on the line below
+
+        setupDrawerToggle();
 
         // Get sessionId from Intent Extras
         sessionId = getIntent().getIntExtra("sessionId",0);
@@ -126,6 +139,25 @@ public class MainActivity extends FragmentActivity implements
 
 
     }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+     void setupToolbar(){
+         mToolbar = (Toolbar) findViewById(R.id.toolbar_home_activity);
+         setSupportActionBar(mToolbar);
+         getSupportActionBar().setDisplayShowHomeEnabled(true);
+     }
+
+     void setupDrawerToggle(){
+         mDrawerToggle = new android.support.v7.app.ActionBarDrawerToggle(this,mDrawerLayout,mToolbar,R.string.app_name, R.string.app_name);
+         //This is necessary to change the icon of the Drawer Toggle upon state change.
+         mDrawerToggle.syncState();
+     }
+
 
     @Override
     public void onFragmentInteraction(String tag, String data) {

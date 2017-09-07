@@ -81,7 +81,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
             mParam1 = getArguments().getString(ARG_PARAM1);
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
-        mLocalityLoaderListener = new LocalityLoaderListener(this, currentSessionId, null);
+        mLocalityLoaderListener = new LocalityLoaderListener(this, this.getActivity(), currentSessionId, null);
 
         // Get current locality and add listener
         selectedLocalityId = ((MainActivity) getActivity()).selectedLocality;
@@ -201,9 +201,14 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
 
     }
 
+    public void resetMapForNewData() {
+        this.mGoogleMap.clear();
+    }
+
     @Override
     public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
         if (cursor != null) {
+            resetMapForNewData();
             this.mMarkers = this.addMapMarkersFromLocalityCursor(this.mGoogleMap, cursor);
             if (mMarkers != null) this.setMapExtentToMarkers(mGoogleMap, mMarkers, mMapView);
         }

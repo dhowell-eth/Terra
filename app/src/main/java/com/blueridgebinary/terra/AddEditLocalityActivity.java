@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,6 +28,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.fragments.LocalityUi;
+import com.blueridgebinary.terra.loaders.LoaderIds;
+import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
 import com.blueridgebinary.terra.utils.PermissionIds;
 import com.blueridgebinary.terra.utils.util;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,7 +46,8 @@ import java.util.Locale;
 public class AddEditLocalityActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleMap.OnCameraMoveListener,
-        TextWatcher {
+        TextWatcher,
+        LocalityUi {
 
     private GoogleMap mMap;
     ImageButton btnGps;
@@ -53,6 +58,8 @@ public class AddEditLocalityActivity extends FragmentActivity implements
     EditText etAccuracy;
     ImageView ivCrosshairs;
     TextView tvTitle;
+    TextView tvSubHeading;
+
 
     private boolean isGpsEnabled;
     private boolean isMapEditEnabled;
@@ -64,7 +71,11 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     private int defaultZoomLevel;
     private int sessionId;
+    private int localityId;
     private String sessionName;
+    private boolean isCreateNewLocality;
+
+    private final String TAG = AddEditActivityLocationListener.class.getSimpleName();
 
 
     @Override
@@ -82,15 +93,23 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         // Get UI References
         btnGps = (ImageButton) findViewById(R.id.imbt_add_edit_locality_toggle_gps);
         btnEditLocation = (ImageButton) findViewById(R.id.imbt_add_edit_locality_toggle_edit);
+        btnOk = (Button) findViewById(R.id.btn_add_edit_locality_ok);
+
         etLatitude = (EditText) findViewById(R.id.et_add_edit_locality_lat);
         etLongitude = (EditText) findViewById(R.id.et_add_edit_locality_long);
         etAccuracy = (EditText) findViewById(R.id.et_add_edit_locality_acc);
         ivCrosshairs = (ImageView) findViewById(R.id.iv_add_edit_crosshairs);
         tvTitle = (TextView) findViewById(R.id.tv_add_edit_locality_title);
+        tvSubHeading = (TextView) findViewById(R.id.tv_add_edit_locality_subheading);
+
 
         // Get extras
         sessionId = getIntent().getIntExtra("sessionId",0);
         sessionName = getIntent().getStringExtra("sessionName");
+        localityId = getIntent().getIntExtra("localityId",0);
+        isCreateNewLocality = getIntent().getBooleanExtra("isCreateNewLocality",true);
+
+        Log.d(TAG,Boolean.toString(isCreateNewLocality));
 
         // Update title with the actual session/project name
         tvTitle.setText(sessionName);
@@ -100,6 +119,18 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         etLongitude.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         etAccuracy.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         toggleEditTextEnabled(true);
+
+        // Set onclick for OK button
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isCreateNewLocality) {
+                    saveNewLocation();
+                }
+                else {
+                    saveEditLocation();
+                }}
+         });
 
         // Get the LocationManager
         locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
@@ -113,9 +144,26 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         isMapEditEnabled = false;
         displayCoordsInDms = false;
 
-        // Start with GPS on by default
-        btnGps.callOnClick();
+        // Set up whatever depending on if we are editing or creating a new station
+        if (isCreateNewLocality) {
+            tvSubHeading.setText(R.string.add_edit_locality_subheading_add);
 
+            // Start with GPS on by default
+            btnGps.callOnClick();
+        }
+        else {
+            if (localityId != 0) {
+                String subheading = getString(R.string.add_edit_locality_subheading_edit);
+                subheading = subheading.replace("?",Integer.toString(localityId));
+                tvSubHeading.setText(subheading);
+
+                // Call a loader for the current location data
+                getSupportLoaderManager().initLoader(LoaderIds.LOCALITY_ADD_EDIT_LOADER_ID,
+                        null,
+                        new LocalityLoaderListener(this, this, sessionId, localityId));
+
+            }
+        }
     }
 
 
@@ -159,7 +207,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             if (isMapEditEnabled) btnEditLocation.performClick();
             startGpsMode();
             btnGps.setImageResource(R.drawable.ic_gps_fixed_white_36dp);
-            btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY);
+            btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.secondaryColor), android.graphics.PorterDuff.Mode.MULTIPLY);
             // call function to enable GPS listeners, etc.
 
         }
@@ -176,7 +224,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             if (isGpsEnabled) btnGps.performClick();
             startMapEditMode();
             // Highlight the button color to indicate you are in this mode
-            btnEditLocation.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY);
+            btnEditLocation.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.secondaryColor), android.graphics.PorterDuff.Mode.MULTIPLY);
             // Call a function that enables the map edit mode
 
         }
@@ -364,7 +412,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
     }
 
     //  TODO: implement a method for saving
-    public void saveNewLocation(View v) {
+    public void saveNewLocation() {
         // To be set as the onClick() event for the "OK" Button
         // Validate entered data
         if (!validateEntries()) {
@@ -392,6 +440,63 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         Log.d("ADDLOCALITY","Added new locality!: "+ uri.toString());
         finish();
     }
+
+    public void saveEditLocation() {
+        // To be set as the onClick() event for the "OK" Button
+        // Validate entered data
+        if (!validateEntries()) {
+            Toast.makeText(this, "Error: Number formatting incorrect, please enter only numerical values" +
+                    " for locations", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        double[] currentCoordinates = getCurrentCoordinates();
+        String accuracy = etAccuracy.getText().toString();
+        String dateTimestamp =  util.getDateTime();
+
+        ContentValues contentValues = new ContentValues();
+        // Put the task description and selected mPriority into the ContentValues
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_LAT, currentCoordinates[0]);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_LONG, currentCoordinates[1]);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_GPSACCURACY, accuracy);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_UPDATED, dateTimestamp);
+
+        // Insert the content values via a ContentResolver
+        Uri updateUri = TerraDbContract.LocalityEntry.CONTENT_URI.buildUpon().appendPath(Integer.toString(localityId)).build();
+        getContentResolver().update(updateUri, contentValues,null,null);
+        Log.d("UPDATELOCALITY","Updated locality!: "+ updateUri.toString());
+        finish();
+    }
+
+    @Override
+    public void updateLocalityUI() {
+
+    }
+
+    @Override
+    public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
+        Log.d(TAG,"Received data for a single Locality query, current locality = " + Integer.toString(localityId));
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            // Otherwise it is the data for the current locality
+            int latIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
+            int lonIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
+            int accIndex = cursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_GPSACCURACY);
+
+            etLatitude.setText(Double.toString(cursor.getDouble(latIndex)));
+            etLongitude.setText(Double.toString(cursor.getDouble(lonIndex)));
+            etAccuracy.setText(Double.toString(cursor.getDouble(accIndex)));
+        }
+        getSupportLoaderManager().destroyLoader(LoaderIds.LOCALITY_ADD_EDIT_LOADER_ID);
+
+    }
+
+
+
+    @Override
+    public void setCurrentLocality(int localityId) {
+    }
+
 
     // For testing purposes, create an internal class to use as a location listener
     public class AddEditActivityLocationListener implements LocationListener {

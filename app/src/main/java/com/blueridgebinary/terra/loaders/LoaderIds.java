@@ -15,5 +15,9 @@ public final class LoaderIds {
 
     public final static int LOCALITY_HOME_LIST_LOADER_ID = 24;
 
+    // For AddEditLocalityActivity
+    public final static int LOCALITY_ADD_EDIT_LOADER_ID = 31;
+
+
     private LoaderIds(){throw new AssertionError();}
 }

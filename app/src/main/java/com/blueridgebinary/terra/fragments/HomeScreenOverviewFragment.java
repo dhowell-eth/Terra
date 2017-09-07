@@ -1,6 +1,8 @@
 package com.blueridgebinary.terra.fragments;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.Image;
@@ -13,12 +15,16 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -70,6 +76,9 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     private Spinner mSpinner;
     private TextView tvSessionName;
     private ImageButton imbtToggleGps;
+    private ImageButton imbtNotes;
+    private ImageButton imbtEditLocality;
+
 
     private TextView tvLat;
     private TextView tvLong;
@@ -97,11 +106,11 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // Start All Localities Loader
         this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.LOCALITY_LOADER_ID,
                 null,
-                new LocalityLoaderListener(this,currentSessionId,null));
+                new LocalityLoaderListener(this,this.getActivity(),currentSessionId,null));
         // Start Single Locality Loader
         this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
                 null,
-                new LocalityLoaderListener(this,currentSessionId,selectedLocalityId.getValue()));
+                new LocalityLoaderListener(this,this.getActivity(),currentSessionId,selectedLocalityId.getValue()));
     }
 
     @Override
@@ -139,6 +148,10 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         tvAcc = (TextView) v.findViewById(R.id.tv_home_overview_accuracy);
         tvNotes = (TextView) v.findViewById(R.id.tv_home_overview_desc);
 
+        // Get Spinner
+        mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
+
+
         // Set Project Name Text
         tvSessionName.setText(currentSessionName);
 
@@ -149,14 +162,42 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
                 intent.putExtra("sessionId",currentSessionId);
                 intent.putExtra("sessionName",currentSessionName);
+                intent.putExtra("localityId",selectedLocalityId.getValue());
+                intent.putExtra("isCreateNewLocality",true);
+                startActivity(intent);
+            }
+        });
+
+        imbtEditLocality = (ImageButton) v.findViewById(R.id.imbt_home_overview_update_location);
+        imbtEditLocality.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
+                intent.putExtra("sessionId",currentSessionId);
+                intent.putExtra("sessionName",currentSessionName);
+                intent.putExtra("localityId",selectedLocalityId.getValue());
+                intent.putExtra("isCreateNewLocality",false);
                 startActivity(intent);
             }
         });
 
 
-        // Populate Spinner
-        mSpinner = (Spinner) v.findViewById(R.id.home_spinner_locality);
+        // Set scrolling for notes text incase someone writes a ton
+        tvNotes.setMovementMethod(new ScrollingMovementMethod());
+        // Set onclick listener for the notes button
+        imbtNotes = (ImageButton) v.findViewById(R.id.imbt_home_overview_notes);
+        imbtNotes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create builder for notes entry and assign to notes button
+                AlertDialog.Builder builder = createEnterNotesDialog();
+                builder.show();
+            }
+        });
+
+        // Return the view for this fragment (required)
         return v;
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -268,7 +309,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // Restart single locality loader using a new listener that has the latest selectedLocalityId
         this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
                 null,
-                new LocalityLoaderListener(this,currentSessionId,selectedLocalityId.getValue()));
+                new LocalityLoaderListener(this,this.getActivity(),currentSessionId,selectedLocalityId.getValue()));
     }
 
     @Override
@@ -316,7 +357,45 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         }
     }
 
+    public AlertDialog.Builder createEnterNotesDialog() {
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+        builder.setTitle("Add/Edit Notes");
+
+        // Set up the input
+        final EditText input = new EditText(this.getActivity());
+        input.setText(tvNotes.getText());
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        builder.setView(input);
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            // TODO: Set the below onClick to write to the DB
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ContentValues contentValues = new ContentValues();
+                // Put the task description and selected mPriority into the ContentValues
+                contentValues.put(TerraDbContract.LocalityEntry.COLUMN_NOTES, input.getText().toString());
+                // Insert the content values via a ContentResolver
+                Uri baseUri = TerraDbContract.LocalityEntry.CONTENT_URI;
+                Uri  idUri = baseUri.buildUpon().appendPath(selectedLocalityId.toString()).build();
+                // Execute Update statement
+                int rowsUpdated = getActivity().getContentResolver().update(idUri, contentValues,null,null);
+
+                Log.d(TAG,"UPDATED NOTES #ROWS = " + Integer.toString(rowsUpdated));
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder;
+    }
 
     public void sessionCursorToCurrentSession(Cursor sessionCursor) {
 

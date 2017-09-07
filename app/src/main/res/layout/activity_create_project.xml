@@ -24,7 +24,7 @@
         android:id="@+id/iv_horizontal_dividing_line"
         android:layout_width="347dp"
         android:layout_height="3dp"
-        app:srcCompat="@color/colorPrimaryDark"
+        app:srcCompat="@color/primaryDarkColor"
         android:layout_marginRight="1dp"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginLeft="1dp"

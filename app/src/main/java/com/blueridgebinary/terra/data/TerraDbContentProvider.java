@@ -214,7 +214,40 @@ public class TerraDbContentProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mTerraDbHelper.getWritableDatabase();
+
+        // Write URI match code and set a variable to return a Cursor
+        int match = sUriMatcher.match(uri);
+
+        String tableName;
+        String rowId;
+        switch (match) {
+            case LOCALITY_WITH_ID:
+                tableName = TerraDbContract.LocalityEntry.TABLE_NAME;
+                rowId = uri.getPathSegments().get(1);
+                // Append id to where clause for query
+                if (selection == null) {
+                    selection = TerraDbContract.LocalityEntry._ID + " = ?";
+                } else {
+                    selection = selection + " AND " + TerraDbContract.LocalityEntry._ID + " = ?";
+                }
+                if (selectionArgs != null) {
+                    selectionArgs = Arrays.copyOf(selectionArgs, selectionArgs.length+1);
+                    selectionArgs[selectionArgs.length - 1] = rowId;
+                }
+                else {
+                    selectionArgs = new String[] {rowId};
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        int numRowsUpdated = db.update(tableName,values,selection,selectionArgs);
+        if (numRowsUpdated > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return numRowsUpdated;
     }
 
     @Nullable

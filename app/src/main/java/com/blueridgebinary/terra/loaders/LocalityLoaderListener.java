@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.fragments.HomeScreenFragment;
+import com.blueridgebinary.terra.fragments.LocalityUi;
 
 import java.lang.reflect.Array;
 
@@ -24,17 +25,20 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
     final private static String TAG = LocalityLoaderListener.class.getSimpleName();
 
     private Integer mLocalityId;
-    private HomeScreenFragment mContext;
+    private Context mContext;
     private Integer mSessionId;
     private boolean mIsSingleQuery;
+    private LocalityUi mUi;
 
-    public LocalityLoaderListener(HomeScreenFragment homeScreenFragment,
+    public LocalityLoaderListener(LocalityUi ui,
+        Context loaderContext,
         Integer sessionId,
         @Nullable Integer localityId) {
 
-        mContext = homeScreenFragment;
+        mContext = loaderContext;
         mSessionId = sessionId;
         mLocalityId = localityId;
+        mUi = ui;
     }
 
     @Override
@@ -53,7 +57,7 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
         String selectionStatement = TerraDbContract.LocalityEntry.COLUMN_SESSIONID + " = ?";
         String[] selectionArgs = new String[]{mSessionId.toString()};
 
-        return new CursorLoader(mContext.getActivity(), baseUri, null,
+        return new CursorLoader(mContext, baseUri, null,
                 selectionStatement,selectionArgs,null);
     }
 
@@ -61,7 +65,7 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             // Pass new data back to the HomeScreenFragment for it to do stuff with it
             Log.d(TAG,data.toString());
-            mContext.handleNewLocalityData(data,mIsSingleQuery);
+            mUi.handleNewLocalityData(data,mIsSingleQuery);
 
 
             // DEBUG ONLY
@@ -77,6 +81,6 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mContext.handleNewLocalityData(null,mIsSingleQuery);
+        mUi.handleNewLocalityData(null,mIsSingleQuery);
     }
 }
