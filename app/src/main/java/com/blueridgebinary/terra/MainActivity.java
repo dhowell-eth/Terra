@@ -1,51 +1,25 @@
 package com.blueridgebinary.terra;
 
 
-import android.database.Cursor;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 
-import android.Manifest;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.blueridgebinary.terra.OpenDataset;
 import com.blueridgebinary.terra.adapters.HomeScreenPagerAdapter;
 import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
-import com.blueridgebinary.terra.data.TerraDbContract;
-import com.blueridgebinary.terra.fragments.HomeScreenOverviewFragment;
-import com.blueridgebinary.terra.fragments.OnLocalitySelectedListener;
 import com.blueridgebinary.terra.fragments.OnTerraFragmentInteractionListener;
 import com.blueridgebinary.terra.utils.ListenableInteger;
 
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;

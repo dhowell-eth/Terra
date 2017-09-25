@@ -46,7 +46,7 @@
 
         <activity
             android:name=".AddEditLocalityActivity"
-            android:label="@string/title_activity_add_edit_locality"></activity>
+            android:label="@string/title_activity_add_edit_locality" />
     </application>
 
 </manifest>

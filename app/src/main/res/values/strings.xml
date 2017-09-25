@@ -58,4 +58,15 @@
     <string name="locality_list_long_base">Longitude: </string>
     <string name="locality_list_elevation_base">Elevation: </string>
 
+    <!-- Compass Activity Stuff         -->
+    <string name="compass_title">Add Compass Measurement</string>
+    <string name="compass_azi_label">Azimuth:</string>
+    <string name="compass_dip_label">Dip:</string>
+    <string name="compass_disabled_message">COMPASS DISABLED</string>
+    <string name="compass_enabled_message">COMPASS ENABLED</string>
+    <string name="compass_ok_button_text">OK</string>
+    <string name="compass_mode_label">Mode:</string>
+    <string name="compass_category_label">Measurement:</string>
+
+
 </resources>

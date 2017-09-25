@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blueridgebinary.terra.AddEditLocalityActivity;
+import com.blueridgebinary.terra.CompassActivity;
 import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.CurrentDataset;
@@ -78,6 +79,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     private ImageButton imbtToggleGps;
     private ImageButton imbtNotes;
     private ImageButton imbtEditLocality;
+    private ImageButton imbtCompass;
 
 
     private TextView tvLat;
@@ -177,6 +179,17 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 intent.putExtra("sessionName",currentSessionName);
                 intent.putExtra("localityId",selectedLocalityId.getValue());
                 intent.putExtra("isCreateNewLocality",false);
+                startActivity(intent);
+            }
+        });
+
+        imbtCompass = (ImageButton) v.findViewById(R.id.imbt_home_overview_compass);
+        imbtCompass.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), CompassActivity.class);
+                intent.putExtra("sessionId",currentSessionId);
+                intent.putExtra("sessionName",currentSessionName);
+                intent.putExtra("localityId",selectedLocalityId.getValue());
                 startActivity(intent);
             }
         });
