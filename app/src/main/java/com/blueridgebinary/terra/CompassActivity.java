@@ -26,6 +26,7 @@ import com.blueridgebinary.terra.utils.ListenableBoolean;
 
 import org.w3c.dom.Text;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 /*
@@ -60,6 +61,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
 
     public Sensor mAccelerometerSensor;
     public Sensor mMagnetometerSensor;
+    public Sensor mGravitySensor;
+
     public int mSensorDelay;
 
     public float[] orientationMatrix;
@@ -92,6 +95,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         // Get Sensors
         mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mMagnetometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        mGravitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+
         // Set Sensor Delay
         mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;
         // Prepare orientation matrix
@@ -181,6 +186,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             gravityMatrix = event.values;
+            Log.d(TAG,String.format("GRAVITY MATRIX: %f %f %f",gravityMatrix[0],gravityMatrix[1],gravityMatrix[2]));
         }
         if (gravityMatrix != null && geomagneticMatrix != null) {
             boolean acquiredRotationMatrix = SensorManager.getRotationMatrix(rRotationMatrix,
@@ -190,11 +196,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
             if (acquiredRotationMatrix) {
                 orientationMatrix = SensorManager.getOrientation(rRotationMatrix, new float[3]);
                 // TODO: DO STUFF WITH NEW SENSOR DATA HERE!
-
-                float aziDeg = (float) Math.toDegrees(orientationMatrix[0]);
-                float dipDeg = (float) Math.toDegrees(orientationMatrix[1]);
+                float[] formattedOrientationData = convertRawOrientationToViewOrientation(mCompassView.getNeedleModeId());
+                Log.d(TAG,String.format("AZI RAD %f | DIP RAD %f",formattedOrientationData[0],formattedOrientationData[1]));
+                float aziDeg = (float) Math.toDegrees(formattedOrientationData[0]);
+                float dipDeg = (float) Math.toDegrees(formattedOrientationData[1]);
                 updateWithNewCompassData(aziDeg,dipDeg);
-
             }
         }
     }
@@ -245,12 +251,48 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                 results[1] = 0;
                 break;
             case 2:
+                results[0] = orientationMatrix[0];
+                results[1] = orientationMatrix[1];
                 break;
             case 3:
+                results = getDipDirection();
                 break;
-
         }
         return results;
+    }
+
+    public float[] applyLength3MatrixTransformation(float[] trans,float[] vect) {
+        float[] out = new float[3];
+        out[0] = vect[0]*trans[0] + vect[1]*trans[1] + vect[2]*trans[2];
+        out[1] = vect[0]*trans[3] + vect[1]*trans[4] + vect[2]*trans[5];
+        out[2] = vect[0]*trans[6] + vect[1]*trans[7] + vect[2]*trans[8];
+        return out;
+    }
+
+    public float angleBetween2VectorsRadians(float[] v1, float[] v2) {
+        double num = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+        Log.d(TAG,Double.toString(num));
+        double denom = Math.sqrt(Math.pow(v1[0],2.0) + Math.pow(v1[1],2.0) + Math.pow(v1[2],2.0)) *
+                Math.sqrt(Math.pow(v2[0],2.0) + Math.pow(v2[1],2.0) + Math.pow(v2[2],2.0));
+        return (float) Math.acos(num / denom);
+    }
+
+    public float[] getDipDirection() {
+        float[] out = new float[2];
+        float[] dipDirectionDeviceCoords = {gravityMatrix[0],gravityMatrix[1],0f};
+        float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix,dipDirectionDeviceCoords);
+        Log.d(TAG, Arrays.toString(dipDirectionDeviceCoords));
+        Log.d(TAG, Arrays.toString(dipDirectionWorldCoords));
+
+        // Adding PI to dip direction to make consistent with righthand rule
+        out[0] = angleBetween2VectorsRadians(new float[] {0,1,0},new float[] {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f}) + (float) Math.PI;
+        out[1] = (float) (Math.PI/2.0) - angleBetween2VectorsRadians(new float[] {0,0,1},dipDirectionWorldCoords);
+        // If Dip is 90, get azimuth from device orientation
+        if (Float.isNaN(out[0])) out[0] = orientationMatrix[0];
+        // If the dip angle comes out as NaN, device is horizontal so set dip to 0
+        if (Float.isNaN(out[1])) out[1] = 0;
+
+        return out;
     }
 
     public void toggleEditTextEnabled(boolean enable) {
