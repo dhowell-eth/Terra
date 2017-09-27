@@ -54,6 +54,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     private Spinner mCompassModeSpinner;
     private Button mOkButton;
     private SpinnerAdapter mCompassMeasurementSpinnerAdapter;
+    private TextView mDipTextView;
+
     public  ListenableBoolean isEnabled;
 
     public SensorManager mSensorManager;
@@ -71,6 +73,10 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     public float[] rRotationMatrix;
     public float[] iRotationMatrix;
 
+    public float aziDeg;
+    public float dipDeg;
+    public float apparentAziDeg;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +89,7 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         mOkButton = (Button) findViewById(R.id.btn_compass_ok);
         mCompassModeSpinner = (Spinner) findViewById(R.id.spinner_compass_mode);
         mCompassMeasurementSpinner = (Spinner) findViewById(R.id.spinner_compass_measurement);
+        mDipTextView = (TextView) findViewById(R.id.tv_compass_dip_label);
 
         // Set edit text input types and default them to off (only populated by compass view)
         mAzimuthEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
@@ -137,9 +144,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                 mCompassView.setNeedleModeId(position + 1);
                 if (position == 0) {
                     mDipEditText.setVisibility(View.GONE);
+                    mDipTextView.setVisibility(View.GONE);
                 }
                 else {
                     mDipEditText.setVisibility(View.VISIBLE);
+                    mDipTextView.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -194,13 +203,22 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
                     gravityMatrix,
                     geomagneticMatrix);
             if (acquiredRotationMatrix) {
+                // If the sensor manager successfully retrieved new data
                 orientationMatrix = SensorManager.getOrientation(rRotationMatrix, new float[3]);
-                // TODO: DO STUFF WITH NEW SENSOR DATA HERE!
+                // Format new data based on the current mode of the compass view
                 float[] formattedOrientationData = convertRawOrientationToViewOrientation(mCompassView.getNeedleModeId());
-                Log.d(TAG,String.format("AZI RAD %f | DIP RAD %f",formattedOrientationData[0],formattedOrientationData[1]));
-                float aziDeg = (float) Math.toDegrees(formattedOrientationData[0]);
-                float dipDeg = (float) Math.toDegrees(formattedOrientationData[1]);
-                updateWithNewCompassData(aziDeg,dipDeg);
+                // Convert angles to degres
+                aziDeg = (float) Math.toDegrees(formattedOrientationData[0]);
+                dipDeg = (float) Math.toDegrees(formattedOrientationData[1]);
+                // Get the apparent azimuth to be used by the compass view.  This is the same as the actual azimuth except
+                // for in cases where the compass is set to the "Plane" recording mode.
+                if (mCompassView.getNeedleModeId() == 3) {
+                    apparentAziDeg = (float) Math.toDegrees(getApparentCompassAzimuth());
+                }
+                else {
+                    apparentAziDeg = aziDeg;
+                }
+                updateWithNewCompassData();
             }
         }
     }
@@ -234,14 +252,11 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     // TODO: this method will do an action based on the accuracy of the compass
     public void sendSensorAccuracyWarning() {}
 
-    public void updateWithNewCompassData(float azi, float dip) {
-        mAzimuthEditText.setText(String.format(Locale.US,"%.2f",azi));
-        mDipEditText.setText(String.format(Locale.US,"%.2f",dip));
-        mCompassView.setOrientation(azi,dip);
+    public void updateWithNewCompassData() {
+        mAzimuthEditText.setText(String.format(Locale.US,"%.2f",aziDeg));
+        mDipEditText.setText(String.format(Locale.US,"%.2f",dipDeg));
+        mCompassView.setOrientation(apparentAziDeg,dipDeg);
     }
-
-    //public float[] calculateDipDegreesVectorMode() {}
-    //public float[] calculateDipDirectionPlaneMode() {}
 
     public float[] convertRawOrientationToViewOrientation(int compassMode) {
         float[] results = new float[2];
@@ -277,13 +292,59 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         return (float) Math.acos(num / denom);
     }
 
+    /*public float[] crossProduct3d(float[] u, float[] v) {
+        float[] out = new float[3];
+        out[0] = u[1]*v[2] - u[2]*v[1];
+        out[1] = u[2]*v[0] - u[0]*v[2];
+        out[2] = u[0]*v[1] - u[1]*v[0];
+        return out;
+    }
+
+    public float determinant3x3(float[] a) {
+        return (a[0] * (a[4]*a[8] - a[5]*a[7])) -
+                (a[1] * (a[3]*a[8] - a[5]*a[6])) +
+                (a[2] * (a[3]*a[7] - a[4]*a[6]));
+    }
+
+    public float[] inverseMatrix3d(float[] a) {
+
+        float[] inv = new float[9];
+        float det = determinant3x3(a);
+        if (det == 0) {
+            throw new ArithmeticException("Determinant of input matrix was 0.0.  Could not invert matrix.");
+        }
+        det = 1/det;
+        inv[0] = det*(a[4]*a[8]-a[5]*a[7]);
+
+        inv[1] = det*(a[3]*a[8]-a[5]*a[6]);
+        inv[2] = det*(a[3]*a[7]-a[4]*a[6]);
+        inv[3] = det*(a[8]*a[1]-a[7]*a[2]);
+        inv[4] = det*(a[0]*a[8]-a[6]*a[2]);
+        inv[5] = det*(a[0]*a[7]-a[6]*a[1]);
+        inv[6] = det*(a[5]*a[1]-a[4]*a[2]);
+        inv[7] = det*(a[0]*a[5]-a[3]*a[2]);
+        inv[8] = det*(a[0]*a[4]-a[3]*a[1]);
+
+        return inv;
+    }*/
+
+    public float getApparentCompassAzimuth() {
+        // Define device Y Vector, want to get the angle between the dip direction and this
+        float[] deviceYVector = {0,1,0};
+        // Get the dip direction from the gravity vector
+        float[] dipDirection= {gravityMatrix[0],gravityMatrix[1],0f};
+        // Normalize the length of the dip direction vector to length 1
+        float mag = (float) (Math.sqrt(Math.pow(dipDirection[0],2) + Math.pow(gravityMatrix[1],2)));
+        dipDirection[0] = dipDirection[0] / mag;
+        dipDirection[1] = dipDirection[1] / mag;
+        // DISPLAY ANGLE = PI - ANGLE(DIP DIRECTION --> Y AXIS)
+        return (float) (Math.PI - (Math.atan2(dipDirection[1],dipDirection[0]) - Math.atan2(deviceYVector[1],deviceYVector[0])));
+    }
+
     public float[] getDipDirection() {
         float[] out = new float[2];
         float[] dipDirectionDeviceCoords = {gravityMatrix[0],gravityMatrix[1],0f};
         float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix,dipDirectionDeviceCoords);
-        Log.d(TAG, Arrays.toString(dipDirectionDeviceCoords));
-        Log.d(TAG, Arrays.toString(dipDirectionWorldCoords));
-
         // Adding PI to dip direction to make consistent with righthand rule
         out[0] = angleBetween2VectorsRadians(new float[] {0,1,0},new float[] {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f}) + (float) Math.PI;
         out[1] = (float) (Math.PI/2.0) - angleBetween2VectorsRadians(new float[] {0,0,1},dipDirectionWorldCoords);
@@ -291,7 +352,6 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         if (Float.isNaN(out[0])) out[0] = orientationMatrix[0];
         // If the dip angle comes out as NaN, device is horizontal so set dip to 0
         if (Float.isNaN(out[1])) out[1] = 0;
-
         return out;
     }
 
