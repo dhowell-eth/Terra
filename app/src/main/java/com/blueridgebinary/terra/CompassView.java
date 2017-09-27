@@ -1,5 +1,10 @@
 package com.blueridgebinary.terra;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -11,19 +16,26 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
+import android.animation.ValueAnimator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.utils.ListenableBoolean;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Custom View for displaying compass data.  Comes with three modes.
  */
-public class CompassView extends View {
+public class CompassView extends View implements ValueAnimator.AnimatorUpdateListener {
 
     static final String TAG = CompassView.class.getSimpleName();
 
@@ -55,12 +67,24 @@ public class CompassView extends View {
     private float px;
     private float py;
 
-
     private int defaultImageResourceId = 17301555;
     // Initialize with default values for dip and azimuth
     private float dip = 90f;
     private float azimuth = 0f;
+
+    // Animation dev stuff
+    private float trueDip = 90f;
+    private float trueAzimuth = 0f;
+
+    private float prevDip = 90f;
+    private float prevAzimuth = 0f;
+
+    private AnimatorSet mAnimatorSet;
+    private LinearInterpolator mInterpolator = new LinearInterpolator();
+
     public ListenableBoolean isEnabled;
+
+    private boolean isAnimating = false;
 
     private GestureDetector mGestureDetector;
 
@@ -140,8 +164,8 @@ public class CompassView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.d(TAG,"onSizeChanged() called!");
-        Log.d(TAG,String.format("%d %d %d %d",w,h,oldw,oldh));
+        //Log.d(TAG,"onSizeChanged() called!");
+        //Log.d(TAG,String.format("%d %d %d %d",w,h,oldw,oldh));
         mPaddingLeft = getPaddingLeft();
         mPaddingTop = getPaddingTop();
         mPaddingRight = getPaddingRight();
@@ -160,61 +184,21 @@ public class CompassView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-/*        // Get current view location and dimensions
-        mPaddingLeft = getPaddingLeft();
-        mPaddingTop = getPaddingTop();
-        mPaddingRight = getPaddingRight();
-        mPaddingBottom = getPaddingBottom();
-        mContentWidth = getWidth() - mPaddingLeft - mPaddingRight;
-        mContentHeight = getHeight() - mPaddingTop - mPaddingBottom;*/
-
         // Get a centered, square portion of the screen you will draw into
         drawingRect = makeCenteredSquareDrawingRect();
-
-/*
-        Path testPath = new Path();
-        testPath.moveTo(drawingRect.left,drawingRect.top);
-        testPath.lineTo(drawingRect.right,drawingRect.top);
-        testPath.lineTo(drawingRect.right,drawingRect.bottom);
-        testPath.lineTo(drawingRect.left,drawingRect.bottom);
-        testPath.lineTo(drawingRect.left,drawingRect.top);
-        canvas.drawPath(testPath,mNeedlePaint);
-*/
-
-        Log.d(TAG,String.format("Content Height, Rect Height %d %d",mContentHeight,drawingRect.height()));
-        Log.d(TAG,String.format("Actual Bottom Y Coord: + %f",getY() + getHeight()));
-        Log.d(TAG,String.format("Drawing Rect Bottom Y Coord: + %d",drawingRect.bottom));
-
-
+        // On first draw load bitmaps
+        if (mBaseImageBitmap == null) loadBaseImage();
         // Check if the view is disabled, if so, load the disabled image and return
         if (!isEnabled.getValue()) {
-            // Load base image into memory
-            mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                    disabledImageResId,
-                    mContentWidth,
-                    mContentHeight);
             canvas.drawBitmap(mBaseImageBitmap, null, drawingRect, mImagePaint);
             return;
         }
-
         // Draw needle layer depending on view mode
         // 1 = azimuth,  2 = vector, 3 = plane
-        // TODO: Animations for each needle type instead of just updating the drawing
         switch (needleModeId) {
             case 1:
-                // Load base image into memory
-                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                        baseImageResId,
-                        mContentWidth,
-                        mContentHeight);
-                // Load needle image into memory
-                mNeedleImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                        needleImageResId,
-                        mContentWidth,
-                        mContentHeight);
-
-                mBaseImageBitmap = scaleBitmapToFitPreserveAspectRatio(mBaseImageBitmap);
-                mNeedleImageBitmap = scaleBitmapToFitPreserveAspectRatio(mNeedleImageBitmap);
+                // Get the needle image if it isn't already loaded
+                if (mNeedleImageBitmap == null) loadNeedleImage();
                 // Populate rotation matrix
                 rotationMatrix.reset();
                 rotationMatrix.postTranslate(-mNeedleImageBitmap.getWidth()/2, -mNeedleImageBitmap.getHeight()/2);
@@ -225,22 +209,12 @@ public class CompassView extends View {
                 canvas.drawBitmap(mNeedleImageBitmap, rotationMatrix, mImagePaint);
                 break;
             case 2:
-                // Load base image into memory
-                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                        orientationImageResId,
-                        mContentWidth,
-                        mContentHeight);
                 fillCompassArrowPath(drawingRect,dip,0f);
                 // Draw!
                 canvas.drawBitmap(mBaseImageBitmap, null, drawingRect, mImagePaint);
                 canvas.drawPath(mNeedlePath,mNeedlePaint);
                 break;
             case 3:
-                // Load base image into memory
-                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                        orientationImageResId,
-                        mContentWidth,
-                        mContentHeight);
                 fillCompassArrowPath(drawingRect,dip,azimuth);
                 // Draw!
                 canvas.drawBitmap(mBaseImageBitmap, null, drawingRect, mImagePaint);
@@ -248,9 +222,6 @@ public class CompassView extends View {
                 break;
         }
     }
-
-
-
 
 
     public Bitmap rotateImage(Bitmap src, float degree) {
@@ -311,11 +282,9 @@ public class CompassView extends View {
         return xyArray;
     }
 
-    public void setOrientation(float azimuth,float dip) {
-        this.azimuth = azimuth;
-        this.dip = dip;
-        // Tell Android this view needs to be re-drawn
-        invalidate();
+    public void setOrientation(float newAzimuth,float newDip) {
+        // Animate this update to the dip/azimuth
+        startAnimating(newAzimuth,newDip);
     }
 
 
@@ -370,12 +339,53 @@ public class CompassView extends View {
 
     // -------------------------GETTERS AND SETTERS -----------------------------------------
 
+    private void loadBaseImage() {
+        switch (needleModeId) {
+            case 1:
+                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                        baseImageResId,
+                        mContentWidth,
+                        mContentHeight);
+                break;
+            case 2:
+                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                        orientationImageResId,
+                        mContentWidth,
+                        mContentHeight);
+                break;
+            case 3:
+                mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                        orientationImageResId,
+                        mContentWidth,
+                        mContentHeight);
+                break;
+        }
+        mBaseImageBitmap = scaleBitmapToFitPreserveAspectRatio(mBaseImageBitmap);
+    }
+    private void loadNeedleImage() {
+        // Load needle image into memory
+        mNeedleImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                needleImageResId,
+                mContentWidth,
+                mContentHeight);
+        mNeedleImageBitmap = scaleBitmapToFitPreserveAspectRatio(mNeedleImageBitmap);
+    }
+
+    private void loadDisabledImage() {
+        mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                disabledImageResId,
+                mContentWidth,
+                mContentHeight);
+    }
+
     public int getNeedleModeId() {
         return needleModeId;
     }
 
     public void setNeedleModeId(int needleModeId) {
         this.needleModeId = needleModeId;
+        // Load new base image
+        loadBaseImage();
         invalidate();
     }
 
@@ -449,6 +459,12 @@ public class CompassView extends View {
     @Override
     public void setEnabled(boolean enable) {
         isEnabled.setValue(enable);
+        if (enable) {
+            loadBaseImage();
+        }
+        else {
+            loadDisabledImage();
+        }
         invalidate();
     }
 
@@ -459,20 +475,20 @@ public class CompassView extends View {
         float scalingFactor;
         // Get scaled dimensions for bitmap
 
-        Log.d(TAG,String.format("BITMAP DIMS: %d %d",bitmap.getWidth(),bitmap.getHeight()));
+        //Log.d(TAG,String.format("BITMAP DIMS: %d %d",bitmap.getWidth(),bitmap.getHeight()));
         if ((drawingRect.width() < bitmap.getWidth()) && (bitmap.getWidth() >= bitmap.getHeight()) ) {
             scalingFactor =  (float) drawingRect.width() / (float) bitmap.getWidth();
-            Log.d(TAG,"Bitmap is wider than view.");
+           // Log.d(TAG,"Bitmap is wider than view.");
         }
         else if ((drawingRect.height() < bitmap.getHeight()) && (bitmap.getHeight() >= bitmap.getWidth())){
             scalingFactor = (float) drawingRect.height() / (float) bitmap.getHeight();
-            Log.d(TAG,"Bitmap is taller than view.");
+            //Log.d(TAG,"Bitmap is taller than view.");
         }
         else {
             return bitmap;
         }
 
-        Log.d(TAG,String.format("Scaling Factor: %f",scalingFactor));
+        //Log.d(TAG,String.format("Scaling Factor: %f",scalingFactor));
         // creates matrix for the manipulation
         Matrix matrix = new Matrix();
         // resize the bit map
@@ -485,13 +501,59 @@ public class CompassView extends View {
         return resizedBitmap;
     }
 
+    public void loadBitmaps() {
+
+    }
+
+
+    public void startAnimating(float newAzi, float newDip) {
+        // Only start a new animation if the current one is not running
+        if (mAnimatorSet != null) {
+            if (mAnimatorSet.isRunning()) {
+                return;
+            }
+        }
+        // If we're able to draw things, go ahead and update to the new azimuth
+        this.trueAzimuth = newAzi;
+        this.trueDip = newDip;
+
+        mAnimatorSet = new AnimatorSet();
+
+        ArrayList<Animator> animators = new ArrayList<>();
+
+        ObjectAnimator aziAnimator;
+        ObjectAnimator dipAnimator;
+        if (Math.abs(trueAzimuth-prevAzimuth) >= 2.5 && (needleModeId == 1 || needleModeId == 3)) {
+            // Animation 1 -> Azimuth
+            aziAnimator = ObjectAnimator.ofFloat(this,"azimuth",prevAzimuth,trueAzimuth);
+            aziAnimator.setDuration(500);
+            aziAnimator.addUpdateListener(this);
+            aziAnimator.setInterpolator(mInterpolator);
+            animators.add(0,aziAnimator);
+            this.prevAzimuth = trueAzimuth;
+        }
+        if (Math.abs(trueDip-prevDip) >= 2.5 && (needleModeId == 2 || needleModeId == 3)) {
+            // Animation 2 -> Dip
+            dipAnimator = ObjectAnimator.ofFloat(this,"dip",prevDip,trueDip);
+            dipAnimator.setDuration(500);
+            dipAnimator.addUpdateListener(this);
+            animators.add(0,dipAnimator);
+            this.prevDip = trueDip;
+        }
+        // Only run animations if angles have changed more than a certain amount
+        if (animators.size() > 0) {
+            mAnimatorSet.playTogether(animators);
+            mAnimatorSet.start();
+        }
+    }
+
     public Rect makeCenteredSquareDrawingRect() {
 
         int[] outLocation = new int[2];
 
 
         getLocationOnScreen(outLocation);
-        Log.d(TAG,String.format("OUT LOCATION: %d , %d",outLocation[0],outLocation[1]));
+        //Log.d(TAG,String.format("OUT LOCATION: %d , %d",outLocation[0],outLocation[1]));
 
         int l = 0;
         int r = mContentWidth;
@@ -499,29 +561,53 @@ public class CompassView extends View {
         int b = mContentHeight;
 
 
-        Log.d(TAG,String.format("BEFORE %d %d %d %d",l,t,r,b));
+        //Log.d(TAG,String.format("BEFORE %d %d %d %d",l,t,r,b));
 
 
 
         // find smallest dimension and shrink the larger dimension to make the box roughly square (+- 1px)
         if (mContentWidth > mContentHeight) {
-            Log.d(TAG,"Creating Rect!   Detected that the content width is greater than height");
+            //Log.d(TAG,"Creating Rect!   Detected that the content width is greater than height");
             int delta = (mContentWidth - mContentHeight)/2;
             l = l + delta;
             r = r - delta;
         }
         else if (mContentHeight > mContentWidth) {
-            Log.d(TAG,"Creating Rect!   Detected that the content height is greater than width");
+            //Log.d(TAG,"Creating Rect!   Detected that the content height is greater than width");
             int delta = ( mContentHeight-mContentWidth)/2;
             t = t + delta;
             b = b - delta;
         }
-        Log.d(TAG,String.format("bottom vs content height %d %d",b,mContentHeight));
-        Log.d(TAG,String.format("AFTER %d %d %d %d",l,t,r,b));
+        //Log.d(TAG,String.format("bottom vs content height %d %d",b,mContentHeight));
+        //Log.d(TAG,String.format("AFTER %d %d %d %d",l,t,r,b));
 
         return new Rect(l,t,r,b);
 
     }
 
+    private float getDip() {
+        return dip;
+    }
 
+    private void setDip(float dip) {
+        this.dip = dip;
+    }
+
+    private float getAzimuth() {
+        return azimuth;
+    }
+
+    private void setAzimuth(float azimuth) {
+        this.azimuth = azimuth;
+    }
+
+    public boolean isAnimating() {
+        return isAnimating;
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
+        // Re-draw view each time the animation executes
+        invalidate();
+    }
 }

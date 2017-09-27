@@ -105,7 +105,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         mGravitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
 
         // Set Sensor Delay
-        mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;
+        // Default is 200,000 us, currently set to 500,000 = 0.5s
+        mSensorDelay = 500000;//SensorManager.SENSOR_DELAY_UI;
         // Prepare orientation matrix
         orientationMatrix = new float[3];
         rRotationMatrix = new float[9];
@@ -374,11 +375,5 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {}
     @Override
-    public void afterTextChanged(Editable s) {
-        try {
-            mCompassView.setOrientation(Float.parseFloat(mAzimuthEditText.getText().toString()),
-                    Float.parseFloat(mDipEditText.getText().toString()));
-        }
-        catch (java.lang.NumberFormatException e) {}
-    }
+    public void afterTextChanged(Editable s) {}
 }
