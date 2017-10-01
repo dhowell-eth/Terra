@@ -22,10 +22,11 @@ public class TerraDbHelper extends SQLiteOpenHelper {
         TerraDbContract.PictureEntry.TABLE_NAME,
         TerraDbContract.CompassMeasurementEntry.TABLE_NAME,
         TerraDbContract.LocalityEntry.TABLE_NAME,
-        TerraDbContract.SessionEntry.TABLE_NAME));
+        TerraDbContract.SessionEntry.TABLE_NAME,
+        TerraDbContract.MeasurementCategoryEntry.TABLE_NAME));
 
     // If you change the database schema, you must increment the database version
-    private static final int VERSION = 4;
+    private static final int VERSION = 6;
 
     // Constructor
     TerraDbHelper(Context context) {
@@ -90,7 +91,28 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.PictureEntry.COLUMN_NOTES    + " TEXT, " +
                 TerraDbContract.PictureEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
                 TerraDbContract.PictureEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
-        Log.d("DB_DEBUGGING",CREATE_TABLE_COMPASSMEASUREMENT);
+        db.execSQL(CREATE_TABLE_PICTURE);
+        // Create measurementCategoru Table
+        final String CREATE_TABLE_MEAS_CAT = "CREATE TABLE "  + TerraDbContract.MeasurementCategoryEntry.TABLE_NAME + " (" +
+                TerraDbContract.MeasurementCategoryEntry._ID                + " INTEGER PRIMARY KEY, " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_SESSIONID + " INTEGER, " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME + " TEXT, " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_NOTES    + " TEXT, " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
+        final String INSERT_DEFAULT_MEAS_CATS = "INSERT INTO " + TerraDbContract.MeasurementCategoryEntry.TABLE_NAME + " (" +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME + ", " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_NOTES + ", " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_CREATED + ", " +
+                TerraDbContract.MeasurementCategoryEntry.COLUMN_UPDATED + ") VALUES " +
+                "('Bedding', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('Foliation', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('Fault', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('Lineation', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('Bearing', 'DEFAULT CATEGORY', datetime(), datetime());";
+        Log.d("DB",INSERT_DEFAULT_MEAS_CATS);
+        db.execSQL(CREATE_TABLE_MEAS_CAT);
+        db.execSQL(INSERT_DEFAULT_MEAS_CATS);
     }
 
     /**

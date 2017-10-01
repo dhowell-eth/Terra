@@ -18,6 +18,7 @@ public final class LoaderIds {
     // For AddEditLocalityActivity
     public final static int LOCALITY_ADD_EDIT_LOADER_ID = 31;
 
+    public final static int COMPASS_MEAS_CATEGORY_LOADER_ID = 40;
 
     private LoaderIds(){throw new AssertionError();}
 }

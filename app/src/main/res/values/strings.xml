@@ -68,5 +68,10 @@
     <string name="compass_mode_label">Mode:</string>
     <string name="compass_category_label">Measurement:</string>
 
+    <!-- Add Measurement Category Stuff        -->
+    <string name="dialog_add_meas_cat_title">Add Measurement Category:</string>
+    <string name="dialog_add_meas_cat_name">Name:</string>
+    <string name="dialog_add_meas_cat_desc_label">Description:</string>
+    <string name="dialog_add_meas_cat_button">OK</string>
 
 </resources>

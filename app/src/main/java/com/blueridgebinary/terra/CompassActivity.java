@@ -1,17 +1,23 @@
 package com.blueridgebinary.terra;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,6 +28,10 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.fragments.MeasurementCategoryUi;
+import com.blueridgebinary.terra.loaders.LoaderIds;
+import com.blueridgebinary.terra.loaders.MeasurementCategoryLoaderListener;
 import com.blueridgebinary.terra.utils.ListenableBoolean;
 
 import org.w3c.dom.Text;
@@ -43,9 +53,16 @@ import java.util.Locale;
 
     -DH
 */
-public class CompassActivity extends AppCompatActivity implements SensorEventListener,TextWatcher {
+public class CompassActivity extends AppCompatActivity implements
+        SensorEventListener,
+        MeasurementCategoryUi{
 
     static private final String TAG = CompassActivity.class.getSimpleName();
+
+    private int sessionId;
+    private int currentMeasurementCategoryId;
+    private String preferredMeasurementCategoryName;
+
 
     private CompassView mCompassView;
     private EditText mAzimuthEditText;
@@ -82,6 +99,9 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compass);
 
+        // Set SessionId from Extras
+        this.sessionId = getIntent().getIntExtra("sessionId",0);
+
         // Get UI Components
         mCompassView = (CompassView) findViewById(R.id.compass_view_add);
         mAzimuthEditText = (EditText) findViewById(R.id.et_compass_azi);
@@ -96,6 +116,9 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         mDipEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         toggleEditTextEnabled(false);
 
+
+        // Start MeasurementCategory loader
+        getSupportLoaderManager().initLoader(LoaderIds.COMPASS_MEAS_CATEGORY_LOADER_ID,null,new MeasurementCategoryLoaderListener(this, this, sessionId));
 
         // Get Sensor Manager
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -163,6 +186,8 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         // Make a spinner adapter for the measurement types
         // will just use a simple query adapter
         // need to make sure that we also have an option here to add a new measurement type
+
+
 
     }
 
@@ -253,6 +278,55 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     // TODO: this method will do an action based on the accuracy of the compass
     public void sendSensorAccuracyWarning() {}
 
+    // Method for creating an Add Measurement dialog
+    public AlertDialog.Builder createAddMeasurementCategoryDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        // Create new dialog
+        AlertDialog dialog = builder.create();
+        // Inflate it's view
+        dialog.setContentView(inflater.inflate(R.layout.dialog_add_measurement_category,null));
+
+        // Get UI Components from view
+        final EditText inputName = (EditText) findViewById(R.id.et_add_meas_cat_name);
+        final EditText inputDesc = (EditText) findViewById(R.id.et_add_meas_cat_desc);
+        final Button btn = (Button) findViewById(R.id.btn_add_meas_cat_ok);
+
+        // Specify the type of input expected
+        inputName.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputDesc.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+
+        // TODO: SET UP ONCLICK LISTENER OF THE DIALOG BUTTON
+/*
+        // Set the onclick of the OK button to write new entry to DB
+        btn.setOnClickListener(new View.OnClickListener() {]} );
+        ContentValues contentValues = new ContentValues();
+        // Put the task description and selected mPriority into the ContentValues
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_LAT, currentCoordinates[0]);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_LONG, currentCoordinates[1]);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_GPSACCURACY, accuracy);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_SESSIONID, sessionId);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_CREATED, dateTimestamp);
+        contentValues.put(TerraDbContract.LocalityEntry.COLUMN_UPDATED, dateTimestamp);
+
+        // Insert the content values via a ContentResolver
+        Uri uri = getContentResolver().insert(TerraDbContract.LocalityEntry.CONTENT_URI, contentValues);
+        Log.d("ADDLOCALITY","Added new locality!: "+ uri.toString());
+
+        handleNewMeasurementCategoryFromDialog(inputName);
+        finish();
+*/
+
+
+        return builder;
+    }
+
+    public void handleNewMeasurementCategoryFromDialog(String newCategoryName) {
+        preferredMeasurementCategoryName = newCategoryName;
+        attemptToSetPreferredMeasurementCategory();
+    }
+
+
     public void updateWithNewCompassData() {
         mAzimuthEditText.setText(String.format(Locale.US,"%.2f",aziDeg));
         mDipEditText.setText(String.format(Locale.US,"%.2f",dipDeg));
@@ -293,42 +367,6 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
         return (float) Math.acos(num / denom);
     }
 
-    /*public float[] crossProduct3d(float[] u, float[] v) {
-        float[] out = new float[3];
-        out[0] = u[1]*v[2] - u[2]*v[1];
-        out[1] = u[2]*v[0] - u[0]*v[2];
-        out[2] = u[0]*v[1] - u[1]*v[0];
-        return out;
-    }
-
-    public float determinant3x3(float[] a) {
-        return (a[0] * (a[4]*a[8] - a[5]*a[7])) -
-                (a[1] * (a[3]*a[8] - a[5]*a[6])) +
-                (a[2] * (a[3]*a[7] - a[4]*a[6]));
-    }
-
-    public float[] inverseMatrix3d(float[] a) {
-
-        float[] inv = new float[9];
-        float det = determinant3x3(a);
-        if (det == 0) {
-            throw new ArithmeticException("Determinant of input matrix was 0.0.  Could not invert matrix.");
-        }
-        det = 1/det;
-        inv[0] = det*(a[4]*a[8]-a[5]*a[7]);
-
-        inv[1] = det*(a[3]*a[8]-a[5]*a[6]);
-        inv[2] = det*(a[3]*a[7]-a[4]*a[6]);
-        inv[3] = det*(a[8]*a[1]-a[7]*a[2]);
-        inv[4] = det*(a[0]*a[8]-a[6]*a[2]);
-        inv[5] = det*(a[0]*a[7]-a[6]*a[1]);
-        inv[6] = det*(a[5]*a[1]-a[4]*a[2]);
-        inv[7] = det*(a[0]*a[5]-a[3]*a[2]);
-        inv[8] = det*(a[0]*a[4]-a[3]*a[1]);
-
-        return inv;
-    }*/
-
     public float getApparentCompassAzimuth() {
         // Define device Y Vector, want to get the angle between the dip direction and this
         float[] deviceYVector = {0,1,0};
@@ -357,23 +395,53 @@ public class CompassActivity extends AppCompatActivity implements SensorEventLis
     }
 
     public void toggleEditTextEnabled(boolean enable) {
-        if (enable) {
-            mAzimuthEditText.addTextChangedListener(this);
-            mDipEditText.addTextChangedListener(this);
-        }
-        else {
-            mAzimuthEditText.removeTextChangedListener(this);
-            mDipEditText.removeTextChangedListener(this);
-        }
         mAzimuthEditText.setEnabled(enable);
         mDipEditText.setEnabled(enable);
     }
 
-    // Methods for handling use input to azi/dip fields
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {}
-    @Override
-    public void afterTextChanged(Editable s) {}
+    public void handleNewMeasurementCategoryData(Cursor data) {
+        // If cursor is null, data is no longer available and you need to disconnect any adapters, etc
+        if (data == null) {
+            mCompassMeasurementSpinner.setAdapter(null);
+            currentMeasurementCategoryId = 0;
+            return;
+        }
+
+        // Otherwise populate the spinner with the entries from the DB
+        SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_spinner_item,
+                data,
+                new String[]{TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME},
+                new int[] {android.R.id.text1},
+                0);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCompassMeasurementSpinner.setAdapter(spinnerAdapter);
+        // Set current item to preferred
+        attemptToSetPreferredMeasurementCategory();
+        // Default item is the first one
+        mCompassMeasurementSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentMeasurementCategoryId = (int) id;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    public void attemptToSetPreferredMeasurementCategory() {
+        if (preferredMeasurementCategoryName != null) {
+            // If there is a preferred measurement category id, find the right spinner entry and set it as the current one
+            for (int i=0; i<mCompassMeasurementSpinner.getCount(); i++) {
+                String thisEntry = (String) mCompassMeasurementSpinner.getItemAtPosition(i);
+                if (thisEntry.equals(preferredMeasurementCategoryName)) {
+                    mCompassMeasurementSpinner.setSelection(i);
+                    break;
+                }
+            }
+        }
+    }
 }

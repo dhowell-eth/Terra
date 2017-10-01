@@ -33,6 +33,9 @@ public class TerraDbContentProvider extends ContentProvider {
     public static final int COMPASS_MEASUREMENTS_WITH_ID = 301;
     public static final int PICTURES = 400;
     public static final int PICTURES_WITH_ID = 401;
+    public static final int MEAS_CAT = 500;
+    public static final int MEAS_CAT_WITH_ID = 501;
+
 
     public static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -57,6 +60,9 @@ public class TerraDbContentProvider extends ContentProvider {
         // Add Picture Table URIs
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLPICTURE, PICTURES);
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLPICTURE + "/#",PICTURES_WITH_ID);
+        // Add Measurement Category URIs
+        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY, MEAS_CAT);
+        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY + "/#",MEAS_CAT_WITH_ID);
         return uriMatcher;
     }
 
@@ -130,6 +136,9 @@ public class TerraDbContentProvider extends ContentProvider {
             case PICTURES:
                 queryTableName = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
                 break;
+            case MEAS_CAT:
+                queryTableName = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
+                break;
             // Default exception
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -171,6 +180,10 @@ public class TerraDbContentProvider extends ContentProvider {
             case PICTURES:
                 tableName = TerraDbContract.PictureEntry.TABLE_NAME;
                 contentUri = TerraDbContract.PictureEntry.CONTENT_URI;
+                break;
+            case MEAS_CAT:
+                tableName = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
+                contentUri = TerraDbContract.MeasurementCategoryEntry.CONTENT_URI;
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

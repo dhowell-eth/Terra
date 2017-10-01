@@ -22,6 +22,8 @@ public class TerraDbContract {
     public static final String PATH_TBLLOCALITY = "locality";
     public static final String PATH_TBLCOMPASSMEASUREMENT = "compassMeasurement";
     public static final String PATH_TBLPICTURE = "picture";
+    public static final String PATH_TBLMEASUREMENTCATEGORY = "measurementCategory";
+
     //public static final String PATH_TBLNOTESCAN = "noteScan";
     // TODO: Add table for tracking user-defined map layers, etc.
 
@@ -90,7 +92,20 @@ public class TerraDbContract {
         public static final String COLUMN_NOTES = "notes";
         public static final String COLUMN_CREATED = "createdDatetime";
         public static final String COLUMN_UPDATED = "updatedDatetime";
-
+    }
         // TODO: Maybe add DB structure for handling annotations
+
+        // ----------------------- tblMeasurementCategory-----------------------------
+        public static final class MeasurementCategoryEntry implements BaseColumns {
+            public static final Uri CONTENT_URI =
+                    TerraDbContract.BASE_CONTENT_URI.buildUpon().appendPath(PATH_TBLMEASUREMENTCATEGORY).build();
+            public static final String TABLE_NAME = "tblMeasurementCategory";
+            // columns
+            public static final String COLUMN_SESSIONID = "sessionId";
+            public static final String COLUMN_NAME = "name";
+            public static final String COLUMN_NOTES = "notes";
+            public static final String COLUMN_CREATED = "createdDatetime";
+            public static final String COLUMN_UPDATED = "updatedDatetime";
+
     }
 }
