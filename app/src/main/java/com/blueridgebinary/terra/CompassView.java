@@ -501,11 +501,6 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         return resizedBitmap;
     }
 
-    public void loadBitmaps() {
-
-    }
-
-
     public void startAnimating(float newAzi, float newDip) {
         // Only start a new animation if the current one is not running
         if (mAnimatorSet != null) {
@@ -550,20 +545,11 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
     public Rect makeCenteredSquareDrawingRect() {
 
         int[] outLocation = new int[2];
-
-
         getLocationOnScreen(outLocation);
-        //Log.d(TAG,String.format("OUT LOCATION: %d , %d",outLocation[0],outLocation[1]));
-
         int l = 0;
         int r = mContentWidth;
         int t = 0;
         int b = mContentHeight;
-
-
-        //Log.d(TAG,String.format("BEFORE %d %d %d %d",l,t,r,b));
-
-
 
         // find smallest dimension and shrink the larger dimension to make the box roughly square (+- 1px)
         if (mContentWidth > mContentHeight) {
@@ -578,11 +564,7 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
             t = t + delta;
             b = b - delta;
         }
-        //Log.d(TAG,String.format("bottom vs content height %d %d",b,mContentHeight));
-        //Log.d(TAG,String.format("AFTER %d %d %d %d",l,t,r,b));
-
         return new Rect(l,t,r,b);
-
     }
 
     private float getDip() {

@@ -174,6 +174,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         imbtEditLocality.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isALocalitySelected()) {return;}
                 Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
                 intent.putExtra("sessionId",currentSessionId);
                 intent.putExtra("sessionName",currentSessionName);
@@ -186,6 +187,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         imbtCompass = (ImageButton) v.findViewById(R.id.imbt_home_overview_compass);
         imbtCompass.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                if (!isALocalitySelected()) {return;}
                 Intent intent = new Intent(getActivity(), CompassActivity.class);
                 intent.putExtra("sessionId",currentSessionId);
                 intent.putExtra("sessionName",currentSessionName);
@@ -202,6 +204,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         imbtNotes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isALocalitySelected()) {return;}
                 // Create builder for notes entry and assign to notes button
                 AlertDialog.Builder builder = createEnterNotesDialog();
                 builder.show();
@@ -240,6 +243,15 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     private void updateSessionUiComponents() {
         //
+    }
+
+    private boolean isALocalitySelected() {
+        if (this.selectedLocalityId.getValue() == 0) {
+            Toast.makeText(this.getActivity(), "Error: You must create/select a locality to add data!",
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        else {return true;}
     }
 
     // TODO: Remove this function and all references to it (use the one below)
