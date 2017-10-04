@@ -103,6 +103,10 @@ public class CompassActivity extends AppCompatActivity implements
     public float[] rRotationMatrix;
     public float[] iRotationMatrix;
 
+    private float[] xAxis = {1,0,0};
+    private float[] yAxis = {0,1,0};
+    private float[] zAxis = {0,0,1};
+
     public float aziDeg;
     public float dipDeg;
     public float apparentAziDeg;
@@ -360,7 +364,14 @@ public class CompassActivity extends AppCompatActivity implements
                 results[1] = 0;
                 break;
             case 2:
-                results[0] = orientationMatrix[0];
+                // Get -y device direction if rotation is negative
+                if (orientationMatrix[1] < 0) {
+                    results[0] = orientationMatrix[0] + (float) Math.PI;
+                }
+                // Otherwise use the +y direction
+                else {
+                    results[0] = orientationMatrix[0];
+                }
                 results[1] = orientationMatrix[1];
                 break;
             case 3:
@@ -378,13 +389,18 @@ public class CompassActivity extends AppCompatActivity implements
         return out;
     }
 
-    public float angleBetween2VectorsRadians(float[] v1, float[] v2) {
-        double num = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
-        double denom = Math.sqrt(Math.pow(v1[0],2.0) + Math.pow(v1[1],2.0) + Math.pow(v1[2],2.0)) *
-                Math.sqrt(Math.pow(v2[0],2.0) + Math.pow(v2[1],2.0) + Math.pow(v2[2],2.0));
-        return (float) Math.acos(num / denom);
+    public float signedAngleBetween2VectorsRadians(float[] v1, float[] v2, float[] vn) {
+        // Calculates the signed angle in radians between two 3d vectors with the same origin
+        // v1 --theta--> v2 assuming both vectors lie in the XY plane.
+        // Uses the relation: atan2((V2 x V1) . Vn, V1 . V2)
+        // where Vn is a unit length reference vector for determining sign
+        return (float) Math.atan2(dotProduct(crossProduct(v2,v1), vn),dotProduct(v1,v2));
     }
 
+
+    /*
+    Calculates the apparent azimuth to be used on the compass widget when in plane measurement mode.
+    This azimuth is the azimuth a horizontal line lying within the device plane (aka a level line) */
     public float getApparentCompassAzimuth() {
         // Define device Y Vector, want to get the angle between the dip direction and this
         float[] deviceYVector = {0,1,0};
@@ -398,15 +414,25 @@ public class CompassActivity extends AppCompatActivity implements
         return (float) (Math.PI - (Math.atan2(dipDirection[1],dipDirection[0]) - Math.atan2(deviceYVector[1],deviceYVector[0])));
     }
 
+    /*  Returns the dip direction of the device in world coordinates
+    return: length 2 float[]
+    output[0] = azimuth (deg)
+    output[1] = dip (deg)*/
     public float[] getDipDirection() {
         float[] out = new float[2];
+        // Device dip direction in device coordinates (steepest vector in the device plane)
         float[] dipDirectionDeviceCoords = {gravityMatrix[0],gravityMatrix[1],0f};
+        // Device dip direction in world coordinates
         float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix,dipDirectionDeviceCoords);
-        // Adding PI to dip direction to make consistent with righthand rule
-        out[0] = angleBetween2VectorsRadians(new float[] {0,1,0},new float[] {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f}) + (float) Math.PI;
-        Log.d(TAG,String.format("DIP DIRECTION AZI FROM getDipDirection(): %f",(float) Math.toDegrees(out[0])));
-        out[1] = (float) (Math.PI/2.0) - angleBetween2VectorsRadians(new float[] {0,0,1},dipDirectionWorldCoords);
-        // If Dip is 90, get azimuth from device orientation
+        // Device dip direction projected onto the world x,y plane (i.e. horizontal plane)
+        float[] dipDirectionInWorldXyPlane = {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f};
+        // Dip Direction Azimuth (Angle between y-axis and dip direction)
+        out[0] = signedAngleBetween2VectorsRadians(yAxis,dipDirectionInWorldXyPlane,zAxis) + (float) Math.PI;
+        // Dip Angle (Calculated as the angle between the dip direction and it's projection in the XY plane)
+        out[1] = signedAngleBetween2VectorsRadians(dipDirectionWorldCoords,
+                dipDirectionInWorldXyPlane,
+                normalizeVector(crossProduct(dipDirectionInWorldXyPlane,dipDirectionWorldCoords)));
+        // If Dip is 90, get azimuth using the device y-axis
         if (Float.isNaN(out[0])) out[0] = orientationMatrix[0];
         // If the dip angle comes out as NaN, device is horizontal so set dip to 0
         if (Float.isNaN(out[1])) out[1] = 0;

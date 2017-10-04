@@ -375,6 +375,16 @@ public class CompassView extends View implements
     // -------------------------GETTERS AND SETTERS -----------------------------------------
 
     private void loadBaseImage() {
+        // If compass is not enabled, load the disabled compass image and return
+        if (!isEnabled.getValue()) {
+            mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
+                    disabledImageResId,
+                    mContentWidth,
+                    mContentHeight);
+            mBaseImageBitmap = scaleBitmapToFitPreserveAspectRatio(mBaseImageBitmap);
+            return;
+        }
+        // Otherwise get the proper base image and load it
         switch (needleModeId) {
             case 1:
                 mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
@@ -406,12 +416,6 @@ public class CompassView extends View implements
         mNeedleImageBitmap = scaleBitmapToFitPreserveAspectRatio(mNeedleImageBitmap);
     }
 
-    private void loadDisabledImage() {
-        mBaseImageBitmap = decodeSampledBitmapFromResource(getResources(),
-                disabledImageResId,
-                mContentWidth,
-                mContentHeight);
-    }
 
     public int getNeedleModeId() {
         return needleModeId;
@@ -494,12 +498,7 @@ public class CompassView extends View implements
     @Override
     public void setEnabled(boolean enable) {
         isEnabled.setValue(enable);
-        if (enable) {
-            loadBaseImage();
-        }
-        else {
-            loadDisabledImage();
-        }
+        loadBaseImage();
         invalidate();
     }
 
