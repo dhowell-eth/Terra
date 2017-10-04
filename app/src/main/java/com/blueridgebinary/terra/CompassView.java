@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -35,7 +36,8 @@ import java.util.List;
 /**
  * Custom View for displaying compass data.  Comes with three modes.
  */
-public class CompassView extends View implements ValueAnimator.AnimatorUpdateListener {
+public class CompassView extends View implements
+        ValueAnimator.AnimatorUpdateListener {
 
     static final String TAG = CompassView.class.getSimpleName();
 
@@ -114,20 +116,20 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
                 1);
 
         // get stroke color
-        needleColor = a.getResourceId(R.styleable.CompassView_needleColor,android.R.color.holo_red_light);
+        needleColor = a.getResourceId(R.styleable.CompassView_needleColor, android.R.color.holo_red_light);
         // get stroke width
-        needleWidth = a.getFloat(R.styleable.CompassView_needleWidth,1.0f);
+        needleWidth = a.getFloat(R.styleable.CompassView_needleWidth, 1.0f);
         // Orientation arrow max length relative to base image (incase you have a border or something)
-        needleLengthFraction = a.getFloat(R.styleable.CompassView_needleLengthProportion,1.0f);
+        needleLengthFraction = a.getFloat(R.styleable.CompassView_needleLengthProportion, 1.0f);
 
-        baseImageResId = a.getResourceId(R.styleable.CompassView_baseImage,defaultImageResourceId);
-        needleImageResId = a.getResourceId(R.styleable.CompassView_needleImage,defaultImageResourceId);
-        disabledImageResId = a.getResourceId(R.styleable.CompassView_disabledImage,defaultImageResourceId);
+        baseImageResId = a.getResourceId(R.styleable.CompassView_baseImage, defaultImageResourceId);
+        needleImageResId = a.getResourceId(R.styleable.CompassView_needleImage, defaultImageResourceId);
+        disabledImageResId = a.getResourceId(R.styleable.CompassView_disabledImage, defaultImageResourceId);
 
         // Orientation mode image defaults to the same one as the compass base
-        orientationImageResId = a.getResourceId(R.styleable.CompassView_orientationModeImage,baseImageResId);
+        orientationImageResId = a.getResourceId(R.styleable.CompassView_orientationModeImage, baseImageResId);
         // Get whether the view is defaulted to enabled or not
-        isEnabled = new ListenableBoolean(a.getBoolean(R.styleable.CompassView_isEnabled,true));
+        isEnabled = new ListenableBoolean(a.getBoolean(R.styleable.CompassView_isEnabled, true));
 
         a.recycle();
 
@@ -138,9 +140,8 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         mNeedlePaint = new Paint();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mNeedlePaint.setColor(getResources().getColor(needleColor,getContext().getTheme()));
-        }
-        else {
+            mNeedlePaint.setColor(getResources().getColor(needleColor, getContext().getTheme()));
+        } else {
             mNeedlePaint.setColor(getResources().getColor(needleColor));
         }
         mNeedlePaint.setStyle(Paint.Style.STROKE);
@@ -148,17 +149,20 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         mNeedlePaint.setStrokeJoin(Paint.Join.ROUND);
 
         // Get GestureDetector for handling enable/disable
-        mGestureDetector = new GestureDetector(getContext(),new GestureDetector.SimpleOnGestureListener() {
+        mGestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
             public void onLongPress(MotionEvent e) {
                 setEnabled(!isEnabled.getValue());
-            };
+                super.onLongPress(e);
+            }
         });
-
+        mGestureDetector.setIsLongpressEnabled(true);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return mGestureDetector.onTouchEvent(event);
+        this.mGestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     @Override
@@ -172,8 +176,8 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         mPaddingBottom = getPaddingBottom();
         mContentWidth = getWidth() - mPaddingLeft - mPaddingRight;
         mContentHeight = getHeight() - mPaddingTop - mPaddingBottom;
-        px = mContentWidth/2;
-        py = mContentHeight/2;
+        px = mContentWidth / 2;
+        py = mContentHeight / 2;
     }
 
     @Override
@@ -201,7 +205,7 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
                 if (mNeedleImageBitmap == null) loadNeedleImage();
                 // Populate rotation matrix
                 rotationMatrix.reset();
-                rotationMatrix.postTranslate(-mNeedleImageBitmap.getWidth()/2, -mNeedleImageBitmap.getHeight()/2);
+                rotationMatrix.postTranslate(-mNeedleImageBitmap.getWidth() / 2, -mNeedleImageBitmap.getHeight() / 2);
                 rotationMatrix.postRotate(azimuth);
                 rotationMatrix.postTranslate(px, py);
                 // Draw!
@@ -209,16 +213,16 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
                 canvas.drawBitmap(mNeedleImageBitmap, rotationMatrix, mImagePaint);
                 break;
             case 2:
-                fillCompassArrowPath(drawingRect,dip,0f);
+                fillCompassArrowPath(drawingRect, dip, 0f);
                 // Draw!
                 canvas.drawBitmap(mBaseImageBitmap, null, drawingRect, mImagePaint);
-                canvas.drawPath(mNeedlePath,mNeedlePaint);
+                canvas.drawPath(mNeedlePath, mNeedlePaint);
                 break;
             case 3:
-                fillCompassArrowPath(drawingRect,dip,azimuth);
+                fillCompassArrowPath(drawingRect, dip, azimuth);
                 // Draw!
                 canvas.drawBitmap(mBaseImageBitmap, null, drawingRect, mImagePaint);
-                canvas.drawPath(mNeedlePath,mNeedlePaint);
+                canvas.drawPath(mNeedlePath, mNeedlePaint);
                 break;
         }
     }
@@ -233,7 +237,7 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
     }
 
 
-    public void fillCompassArrowPath(Rect drawingRect,float dip, float azimuth) {
+    public void fillCompassArrowPath(Rect drawingRect, float dip, float azimuth) {
         // TODO: Remove hardcoding
         double arrowProportion = 0.2;
         double arrowAngle = Math.toRadians(40);
@@ -244,11 +248,11 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         // Move to center of compass
         mNeedlePath.moveTo(drawingRect.centerX(), drawingRect.centerY());
         // Get coords of path points, pre-rotation
-        double point[] = {0,0-vectorLength};
+        double point[] = {0, 0 - vectorLength};
         double arrowDy = Math.cos(arrowAngle) * (arrowProportion * vectorLength);
         double arrowDx = Math.sin(arrowAngle) * (arrowProportion * vectorLength);
-        double arrowLeftTip[] = {point[0] - arrowDx,point[1] + arrowDy};
-        double arrowRightTip[] = {point[0] + arrowDx,point[1] + arrowDy};
+        double arrowLeftTip[] = {point[0] - arrowDx, point[1] + arrowDy};
+        double arrowRightTip[] = {point[0] + arrowDx, point[1] + arrowDy};
         // Rotate points if necessary (about origin)
         if (azimuth != 0) {
             point = rotateXY(point, Math.toRadians(azimuth));
@@ -258,35 +262,66 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
 
 
         // Draw, shifting points from origin to center of view
-        mNeedlePath.lineTo((float) (point[0] + drawingRect.centerX()),(float) (point[1] + drawingRect.centerY()));
-        mNeedlePath.lineTo((float) (arrowLeftTip[0] + drawingRect.centerX()),(float) (arrowLeftTip[1] + drawingRect.centerY()));
-        mNeedlePath.moveTo((float) (point[0] + drawingRect.centerX()),(float) (point[1] + drawingRect.centerY()));
-        mNeedlePath.lineTo((float) (arrowRightTip[0] + drawingRect.centerX()),(float) (arrowRightTip[1] + drawingRect.centerY()));
+        mNeedlePath.lineTo((float) (point[0] + drawingRect.centerX()), (float) (point[1] + drawingRect.centerY()));
+        mNeedlePath.lineTo((float) (arrowLeftTip[0] + drawingRect.centerX()), (float) (arrowLeftTip[1] + drawingRect.centerY()));
+        mNeedlePath.moveTo((float) (point[0] + drawingRect.centerX()), (float) (point[1] + drawingRect.centerY()));
+        mNeedlePath.lineTo((float) (arrowRightTip[0] + drawingRect.centerX()), (float) (arrowRightTip[1] + drawingRect.centerY()));
         // If in orientation mode, get coords of two ends of strike line
-        if (needleModeId==3) {
+        if (needleModeId == 3) {
             double strikeLeftPoint[] = {0 - (mContentWidth / 2) * needleLengthFraction, 0};
             double strikeRightPoint[] = {0 + (mContentWidth / 2) * needleLengthFraction, 0};
             strikeLeftPoint = rotateXY(strikeLeftPoint, Math.toRadians(azimuth));
-            strikeRightPoint = rotateXY(strikeRightPoint,Math.toRadians(azimuth));
-            mNeedlePath.moveTo(drawingRect.centerX(),drawingRect.centerY());
-            mNeedlePath.lineTo((float) strikeLeftPoint[0] + drawingRect.centerX(),(float) strikeLeftPoint[1] + drawingRect.centerY());
-            mNeedlePath.lineTo((float) strikeRightPoint[0] + drawingRect.centerX(),(float) strikeRightPoint[1] + drawingRect.centerY());
+            strikeRightPoint = rotateXY(strikeRightPoint, Math.toRadians(azimuth));
+            mNeedlePath.moveTo(drawingRect.centerX(), drawingRect.centerY());
+            mNeedlePath.lineTo((float) strikeLeftPoint[0] + drawingRect.centerX(), (float) strikeLeftPoint[1] + drawingRect.centerY());
+            mNeedlePath.lineTo((float) strikeRightPoint[0] + drawingRect.centerX(), (float) strikeRightPoint[1] + drawingRect.centerY());
         }
     }
 
-    public double[] rotateXY(double[] xyArray,double thetaRadians) {
+    public double[] rotateXY(double[] xyArray, double thetaRadians) {
         double x = xyArray[0];
         double y = xyArray[1];
-        xyArray[0] = (x*Math.cos(thetaRadians)) - (y*Math.sin(thetaRadians));
-        xyArray[1] = (y*Math.cos(thetaRadians)) + (x*Math.sin(thetaRadians));
+        xyArray[0] = (x * Math.cos(thetaRadians)) - (y * Math.sin(thetaRadians));
+        xyArray[1] = (y * Math.cos(thetaRadians)) + (x * Math.sin(thetaRadians));
         return xyArray;
     }
 
-    public void setOrientation(float newAzimuth,float newDip) {
+    public void setOrientation(float newAzimuth, float newDip) {
         // Animate this update to the dip/azimuth
-        startAnimating(newAzimuth,newDip);
+        startAnimating(newAzimuth, newDip);
     }
 
+    public float makeAngleDegreesPositive(float angleDeg) {
+        if (angleDeg < 0) {
+            return angleDeg + 360;
+        }
+        else {
+            return angleDeg;
+        }
+    }
+
+    // Checks the new azimuth against the previous azimuth, making it a negative angle if needed
+    public float calcNewAzimuthMinRotation(float previousAzimuth, float newAzimuth) {
+        // Set new azimuth to the shortest rotation distance
+        float difference = newAzimuth - previousAzimuth;
+        if (difference > 180) {
+            return difference - 360 + previousAzimuth;
+        }
+        else {
+            return newAzimuth;
+        }
+    }
+
+    // Checks the previous azimuth against the next azimuth, making it a negative angle if needed
+    public float calcPrevAzimuthMinRotation(float previousAzimuth, float newAzimuth) {
+        // Set new azimuth to the shortest rotation distance
+        float difference = newAzimuth - previousAzimuth;
+        if (difference < -180) {
+            return newAzimuth - (difference + 360);
+        } else {
+            return previousAzimuth;
+        }
+    }
 
     /*
         From https://developer.android.com/topic/performance/graphics/load-bitmap.html
@@ -468,9 +503,6 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         invalidate();
     }
 
-    // overide this in subclasses to add additional functionality to when the compass is enabled/disabled
-    public void onStatusChanged() {}
-
     public Bitmap scaleBitmapToFitPreserveAspectRatio(Bitmap bitmap) {
         float scalingFactor;
         // Get scaled dimensions for bitmap
@@ -508,9 +540,17 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
                 return;
             }
         }
+
+
         // If we're able to draw things, go ahead and update to the new azimuth
-        this.trueAzimuth = newAzi;
+        // ensuring azimuth is between 0-360 deg
+        this.trueAzimuth = makeAngleDegreesPositive(newAzi);
         this.trueDip = newDip;
+
+        // Calculate the angle that should be passed into rotation routines for the current angle
+        // and the new angle to update to.  This allows the compass to properly rotate.
+        float drawingAzimuth = calcNewAzimuthMinRotation(this.prevAzimuth,this.trueAzimuth);
+        float drawingPrevAzimuth = calcPrevAzimuthMinRotation(this.prevAzimuth,this.trueAzimuth);
 
         mAnimatorSet = new AnimatorSet();
 
@@ -520,7 +560,7 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
         ObjectAnimator dipAnimator;
         if (Math.abs(trueAzimuth-prevAzimuth) >= 2.5 && (needleModeId == 1 || needleModeId == 3)) {
             // Animation 1 -> Azimuth
-            aziAnimator = ObjectAnimator.ofFloat(this,"azimuth",prevAzimuth,trueAzimuth);
+            aziAnimator = ObjectAnimator.ofFloat(this,"azimuth",drawingPrevAzimuth,drawingAzimuth);
             aziAnimator.setDuration(500);
             aziAnimator.addUpdateListener(this);
             aziAnimator.setInterpolator(mInterpolator);
@@ -591,5 +631,9 @@ public class CompassView extends View implements ValueAnimator.AnimatorUpdateLis
     public void onAnimationUpdate(ValueAnimator animation) {
         // Re-draw view each time the animation executes
         invalidate();
+    }
+
+    public float getPrevAzimuth() {
+        return prevAzimuth;
     }
 }

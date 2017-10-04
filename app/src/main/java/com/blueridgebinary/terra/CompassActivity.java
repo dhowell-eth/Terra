@@ -3,12 +3,15 @@ package com.blueridgebinary.terra;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +20,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -64,6 +69,7 @@ public class CompassActivity extends AppCompatActivity implements
     private int sessionId;
     private int localityId;
 
+
     private int currentMeasurementCategoryId;
     private String preferredMeasurementCategoryName;
     private Context mContext;
@@ -75,6 +81,8 @@ public class CompassActivity extends AppCompatActivity implements
     private Spinner mCompassModeSpinner;
     private Button mOkButton;
     private ImageButton mNewMeasurementCategoryImageButton;
+    private ImageView mLeftAlertBarImageView;
+    private ImageView mRightAlertBarImageView;
     private TextView mDipTextView;
     private AlertDialog.Builder mDialogBuilder;
 
@@ -87,6 +95,7 @@ public class CompassActivity extends AppCompatActivity implements
     public Sensor mGravitySensor;
 
     public int mSensorDelay;
+    private int currentAccuracy;
 
     public float[] orientationMatrix;
     public float[] geomagneticMatrix;
@@ -97,6 +106,8 @@ public class CompassActivity extends AppCompatActivity implements
     public float aziDeg;
     public float dipDeg;
     public float apparentAziDeg;
+
+    private boolean shouldDisplayedAccuracyToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,8 +127,11 @@ public class CompassActivity extends AppCompatActivity implements
         mCompassMeasurementSpinner = (Spinner) findViewById(R.id.spinner_compass_measurement);
         mDipTextView = (TextView) findViewById(R.id.tv_compass_dip_label);
         mNewMeasurementCategoryImageButton = (ImageButton) findViewById(R.id.imbt_compass_add_meas_cat);
+        mLeftAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_left);
+        mRightAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_right);
 
-
+        // Initialize accuracy toast flag
+        shouldDisplayedAccuracyToast = true;
 
         // Set edit text input types and default them to off (only populated by compass view)
         mAzimuthEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
@@ -245,6 +259,9 @@ public class CompassActivity extends AppCompatActivity implements
                 // Convert angles to degres
                 aziDeg = (float) Math.toDegrees(formattedOrientationData[0]);
                 dipDeg = (float) Math.toDegrees(formattedOrientationData[1]);
+                // Make sure all angles range from 0 to 360
+                if (aziDeg < 0) aziDeg = aziDeg + 360;
+
                 // Get the apparent azimuth to be used by the compass view.  This is the same as the actual azimuth except
                 // for in cases where the compass is set to the "Plane" recording mode.
                 if (mCompassView.getNeedleModeId() == 3) {
@@ -260,32 +277,14 @@ public class CompassActivity extends AppCompatActivity implements
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        String sensorStatus;
-        boolean needsWarning;
-        String sensorName = sensor.getStringType();
-        switch (accuracy) {
-            case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
-                sensorStatus = "LOW";
-                needsWarning = true;
-                break;
-            case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
-                sensorStatus = "MEDIUM";
-                needsWarning = true;
-                break;
-            case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
-                sensorStatus = "HIGH";
-                needsWarning = false;
-                break;
-            default:
-                sensorStatus = "UNKNOWN ACCURACY";
-                needsWarning = false; // TODO: might change this to true
-                break;
-        };
-        sendSensorAccuracyWarning();
+        refreshAccuracyAlertBars(accuracy);
     }
 
     // TODO: this method will do an action based on the accuracy of the compass
-    public void sendSensorAccuracyWarning() {}
+    public void displaySensorAccuracyWarning() {
+        String message = getResources().getString(R.string.compass_sensor_acc_warning);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
     // Method for creating an Add Measurement dialog
     public AlertDialog.Builder createAddMeasurementCategoryDialog(Context context) {
@@ -405,6 +404,7 @@ public class CompassActivity extends AppCompatActivity implements
         float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix,dipDirectionDeviceCoords);
         // Adding PI to dip direction to make consistent with righthand rule
         out[0] = angleBetween2VectorsRadians(new float[] {0,1,0},new float[] {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f}) + (float) Math.PI;
+        Log.d(TAG,String.format("DIP DIRECTION AZI FROM getDipDirection(): %f",(float) Math.toDegrees(out[0])));
         out[1] = (float) (Math.PI/2.0) - angleBetween2VectorsRadians(new float[] {0,0,1},dipDirectionWorldCoords);
         // If Dip is 90, get azimuth from device orientation
         if (Float.isNaN(out[0])) out[0] = orientationMatrix[0];
@@ -464,4 +464,85 @@ public class CompassActivity extends AppCompatActivity implements
             }
         }
     }
+
+    public void refreshAccuracyAlertBars(int accuracy) {
+
+        int newColor;
+        int newDisplay;
+        boolean isPoorAccuracy;
+        switch (accuracy) {
+            case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
+                newColor = ContextCompat.getColor(this,R.color.alertRed);
+                newDisplay = View.VISIBLE;
+                isPoorAccuracy = true;
+                break;
+            case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
+                newColor = ContextCompat.getColor(this,R.color.alertYellow);
+                newDisplay = View.VISIBLE;
+                isPoorAccuracy = true;
+                break;
+            case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
+                newColor = ContextCompat.getColor(this,android.R.color.transparent);
+                newDisplay = View.GONE;
+                isPoorAccuracy = false;
+                // Set flag so the next time the device detects poor accuracy a toast will be sent
+                shouldDisplayedAccuracyToast = true;
+                break;
+            default:
+                newColor = ContextCompat.getColor(this,android.R.color.transparent);
+                newDisplay = View.GONE;
+                isPoorAccuracy = false;
+                shouldDisplayedAccuracyToast = true;
+        };
+        // Set Colors
+        mLeftAlertBarImageView.setImageDrawable(new ColorDrawable(newColor));
+        mRightAlertBarImageView.setImageDrawable(new ColorDrawable(newColor));
+        // Set Visibility
+        mLeftAlertBarImageView.setVisibility(newDisplay);
+        mRightAlertBarImageView.setVisibility(newDisplay);
+        // Send the user a toast if the accuracy is low
+        if (shouldDisplayedAccuracyToast && isPoorAccuracy) {
+            displaySensorAccuracyWarning();
+            shouldDisplayedAccuracyToast = false;
+        }
+    }
+
+    public float[] crossProduct(float[] a,float[] b) {
+        float[] out = new float[3];
+        out[0] = ( a[1]*b[2] -b[1]*a[2] );
+        out[1] = -1*( a[0]*b[2] - a[2]*b[0]);
+        out[2] = ( a[0]*b[1] - a[1]*b[0]);
+        return out;
+    }
+
+    public float[] normalizeVector(float[] v) {
+        float[] out = new float[3];
+        float mag = (float) Math.sqrt(Math.pow(v[0],2.0) + Math.pow(v[1],2.0) + Math.pow(v[2],2.0));
+        for(int i=0; i<v.length;i++) {
+            out[i] = v[i]/mag;
+        }
+        return out;
+    }
+
+    public float dotProduct(float[] a,float[] b) {
+        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    }
+
+    // Set Physical Key Press Events
+    // Clicking the volume down key toggles the compass on/off
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (action == KeyEvent.ACTION_DOWN) {
+                    mCompassView.setEnabled(!mCompassView.isEnabled.getValue());
+                }
+                return true;
+            default:
+                return super.dispatchKeyEvent(event);
+        }
+    }
+
 }

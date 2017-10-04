@@ -74,4 +74,9 @@
     <string name="dialog_add_meas_cat_desc_label">Description:</string>
     <string name="dialog_add_meas_cat_button">OK</string>
 
+    <!-- Warnings -->
+    <string name="compass_sensor_acc_warning">Warning! Detected a low compass accuracy.  Rotate your phone a few times to recalibrate the sensor.</string>
+
+
+
 </resources>

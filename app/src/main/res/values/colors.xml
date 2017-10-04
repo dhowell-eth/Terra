@@ -11,9 +11,8 @@
   <color name="primaryTextColor">#ffffff</color>
   <color name="secondaryTextColor">#000000</color>
 
-  <!--Open activity colors-->
-
-  <!--Project recycler view colors-->
-
+  <!--General Colors For Alerts-->
+  <color name="alertRed">#f44336</color>
+  <color name="alertYellow">#FFEE58</color>
 
 </resources>
