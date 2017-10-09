@@ -26,7 +26,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
         TerraDbContract.MeasurementCategoryEntry.TABLE_NAME));
 
     // If you change the database schema, you must increment the database version
-    private static final int VERSION = 6;
+    private static final int VERSION = 7;
 
     // Constructor
     TerraDbHelper(Context context) {
@@ -72,10 +72,11 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.CompassMeasurementEntry.COLUMN_DIP + " REAL, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_DIPDIRECTION + " REAL, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_ISMANUALMEASUREMENT + " INTEGER, " +
-                TerraDbContract.CompassMeasurementEntry.COLUMN_COMPASSRELIABILITY + " INTEGER, " +
-                TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTTYPEID + " INTEGER, " +
+                TerraDbContract.CompassMeasurementEntry.COLUMN_COMPASSRELIABILITY + " TEXT, " +
+                TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTMODE + " TEXT, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_NOTES    + " TEXT, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
+                TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID + " INTEGER, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
         Log.d("DB_DEBUGGING",CREATE_TABLE_COMPASSMEASUREMENT);
         db.execSQL(CREATE_TABLE_COMPASSMEASUREMENT);

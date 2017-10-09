@@ -62,7 +62,7 @@ import java.util.Locale;
 */
 public class CompassActivity extends AppCompatActivity implements
         SensorEventListener,
-        MeasurementCategoryUi{
+        MeasurementCategoryUi {
 
     static private final String TAG = CompassActivity.class.getSimpleName();
 
@@ -86,7 +86,7 @@ public class CompassActivity extends AppCompatActivity implements
     private TextView mDipTextView;
     private AlertDialog.Builder mDialogBuilder;
 
-    public  ListenableBoolean isEnabled;
+    public ListenableBoolean isEnabled;
 
     public SensorManager mSensorManager;
 
@@ -103,9 +103,9 @@ public class CompassActivity extends AppCompatActivity implements
     public float[] rRotationMatrix;
     public float[] iRotationMatrix;
 
-    private float[] xAxis = {1,0,0};
-    private float[] yAxis = {0,1,0};
-    private float[] zAxis = {0,0,1};
+    private float[] xAxis = {1, 0, 0};
+    private float[] yAxis = {0, 1, 0};
+    private float[] zAxis = {0, 0, 1};
 
     public float aziDeg;
     public float dipDeg;
@@ -119,8 +119,8 @@ public class CompassActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_compass);
 
         // Set SessionId from Extras
-        this.sessionId = getIntent().getIntExtra("sessionId",0);
-        this.localityId =  getIntent().getIntExtra("localityId",0);
+        this.sessionId = getIntent().getIntExtra("sessionId", 0);
+        this.localityId = getIntent().getIntExtra("localityId", 0);
 
         // Get UI Components
         mCompassView = (CompassView) findViewById(R.id.compass_view_add);
@@ -143,7 +143,7 @@ public class CompassActivity extends AppCompatActivity implements
         toggleEditTextEnabled(false);
 
         // Start MeasurementCategory loader
-        getSupportLoaderManager().initLoader(LoaderIds.COMPASS_MEAS_CATEGORY_LOADER_ID,null,new MeasurementCategoryLoaderListener(this, this, sessionId));
+        getSupportLoaderManager().initLoader(LoaderIds.COMPASS_MEAS_CATEGORY_LOADER_ID, null, new MeasurementCategoryLoaderListener(this, this, sessionId));
 
         // Get Sensor Manager
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -170,14 +170,14 @@ public class CompassActivity extends AppCompatActivity implements
                     mSensorManager.registerListener(CompassActivity.this, mAccelerometerSensor, mSensorDelay);
                     mSensorManager.registerListener(CompassActivity.this, mMagnetometerSensor, mSensorDelay);
                     Toast.makeText(CompassActivity.this, getResources().getString(R.string.compass_enabled_message), Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     toggleEditTextEnabled(true);
                     mSensorManager.unregisterListener(CompassActivity.this, mAccelerometerSensor);
                     mSensorManager.unregisterListener(CompassActivity.this, mMagnetometerSensor);
                     Toast.makeText(CompassActivity.this, getResources().getString(R.string.compass_disabled_message), Toast.LENGTH_SHORT).show();
                 }
-            }});
+            }
+        });
 
         mContext = this;
         mNewMeasurementCategoryImageButton.setOnClickListener(new View.OnClickListener() {
@@ -191,7 +191,7 @@ public class CompassActivity extends AppCompatActivity implements
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-        R.array.compass_modes, android.R.layout.simple_spinner_item);
+                R.array.compass_modes, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
@@ -204,8 +204,7 @@ public class CompassActivity extends AppCompatActivity implements
                 if (position == 0) {
                     mDipEditText.setVisibility(View.GONE);
                     mDipTextView.setVisibility(View.GONE);
-                }
-                else {
+                } else {
                     mDipEditText.setVisibility(View.VISIBLE);
                     mDipTextView.setVisibility(View.VISIBLE);
                 }
@@ -217,8 +216,14 @@ public class CompassActivity extends AppCompatActivity implements
             }
         });
 
-    }
+        mOkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveNewCompassData();
+            }
+        });
 
+    }
 
 
     @Override
@@ -270,8 +275,7 @@ public class CompassActivity extends AppCompatActivity implements
                 // for in cases where the compass is set to the "Plane" recording mode.
                 if (mCompassView.getNeedleModeId() == 3) {
                     apparentAziDeg = (float) Math.toDegrees(getApparentCompassAzimuth());
-                }
-                else {
+                } else {
                     apparentAziDeg = aziDeg;
                 }
                 updateWithNewCompassData();
@@ -281,6 +285,7 @@ public class CompassActivity extends AppCompatActivity implements
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        this.currentAccuracy = accuracy;
         refreshAccuracyAlertBars(accuracy);
     }
 
@@ -296,7 +301,7 @@ public class CompassActivity extends AppCompatActivity implements
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         LayoutInflater inflater = LayoutInflater.from(mContext);
         // Inflate it's view
-        View view =  inflater.inflate(R.layout.dialog_add_measurement_category,null);
+        View view = inflater.inflate(R.layout.dialog_add_measurement_category, null);
         builder.setView(view);
 
         // Get UI Components from view
@@ -306,11 +311,11 @@ public class CompassActivity extends AppCompatActivity implements
         inputName.setInputType(InputType.TYPE_CLASS_TEXT);
         inputDesc.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 
-        builder.setPositiveButton("OK",new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ContentValues contentValues = new ContentValues();
-                String dateTimestamp =  util.getDateTime();
+                String dateTimestamp = util.getDateTime();
                 String name = inputName.getText().toString();
                 String notes = inputDesc.getText().toString();
                 // If no name, send a TOAST to tell the user they must put a name
@@ -334,7 +339,7 @@ public class CompassActivity extends AppCompatActivity implements
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -351,9 +356,9 @@ public class CompassActivity extends AppCompatActivity implements
 
 
     public void updateWithNewCompassData() {
-        mAzimuthEditText.setText(String.format(Locale.US,"%.2f",aziDeg));
-        mDipEditText.setText(String.format(Locale.US,"%.2f",dipDeg));
-        mCompassView.setOrientation(apparentAziDeg,dipDeg);
+        mAzimuthEditText.setText(String.format(Locale.US, "%.2f", aziDeg));
+        mDipEditText.setText(String.format(Locale.US, "%.2f", dipDeg));
+        mCompassView.setOrientation(apparentAziDeg, dipDeg);
     }
 
     public float[] convertRawOrientationToViewOrientation(int compassMode) {
@@ -381,11 +386,11 @@ public class CompassActivity extends AppCompatActivity implements
         return results;
     }
 
-    public float[] applyLength3MatrixTransformation(float[] trans,float[] vect) {
+    public float[] applyLength3MatrixTransformation(float[] trans, float[] vect) {
         float[] out = new float[3];
-        out[0] = vect[0]*trans[0] + vect[1]*trans[1] + vect[2]*trans[2];
-        out[1] = vect[0]*trans[3] + vect[1]*trans[4] + vect[2]*trans[5];
-        out[2] = vect[0]*trans[6] + vect[1]*trans[7] + vect[2]*trans[8];
+        out[0] = vect[0] * trans[0] + vect[1] * trans[1] + vect[2] * trans[2];
+        out[1] = vect[0] * trans[3] + vect[1] * trans[4] + vect[2] * trans[5];
+        out[2] = vect[0] * trans[6] + vect[1] * trans[7] + vect[2] * trans[8];
         return out;
     }
 
@@ -394,7 +399,7 @@ public class CompassActivity extends AppCompatActivity implements
         // v1 --theta--> v2 assuming both vectors lie in the XY plane.
         // Uses the relation: atan2((V2 x V1) . Vn, V1 . V2)
         // where Vn is a unit length reference vector for determining sign
-        return (float) Math.atan2(dotProduct(crossProduct(v2,v1), vn),dotProduct(v1,v2));
+        return (float) Math.atan2(dotProduct(crossProduct(v2, v1), vn), dotProduct(v1, v2));
     }
 
 
@@ -403,15 +408,15 @@ public class CompassActivity extends AppCompatActivity implements
     This azimuth is the azimuth a horizontal line lying within the device plane (aka a level line) */
     public float getApparentCompassAzimuth() {
         // Define device Y Vector, want to get the angle between the dip direction and this
-        float[] deviceYVector = {0,1,0};
+        float[] deviceYVector = {0, 1, 0};
         // Get the dip direction from the gravity vector
-        float[] dipDirection= {gravityMatrix[0],gravityMatrix[1],0f};
+        float[] dipDirection = {gravityMatrix[0], gravityMatrix[1], 0f};
         // Normalize the length of the dip direction vector to length 1
-        float mag = (float) (Math.sqrt(Math.pow(dipDirection[0],2) + Math.pow(gravityMatrix[1],2)));
+        float mag = (float) (Math.sqrt(Math.pow(dipDirection[0], 2) + Math.pow(gravityMatrix[1], 2)));
         dipDirection[0] = dipDirection[0] / mag;
         dipDirection[1] = dipDirection[1] / mag;
         // DISPLAY ANGLE = PI - ANGLE(DIP DIRECTION --> Y AXIS)
-        return (float) (Math.PI - (Math.atan2(dipDirection[1],dipDirection[0]) - Math.atan2(deviceYVector[1],deviceYVector[0])));
+        return (float) (Math.PI - (Math.atan2(dipDirection[1], dipDirection[0]) - Math.atan2(deviceYVector[1], deviceYVector[0])));
     }
 
     /*  Returns the dip direction of the device in world coordinates
@@ -421,17 +426,17 @@ public class CompassActivity extends AppCompatActivity implements
     public float[] getDipDirection() {
         float[] out = new float[2];
         // Device dip direction in device coordinates (steepest vector in the device plane)
-        float[] dipDirectionDeviceCoords = {gravityMatrix[0],gravityMatrix[1],0f};
+        float[] dipDirectionDeviceCoords = {gravityMatrix[0], gravityMatrix[1], 0f};
         // Device dip direction in world coordinates
-        float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix,dipDirectionDeviceCoords);
+        float[] dipDirectionWorldCoords = applyLength3MatrixTransformation(rRotationMatrix, dipDirectionDeviceCoords);
         // Device dip direction projected onto the world x,y plane (i.e. horizontal plane)
-        float[] dipDirectionInWorldXyPlane = {dipDirectionWorldCoords[0],dipDirectionWorldCoords[1],0f};
+        float[] dipDirectionInWorldXyPlane = {dipDirectionWorldCoords[0], dipDirectionWorldCoords[1], 0f};
         // Dip Direction Azimuth (Angle between y-axis and dip direction)
-        out[0] = signedAngleBetween2VectorsRadians(yAxis,dipDirectionInWorldXyPlane,zAxis) + (float) Math.PI;
+        out[0] = signedAngleBetween2VectorsRadians(yAxis, dipDirectionInWorldXyPlane, zAxis) + (float) Math.PI;
         // Dip Angle (Calculated as the angle between the dip direction and it's projection in the XY plane)
         out[1] = signedAngleBetween2VectorsRadians(dipDirectionWorldCoords,
                 dipDirectionInWorldXyPlane,
-                normalizeVector(crossProduct(dipDirectionInWorldXyPlane,dipDirectionWorldCoords)));
+                normalizeVector(crossProduct(dipDirectionInWorldXyPlane, dipDirectionWorldCoords)));
         // If Dip is 90, get azimuth using the device y-axis
         if (Float.isNaN(out[0])) out[0] = orientationMatrix[0];
         // If the dip angle comes out as NaN, device is horizontal so set dip to 0
@@ -458,14 +463,14 @@ public class CompassActivity extends AppCompatActivity implements
                 android.R.layout.simple_spinner_item,
                 data,
                 new String[]{TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME},
-                new int[] {android.R.id.text1},
+                new int[]{android.R.id.text1},
                 0);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCompassMeasurementSpinner.setAdapter(spinnerAdapter);
         // Set current item to preferred
         attemptToSetPreferredMeasurementCategory();
         // Default item is the first one
-        mCompassMeasurementSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+        mCompassMeasurementSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentMeasurementCategoryId = (int) id;
@@ -480,7 +485,7 @@ public class CompassActivity extends AppCompatActivity implements
     public void attemptToSetPreferredMeasurementCategory() {
         if (preferredMeasurementCategoryName != null) {
             // If there is a preferred measurement category id, find the right spinner entry and set it as the current one
-            for (int i=0; i<mCompassMeasurementSpinner.getCount(); i++) {
+            for (int i = 0; i < mCompassMeasurementSpinner.getCount(); i++) {
                 Cursor thisData = (Cursor) mCompassMeasurementSpinner.getItemAtPosition(i);
                 String thisEntry = thisData.getString(thisData.getColumnIndex(TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME));
                 if (thisEntry.equals(preferredMeasurementCategoryName)) {
@@ -498,28 +503,29 @@ public class CompassActivity extends AppCompatActivity implements
         boolean isPoorAccuracy;
         switch (accuracy) {
             case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
-                newColor = ContextCompat.getColor(this,R.color.alertRed);
+                newColor = ContextCompat.getColor(this, R.color.alertRed);
                 newDisplay = View.VISIBLE;
                 isPoorAccuracy = true;
                 break;
             case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
-                newColor = ContextCompat.getColor(this,R.color.alertYellow);
+                newColor = ContextCompat.getColor(this, R.color.alertYellow);
                 newDisplay = View.VISIBLE;
                 isPoorAccuracy = true;
                 break;
             case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
-                newColor = ContextCompat.getColor(this,android.R.color.transparent);
+                newColor = ContextCompat.getColor(this, android.R.color.transparent);
                 newDisplay = View.GONE;
                 isPoorAccuracy = false;
                 // Set flag so the next time the device detects poor accuracy a toast will be sent
                 shouldDisplayedAccuracyToast = true;
                 break;
             default:
-                newColor = ContextCompat.getColor(this,android.R.color.transparent);
+                newColor = ContextCompat.getColor(this, android.R.color.transparent);
                 newDisplay = View.GONE;
                 isPoorAccuracy = false;
                 shouldDisplayedAccuracyToast = true;
-        };
+        }
+        ;
         // Set Colors
         mLeftAlertBarImageView.setImageDrawable(new ColorDrawable(newColor));
         mRightAlertBarImageView.setImageDrawable(new ColorDrawable(newColor));
@@ -533,25 +539,25 @@ public class CompassActivity extends AppCompatActivity implements
         }
     }
 
-    public float[] crossProduct(float[] a,float[] b) {
+    public float[] crossProduct(float[] a, float[] b) {
         float[] out = new float[3];
-        out[0] = ( a[1]*b[2] -b[1]*a[2] );
-        out[1] = -1*( a[0]*b[2] - a[2]*b[0]);
-        out[2] = ( a[0]*b[1] - a[1]*b[0]);
+        out[0] = (a[1] * b[2] - b[1] * a[2]);
+        out[1] = -1 * (a[0] * b[2] - a[2] * b[0]);
+        out[2] = (a[0] * b[1] - a[1] * b[0]);
         return out;
     }
 
     public float[] normalizeVector(float[] v) {
         float[] out = new float[3];
-        float mag = (float) Math.sqrt(Math.pow(v[0],2.0) + Math.pow(v[1],2.0) + Math.pow(v[2],2.0));
-        for(int i=0; i<v.length;i++) {
-            out[i] = v[i]/mag;
+        float mag = (float) Math.sqrt(Math.pow(v[0], 2.0) + Math.pow(v[1], 2.0) + Math.pow(v[2], 2.0));
+        for (int i = 0; i < v.length; i++) {
+            out[i] = v[i] / mag;
         }
         return out;
     }
 
-    public float dotProduct(float[] a,float[] b) {
-        return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+    public float dotProduct(float[] a, float[] b) {
+        return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
     }
 
     // Set Physical Key Press Events
@@ -569,6 +575,89 @@ public class CompassActivity extends AppCompatActivity implements
             default:
                 return super.dispatchKeyEvent(event);
         }
+    }
+
+    public boolean validateEntries() {
+
+        boolean isValid = true;
+        // If the azimuth can't be parsed, return false as it is a required input
+        try {
+            aziDeg = (float) Double.parseDouble(mAzimuthEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            isValid = false;
+        }
+
+        // If the dip can't be parsed and we are in
+        try {
+            dipDeg = (float) Double.parseDouble(mDipEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            // If it can't parse b/c it's empty and we are in a bearing mode, set the dip to 0 (we don't need it)
+            if (mDipEditText.getText().toString().equals("") && mCompassView.getNeedleModeId() == 1) {
+                mDipEditText.setText("0");
+            } else {
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // TODO: implement this
+    public void saveNewCompassData() {
+        // To be set as the onClick() event for the "OK" Button
+
+        // Validate entered data
+        if (!validateEntries()) {
+            Toast.makeText(this, "Error: Number formatting incorrect, please enter only numerical values" +
+                    " for azimuth and dip.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // Prepare values for DB
+        String measurementModeDesc;
+        switch (mCompassView.getNeedleModeId()) {
+            case 1:
+                measurementModeDesc = "BEARING";
+                break;
+            case 2:
+                measurementModeDesc = "VECTOR";
+                break;
+            case 3:
+                measurementModeDesc = "PLANE";
+                break;
+            default:
+                measurementModeDesc = "";
+        }
+        String compassAccuracyDesc;
+        switch (this.currentAccuracy) {
+            case (SensorManager.SENSOR_STATUS_ACCURACY_LOW):
+                compassAccuracyDesc = "LOW";
+            case (SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM):
+                compassAccuracyDesc = "MEDIUM";
+            case (SensorManager.SENSOR_STATUS_ACCURACY_HIGH):
+                compassAccuracyDesc = "HIGH";
+                break;
+            default:
+                compassAccuracyDesc = "";
+        }
+        String dateTimestamp = util.getDateTime();
+
+
+        ContentValues contentValues = new ContentValues();
+        // Put the task description and selected mPriority into the ContentValues
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_STRIKE, aziDeg - 90f);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_DIP, dipDeg);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_DIPDIRECTION, aziDeg);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID, localityId);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_COMPASSRELIABILITY, compassAccuracyDesc);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTMODE, measurementModeDesc);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID, currentMeasurementCategoryId);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED, dateTimestamp);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_UPDATED, dateTimestamp);
+
+        // Insert the content values via a ContentResolver
+        Uri uri = getContentResolver().insert(TerraDbContract.CompassMeasurementEntry.CONTENT_URI, contentValues);
+        Log.d(TAG, "Added new compass measurement!: " + uri.toString());
+        finish();
     }
 
 }

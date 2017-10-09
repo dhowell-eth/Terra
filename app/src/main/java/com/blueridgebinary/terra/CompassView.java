@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -15,6 +16,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.animation.ValueAnimator;
 import android.util.AttributeSet;
@@ -25,9 +27,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.Toast;
 
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.utils.ListenableBoolean;
+import com.blueridgebinary.terra.utils.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -635,4 +639,8 @@ public class CompassView extends View implements
     public float getPrevAzimuth() {
         return prevAzimuth;
     }
+
+
+
+
 }

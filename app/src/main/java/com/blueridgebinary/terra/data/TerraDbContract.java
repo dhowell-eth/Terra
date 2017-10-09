@@ -71,10 +71,11 @@ public class TerraDbContract {
         public static final String COLUMN_DIPDIRECTION = "dipDirection";
         public static final String COLUMN_ISMANUALMEASUREMENT = "isManualMeasurement";
         public static final String COLUMN_COMPASSRELIABILITY = "compassReliability";
-        public static final String COLUMN_MEASUREMENTTYPEID = "measurementTypeId";
+        public static final String COLUMN_MEASUREMENTMODE = "measurementMode";
         public static final String COLUMN_NOTES = "notes";
         public static final String COLUMN_CREATED = "createdDatetime";
         public static final String COLUMN_UPDATED = "updatedDatetime";
+        public static final String COLUMN_MEASUREMENTCATEGORYID = "measurementCategoryId";
     }
 
     // ----------------------- tblPicture-----------------------------
