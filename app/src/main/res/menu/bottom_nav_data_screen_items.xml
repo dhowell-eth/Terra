@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_data_compass"
+        android:title="@string/data_screen_bottom_menu_compass"
+        android:icon="@drawable/ic_explore_white_24dp"
+        />
+    <item
+        android:id="@+id/menu_data_photos"
+        android:title="@string/data_screen_bottom_menu_photos"
+        android:icon="@drawable/ic_photo_camera_white_48dp"
+        />
+</menu>

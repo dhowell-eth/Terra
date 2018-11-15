@@ -23,6 +23,9 @@ public class TerraDbContract {
     public static final String PATH_TBLCOMPASSMEASUREMENT = "compassMeasurement";
     public static final String PATH_TBLPICTURE = "picture";
     public static final String PATH_TBLMEASUREMENTCATEGORY = "measurementCategory";
+    // Joined table paths
+    public static final String PATH_JOINEDCOMPASSMEASUREMENTS = "joinedCompassMeasurements";
+
 
     //public static final String PATH_TBLNOTESCAN = "noteScan";
     // TODO: Add table for tracking user-defined map layers, etc.
@@ -109,4 +112,12 @@ public class TerraDbContract {
             public static final String COLUMN_UPDATED = "updatedDatetime";
 
     }
+
+    // ----------------------- tblMeasurementCategory-----------------------------
+    public static final class JoinedCompassEntry implements BaseColumns {
+        public static final Uri CONTENT_URI =
+                TerraDbContract.BASE_CONTENT_URI.buildUpon().appendPath(PATH_JOINEDCOMPASSMEASUREMENTS).build();
+    }
+
+
 }

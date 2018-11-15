@@ -77,6 +77,13 @@
     <!-- Warnings -->
     <string name="compass_sensor_acc_warning">Warning! Detected a low compass accuracy.  Rotate your phone a few times to recalibrate the sensor.</string>
 
-
+    <!-- Data Screen Stuff -->
+    <string name="data_screen_bottom_menu_compass">Compass Data</string>
+    <string name="data_screen_bottom_menu_photos">Photos</string>
+    <string name="data_screen_recycler_dip_label">Dip:</string>
+    <string name="data_screen_recycler_azi_label">Dip Direction:</string>
+    <string name="data_screen_recycler_measurement_mode_label">Measurement:</string>
+    <string name="data_screen_recycler_measurement_category">Category:</string>
+    <string name="data_screen_recycler_locality_label">Station:</string>
 
 </resources>

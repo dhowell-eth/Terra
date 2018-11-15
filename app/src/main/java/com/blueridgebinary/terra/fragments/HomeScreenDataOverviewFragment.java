@@ -1,6 +1,7 @@
 package com.blueridgebinary.terra.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.blueridgebinary.terra.DataScreenActvity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.adapters.HomeLocalityListCursorAdapter;
 import com.blueridgebinary.terra.adapters.SessionCursorAdapter;
@@ -44,7 +46,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
 
     private OnTerraFragmentInteractionListener mListener;
     private RecyclerView mRecyclerView;
-    private HomeLocalityListCursorAdapter mAdapter;
+    public HomeLocalityListCursorAdapter mAdapter;
     private LocalityLoaderListener mLocalityLoaderListener;
 
     public HomeScreenDataOverviewFragment() {
@@ -99,6 +101,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
         }
         mAdapter = new HomeLocalityListCursorAdapter(this.getContext(), this);
+
     }
 
     @Override
@@ -133,6 +136,9 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     @Override
     public void onClick(int localityId) {
         Toast.makeText(this.getActivity(), "Clicked!", Toast.LENGTH_SHORT).show();
+        Intent startDataScreenIntent = new Intent(getActivity(), DataScreenActvity.class);
+        startActivity(startDataScreenIntent);
+
     }
 
     @Override

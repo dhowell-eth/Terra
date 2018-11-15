@@ -10,12 +10,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 
 import com.blueridgebinary.terra.data.TerraDbContract;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 
 /**
@@ -24,6 +26,7 @@ import java.util.Arrays;
 
 public class TerraDbContentProvider extends ContentProvider {
 
+    public static final String TAG = TerraDbContentProvider.class.getSimpleName();
 
     public static final int SESSIONS = 100;
     public static final int SESSION_WITH_ID = 101;
@@ -36,6 +39,8 @@ public class TerraDbContentProvider extends ContentProvider {
     public static final int MEAS_CAT = 500;
     public static final int MEAS_CAT_WITH_ID = 501;
 
+    public static final int COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT = 600;
+    public static final int COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT_WITH_ID = 601;
 
     public static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -63,6 +68,11 @@ public class TerraDbContentProvider extends ContentProvider {
         // Add Measurement Category URIs
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY, MEAS_CAT);
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY + "/#",MEAS_CAT_WITH_ID);
+        // Add joined compass tables
+        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_JOINEDCOMPASSMEASUREMENTS,
+                COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT);
+        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_JOINEDCOMPASSMEASUREMENTS + "/#",
+                COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT_WITH_ID);
         return uriMatcher;
     }
 
@@ -139,10 +149,29 @@ public class TerraDbContentProvider extends ContentProvider {
             case MEAS_CAT:
                 queryTableName = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
                 break;
+            case COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT:
+                String tMain = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
+                String tMainCol1 = TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID;
+                String tMainCol2 = TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID;
+                String tJoin1 = TerraDbContract.LocalityEntry.TABLE_NAME;
+                String tJoin1Col = TerraDbContract.LocalityEntry._ID;
+                String tJoin2 = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
+                String tJoinCol2 = TerraDbContract.MeasurementCategoryEntry._ID;
+                String joinQuery = String.format(Locale.US,
+                        "SELECT * " +
+                        "FROM %s t1 " +
+                        "JOIN %s t2 ON t1.%s = t2.%s " +
+                        "JOIN %s t3 ON t1.%s = t3.%s;",
+                        tMain,tJoin1,tMainCol1,tJoin1Col,tJoin2,tMainCol2,tJoinCol2);
+                Log.d(TAG,"Formatted a new join compass query: " + joinQuery);
+                retCursor = db.rawQuery(joinQuery,null);
+                Log.d(TAG,"Queried a new join compass query: " + joinQuery);
+                return retCursor;
             // Default exception
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+
         retCursor =  db.query(queryTableName,
                 projection,
                 selection,
@@ -206,13 +235,33 @@ public class TerraDbContentProvider extends ContentProvider {
         // Write URI match code and set a variable to return a Cursor
         int match = sUriMatcher.match(uri);
         Cursor retCursor;
+        String idList = TextUtils.join(",",selectionArgs);
 
         // Query for the tasks directory and write a default case
-        int numRowsDeleted;
+        int numRowsDeleted = 0;
         switch (match) {
             // Query for the tasks directory
             case SESSIONS:
                 numRowsDeleted = db.delete(TerraDbContract.SessionEntry.TABLE_NAME, "1", null);
+                break;
+            case LOCALITIES:
+                Log.d(TAG,  "refreshAppBar: "+ Arrays.toString(selectionArgs));
+                if (selectionArgs.length >= 1) {
+                    Log.d(TAG,  "refreshAppBar: we have some selections to delete.");
+                    // Delete relevant data in measurement table (linked as foreign keys)
+                    String delete_comp_sql = "DELETE FROM " + TerraDbContract.CompassMeasurementEntry.TABLE_NAME +
+                            " WHERE " + TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID + " IN (" +
+                            idList + ");";
+                    String delete_locality_sql = "DELETE FROM " + TerraDbContract.LocalityEntry.TABLE_NAME +
+                            " WHERE " + TerraDbContract.LocalityEntry._ID + " IN (" +
+                            idList + ");";
+                    db.beginTransaction();
+                    db.execSQL(delete_comp_sql);
+                    db.execSQL(delete_locality_sql);
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                    numRowsDeleted = selectionArgs.length;
+                }
                 break;
             // Default exception
             default:

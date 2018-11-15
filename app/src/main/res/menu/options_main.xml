@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Items for the options_main menu go here -->
+    <!-- Create Delete Project, Settings-->
+    <group />
+    <item
+        android:title="DELETE"
+        android:id="@+id/menu_execute_delete"
+        app:showAsAction="always"
+
+        />
+    <item
+        android:icon="@drawable/baseline_save_alt_black_18"
+        android:title="Export"
+        android:id = "@+id/menu_export"
+        app:showAsAction="always"/>
+    <item
+        android:icon="@drawable/baseline_settings_black_18"
+        android:title="Settings"
+        android:id="@+id/menu_settings"
+        app:showAsAction="always"/>
+</menu>

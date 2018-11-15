@@ -1,16 +1,28 @@
 package com.blueridgebinary.terra.adapters;
 
+
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.media.Image;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blueridgebinary.terra.DataScreenActvity;
+import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.fragments.HomeScreenDataOverviewFragment;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by dorra on 8/29/2017.
@@ -18,6 +30,7 @@ import com.blueridgebinary.terra.data.TerraDbContract;
 
 public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLocalityListCursorAdapter.LocalityViewHolder> {
 
+    public final String TAG = HomeLocalityListCursorAdapter.class.getSimpleName();
     private Cursor mCursor;
     private Context mContext;
 
@@ -27,6 +40,8 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
     private int mElevIndex;
     private int mCreatedIndex;
     private int mUpdatedIndex;
+
+    public List<Integer> selectedRecyclerViewItems = new ArrayList<Integer>();
 
     final private HomeLocalityListCursorAdapter.LocalityAdapterOnClickHandler mClickHandler;
 
@@ -67,15 +82,63 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
 
         holder.itemView.setTag(id);
 
+        // Reset our viewholder to defaults each time our recyclerview is recreated
+        this.selectedRecyclerViewItems.clear();
+        holder.setChecked(false);
+        holder.mIvRowIcon.setImageResource(R.drawable.ic_geo_fence);
+        MainActivity activity = (MainActivity) mContext;
+        activity.refreshAppBar(false);
+
+
         Resources res = mContext.getResources();
+
+        final LocalityViewHolder mHolder = holder;
 
         holder.mTvLocalityName.setText(res.getString(R.string.locality_list_item_base) + " " + Integer.toString(id));
         holder.mTvLat.setText(res.getString(R.string.locality_list_lat_base) + " " + Double.toString(lat));
         holder.mTvLong.setText(res.getString(R.string.locality_list_long_base) + " " + Double.toString(lon));
         holder.mTvElev.setText(res.getString(R.string.locality_list_elevation_base) + " " + Double.toString(elev));
         holder.mTvCreated.setText(res.getString(R.string.locality_list_created_date_base) + " " + createdDate);
-        holder.mTvUpdated.setText(res.getString(R.string.locality_list_updated_date_base) + " " + updatedDate);
-
+        holder.mIvRowIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImageView clickedImage = (ImageView) v;
+                //LocalityViewHolder holder = (LocalityViewHolder) v.getParent();
+                // If you click on the icon and it's already checked, deselect it
+                if (mHolder.isChecked) {
+                    // Swap image to "unselected" icon
+                    clickedImage.setImageResource(R.drawable.ic_geo_fence);
+                    // Remove from this activity's selection
+                    Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
+                    while(iterator.hasNext()) {
+                        Integer next = iterator.next();
+                        if(next.equals(id)) {
+                            iterator.remove();
+                        }
+                    }
+                    // Set the view to "unchecked"
+                    mHolder.setChecked(false);
+                }
+                // Otherwise, add this to our selection
+                else {
+                    // Swap image to "unselected" icon
+                    clickedImage.setImageResource(R.drawable.baseline_delete_black_18dp);
+                    // Remove from this activity's selection
+                    selectedRecyclerViewItems.add(id);
+                    // Set the view to "unchecked"
+                    mHolder.setChecked(true);
+                }
+                // Finally, refresh the app bar so the icons displayed a relevant to whether we have
+                // selected something
+                if (mContext instanceof MainActivity)
+                {
+                    MainActivity activity = (MainActivity) mContext;
+                    boolean anythingSelected = !selectedRecyclerViewItems.isEmpty();
+                    activity.refreshAppBar(anythingSelected);
+                    // Then call the method in the activity.
+                }
+            }
+        });
     }
 
     @Override
@@ -101,6 +164,8 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         return temp;
     }
 
+
+
     // TODO: add onclick listener logic here
 
     class LocalityViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -109,7 +174,10 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         TextView mTvLong;
         TextView mTvElev;
         TextView mTvCreated;
-        TextView mTvUpdated;
+        ImageView mIvRowIcon;
+        private boolean isChecked;
+
+        //TextView mTvUpdated;
 
         public LocalityViewHolder(View itemView) {
             super(itemView);
@@ -118,8 +186,14 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
             mTvLong = (TextView) itemView.findViewById(R.id.tv_locality_list_long);
             mTvElev = (TextView) itemView.findViewById(R.id.tv_locality_list_elev);
             mTvCreated = (TextView) itemView.findViewById(R.id.tv_locality_list_created);
-            mTvUpdated = (TextView) itemView.findViewById(R.id.tv_locality_list_updated);
+            mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_locality_list_icon);
+            isChecked = false;
+
             itemView.setOnClickListener(this);
+        }
+
+        public void setChecked(boolean status) {
+            isChecked = status;
         }
 
         @Override

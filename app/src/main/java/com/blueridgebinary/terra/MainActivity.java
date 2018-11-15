@@ -1,27 +1,36 @@
 package com.blueridgebinary.terra;
 
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.ContentValues;
+import android.net.Uri;
 import android.support.design.widget.BottomNavigationView;
 
 import android.support.annotation.NonNull;
 
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.blueridgebinary.terra.adapters.HomeScreenPagerAdapter;
 import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
+import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.fragments.HomeScreenDataOverviewFragment;
 import com.blueridgebinary.terra.fragments.OnTerraFragmentInteractionListener;
 import com.blueridgebinary.terra.utils.ListenableInteger;
 
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -30,13 +39,16 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements
         OnTerraFragmentInteractionListener<String> {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     ViewPager mViewPager;
     HomeScreenPagerAdapter homeScreenPagerAdapter;
     DrawerLayout mDrawerLayout;
-    ActionBarDrawerToggle mDrawerToggle;
     Toolbar mToolbar;
 
     BottomNavigationView mBottomNavView;
+    Menu mOptionsMenu;
+
     final List<MenuItem> items=new ArrayList<>();
 
     private int sessionId;
@@ -44,23 +56,23 @@ public class MainActivity extends AppCompatActivity implements
 
     public ListenableInteger selectedLocality;
 
+    public boolean itemsSelectedInRecyclerView;
+
     final static int OVERVIEW_PAGE = 1;
 
     public CurrentSession currentSession;
     public CurrentLocality currentLocality;
+    List<Integer> selectedLocalitiesInRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_2);
 
-        //Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_home_screen);
-        //setSupportActionBar(myToolbar);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_main);
-        setupToolbar();
-        // Add whatever stuff you need for populating drawer on the line below
 
-        setupDrawerToggle();
+        // Set up the main tool/app bar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_home_activity);
+        setSupportActionBar(myToolbar);
 
         // Get sessionId from Intent Extras
         sessionId = getIntent().getIntExtra("sessionId",0);
@@ -108,33 +120,104 @@ public class MainActivity extends AppCompatActivity implements
                 if (position < items.size()) {
                     mBottomNavView.setSelectedItemId(items.get(position).getItemId());
                 }
+                if (position == 2 && itemsSelectedInRecyclerView) {
+                    mOptionsMenu.findItem(R.id.menu_execute_delete).setEnabled(true);
+                    mOptionsMenu.findItem(R.id.menu_execute_delete).setVisible(true);
+                }
+                else {
+                    mOptionsMenu.findItem(R.id.menu_execute_delete).setEnabled(false);
+                    mOptionsMenu.findItem(R.id.menu_execute_delete).setVisible(false);
+                }
+
+
             }
         });
 
+    }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        mOptionsMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_main, menu);
+        return true;
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem delete = menu.findItem(R.id.menu_execute_delete);
+        // If there are items selected, show the delete button
+        if (itemsSelectedInRecyclerView) {
+            delete.setVisible(true);
+            delete.setEnabled(true);
+        }
+        // Otherwise hide it
+        else
+        {
+            delete.setVisible(false);
+            delete.setEnabled(false);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
-     void setupToolbar(){
-         mToolbar = (Toolbar) findViewById(R.id.toolbar_home_activity);
-         setSupportActionBar(mToolbar);
-         getSupportActionBar().setDisplayShowHomeEnabled(true);
-     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_execute_delete:
+                // User pressed Delete Button
+                this.deleteSelectedLocalities();
+                return true;
 
-     void setupDrawerToggle(){
-         mDrawerToggle = new android.support.v7.app.ActionBarDrawerToggle(this,mDrawerLayout,mToolbar,R.string.app_name, R.string.app_name);
-         //This is necessary to change the icon of the Drawer Toggle upon state change.
-         mDrawerToggle.syncState();
-     }
+            case R.id.menu_export:
+                // User pressed Export Button
 
+                return true;
+            case R.id.menu_settings:
+                // User pressed Settings Button
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void deleteSelectedLocalities() {
+        // First, get the array of selected ids and convert from int to string array
+        HomeScreenDataOverviewFragment dataOverviewFragment = (HomeScreenDataOverviewFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.vp_home + ":" + "2");
+        int numIds = dataOverviewFragment.mAdapter.selectedRecyclerViewItems.size();
+        String[] localityIds = new String[numIds];
+        for (int i = 0; i < numIds; i++) {
+            localityIds[i] = Integer.toString(dataOverviewFragment.mAdapter.selectedRecyclerViewItems.get(i));
+        }
+        Log.d(TAG,  "refreshAppBar: "+ Arrays.toString(localityIds));
+        // Then, attempt to execute a delete with this selection
+        int nRowsDeleted = getContentResolver().delete(TerraDbContract.LocalityEntry.CONTENT_URI, "",localityIds);
+        // Once we've deleted the data, update our selection container to reflect changes
+        dataOverviewFragment.mAdapter.selectedRecyclerViewItems.clear();
+        dataOverviewFragment.mAdapter.notifyDataSetChanged();
+        // And finally, refresh the app bar
+        this.refreshAppBar(false);
+    }
+
+    // TODO:
+    // Add onclick for delete button that will launch an alert
+    // Will need to get the fragment with the recycler view to access the ids for the selected
+    // stations we want to delete.
+    // e.g. Fragment currentFragment = getActivity().getFragmentManager().findFragmentById(R.id.fragment_container);
+    // Then, if the user selects yes we need to dispatch a command do our contentprovider to delete those entries
+    // along with their associated data
 
     @Override
     public void onFragmentInteraction(String tag, String data) {
+        return;
+    }
+
+
+    public void refreshAppBar(Boolean isSelected) {
+        Log.d(TAG,  "refreshAppBar: "+ isSelected.toString());
+        this.itemsSelectedInRecyclerView = isSelected;
+        this.onPrepareOptionsMenu(mOptionsMenu);
+        Log.d(TAG, "refreshAppBar: called.");
         return;
     }
 
@@ -150,5 +233,7 @@ public class MainActivity extends AppCompatActivity implements
     public void setSessionId(int sessionId) {
         this.sessionId = sessionId;
     }
+
+
 
  }
