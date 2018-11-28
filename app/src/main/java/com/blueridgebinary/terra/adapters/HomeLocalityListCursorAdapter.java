@@ -85,7 +85,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         // Reset our viewholder to defaults each time our recyclerview is recreated
         this.selectedRecyclerViewItems.clear();
         holder.setChecked(false);
-        holder.mIvRowIcon.setImageResource(R.drawable.ic_geo_fence);
+        holder.mIvRowIcon.setImageResource(R.drawable.baseline_location_on_black_48);
         MainActivity activity = (MainActivity) mContext;
         activity.refreshAppBar(false);
 
@@ -107,7 +107,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
                 // If you click on the icon and it's already checked, deselect it
                 if (mHolder.isChecked) {
                     // Swap image to "unselected" icon
-                    clickedImage.setImageResource(R.drawable.ic_geo_fence);
+                    clickedImage.setImageResource(R.drawable.baseline_location_on_black_48);
                     // Remove from this activity's selection
                     Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
                     while(iterator.hasNext()) {
@@ -122,7 +122,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
                 // Otherwise, add this to our selection
                 else {
                     // Swap image to "unselected" icon
-                    clickedImage.setImageResource(R.drawable.baseline_delete_black_18dp);
+                    clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
                     // Remove from this activity's selection
                     selectedRecyclerViewItems.add(id);
                     // Set the view to "unchecked"
