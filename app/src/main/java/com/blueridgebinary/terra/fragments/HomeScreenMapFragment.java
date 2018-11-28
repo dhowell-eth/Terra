@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.Map;
 
@@ -41,7 +43,9 @@ import java.util.Map;
  * Use the {@link HomeScreenMapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapReadyCallback{
+public class HomeScreenMapFragment extends HomeScreenFragment implements
+        OnMapReadyCallback,
+        OnMarkerClickListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
     private static final String TAG = HomeScreenMapFragment.class.getSimpleName();
@@ -90,6 +94,11 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
             public void onChange() {
                 int newId = selectedLocalityId.getValue();
                 setCurrentLocality(newId);
+
+                getActivity().getSupportLoaderManager().restartLoader(LoaderIds.OVERVIEW_MAP_LOCALITY_LOADER_ID,
+                        null,
+                        mLocalityLoaderListener);
+
             }
         });
 
@@ -129,10 +138,29 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
                     null,
                     mLocalityLoaderListener);
         }
+        // Set a listener for marker click.
+        mGoogleMap.setOnMarkerClickListener(this);
         UiSettings settings =  mGoogleMap.getUiSettings();
         settings.setRotateGesturesEnabled(true);
         settings.setZoomControlsEnabled(true);
+        settings.setMapToolbarEnabled(false);
 
+    }
+
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+        // Parse the ID from the marker title and set it as the current locality
+        int clickedId = Integer.parseInt(marker.getTitle());
+        this.selectedLocalityId.setValue(clickedId);
+        this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.OVERVIEW_MAP_LOCALITY_LOADER_ID,
+                null,
+                mLocalityLoaderListener);
+        Log.d(TAG, "onMarkerClick: clicked a marker" + Integer.toString(clickedId));
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
+        marker.showInfoWindow();
+        return true;
     }
 
     @Override
@@ -174,7 +202,17 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
 
             MarkerOptions options = new MarkerOptions();
             options.position(new LatLng(lat,lon)).title(Integer.toString(id));
+            Log.d(TAG, "addMapMarkersFromLocalityCursor: " + selectedLocalityId.toString());
+            if (id == selectedLocalityId.getValue()) {
+
+                 options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+            }
+
             markers[i] = googleMap.addMarker(options);
+            if (id == selectedLocalityId.getValue()) {
+                markers[i].showInfoWindow();
+            }
+
             localityCursor.moveToNext();
             ++i;
         }
@@ -215,11 +253,6 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
     }
 
     @Override
-    public void setCurrentLocality(int localityId) {
-        Log.d(TAG,"I was notified via listener that the currently selected locality has changed to:  " + Integer.toString(localityId));
-    }
-
-    @Override
     public void updateSessionUI() {
 
     }
@@ -228,4 +261,14 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements OnMapRe
     public void handleNewSessionData(Cursor cursor) {
 
     }
+
+    @Override
+    public void setCurrentLocality(int localityId) {
+/*        // Restart single locality loader using a new listener that has the latest selectedLocalityId
+        this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.SINGLE_LOCALITY_LOADER_ID,
+                null,
+                new LocalityLoaderListener(this,this.getActivity(),currentSessionId,null);*/
+    }
+
+
 }

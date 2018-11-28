@@ -255,6 +255,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     }
 
     // TODO: Remove this function and all references to it (use the one below)
+/*
     private void updateLocalityUiComponents() {
         if (currentLocality != null) {
             tvLat.setText(String.format(Locale.US,"%.6f",currentLocality.getLatitude()));
@@ -263,6 +264,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             tvNotes.setText(currentLocality.getLocalityNotes());
         }
     }
+*/
 
     @Override
     public void updateLocalityUI() {
@@ -271,6 +273,27 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             tvLong.setText(String.format(Locale.US,"%.6f",currentLocality.getLongitude()));
             tvAcc.setText(String.format(Locale.US,"%.6f",currentLocality.getAccuracy()));
             tvNotes.setText(currentLocality.getLocalityNotes());
+        }
+        else {
+            tvLat.setText("");
+            tvLong.setText("");
+            tvAcc.setText("");
+            tvNotes.setText("");
+        }
+    }
+
+    public void setSpinnerItemById(Spinner spinner, int _id)
+    {
+        int spinnerCount = spinner.getCount();
+        for (int i = 0; i < spinnerCount; i++)
+        {
+            Cursor value = (Cursor) spinner.getItemAtPosition(i);
+            long id = value.getLong(value.getColumnIndex("_id"));
+            if (id == _id)
+            {
+                spinner.setSelection(i);
+                break;
+            }
         }
     }
 
@@ -293,17 +316,20 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                     0); // Not sure about this
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSpinner.setAdapter(spinnerAdapter);
-            // Default item is the last one (i.e. most recently added station)
-            mSpinner.setSelection(mSpinner.getAdapter().getCount()-1);
 
-            // TODO:  add onItemSelected() listener for Spinner
+            // If there is already a locality selected in the UI, set the spinner to that
+            if (selectedLocalityId != null) {
+                setSpinnerItemById(mSpinner,selectedLocalityId.getValue());
+            } // Otherwise the default item is the last one (i.e. most recently added station)
+            else {
+                mSpinner.setSelection(mSpinner.getAdapter().getCount()-1);
+            }
+
             mSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(getContext(), "CLICKED ITEM: " + Long.toString(id), Toast.LENGTH_SHORT).show();
                     selectedLocalityId.setValue((int) id);
                 }
-
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
@@ -324,6 +350,18 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 tvLong.setText(String.format(Locale.US, "%.6f", cursor.getDouble(lonIndex)));
                 tvAcc.setText(String.format(Locale.US, "%.1f", cursor.getDouble(accIndex)));
                 tvNotes.setText(cursor.getString(notesIndex));
+
+
+                // If there is already a locality selected in the UI, set the spinner to that when our selection has changed
+                if (selectedLocalityId != null) {
+                    setSpinnerItemById(mSpinner,selectedLocalityId.getValue());
+                }
+            }
+            else {
+                tvLat.setText("");
+                tvLong.setText("");
+                tvAcc.setText("");
+                tvNotes.setText("");
             }
         }
 
