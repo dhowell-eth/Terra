@@ -26,7 +26,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
         TerraDbContract.MeasurementCategoryEntry.TABLE_NAME));
 
     // If you change the database schema, you must increment the database version
-    private static final int VERSION = 7;
+    private static final int VERSION = 8;
 
     // Constructor
     TerraDbHelper(Context context) {
@@ -110,6 +110,8 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 "('Foliation', 'DEFAULT CATEGORY', datetime(), datetime())," +
                 "('Fault', 'DEFAULT CATEGORY', datetime(), datetime())," +
                 "('Lineation', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('3D Plane', 'DEFAULT CATEGORY', datetime(), datetime())," +
+                "('3D Line', 'DEFAULT CATEGORY', datetime(), datetime())," +
                 "('Bearing', 'DEFAULT CATEGORY', datetime(), datetime());";
         Log.d("DB",INSERT_DEFAULT_MEAS_CATS);
         db.execSQL(CREATE_TABLE_MEAS_CAT);

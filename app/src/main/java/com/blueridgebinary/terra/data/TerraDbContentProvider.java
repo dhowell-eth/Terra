@@ -69,10 +69,8 @@ public class TerraDbContentProvider extends ContentProvider {
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY, MEAS_CAT);
         uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLMEASUREMENTCATEGORY + "/#",MEAS_CAT_WITH_ID);
         // Add joined compass tables
-        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_JOINEDCOMPASSMEASUREMENTS,
+        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_TBLCOMPASSMEASUREMENT + "/" + TerraDbContract.PATH_JOINEDCOMPASSMEASUREMENTS,
                 COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT);
-        uriMatcher.addURI(TerraDbContract.AUTHORITY,TerraDbContract.PATH_JOINEDCOMPASSMEASUREMENTS + "/#",
-                COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT_WITH_ID);
         return uriMatcher;
     }
 
@@ -150,6 +148,10 @@ public class TerraDbContentProvider extends ContentProvider {
                 queryTableName = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
                 break;
             case COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT:
+                String localityId = "";
+                if (selectionArgs.length > 0){
+                    localityId = selectionArgs[0];
+                }
                 String tMain = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
                 String tMainCol1 = TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID;
                 String tMainCol2 = TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID;
@@ -158,14 +160,18 @@ public class TerraDbContentProvider extends ContentProvider {
                 String tJoin2 = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
                 String tJoinCol2 = TerraDbContract.MeasurementCategoryEntry._ID;
                 String joinQuery = String.format(Locale.US,
-                        "SELECT * " +
+                        "SELECT t1._id as compassId, t1.*,t2.*,t3.*" +
                         "FROM %s t1 " +
                         "JOIN %s t2 ON t1.%s = t2.%s " +
-                        "JOIN %s t3 ON t1.%s = t3.%s;",
-                        tMain,tJoin1,tMainCol1,tJoin1Col,tJoin2,tMainCol2,tJoinCol2);
-                Log.d(TAG,"Formatted a new join compass query: " + joinQuery);
+                        "JOIN %s t3 ON t1.%s = t3.%s " +
+                        "WHERE t2._id == %s;",
+                        tMain,tJoin1,tMainCol1,tJoin1Col,tJoin2,tMainCol2,tJoinCol2,localityId);
+                /*Log.d(TAG,"Formatted a new join compass query: " + joinQuery);*/
                 retCursor = db.rawQuery(joinQuery,null);
-                Log.d(TAG,"Queried a new join compass query: " + joinQuery);
+                // Notifications have to happen for all joined tables, so the observer is pointed at the base_content_uri
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                Log.d(TAG, "query: set notifcation uri at " + uri);
+                /*Log.d(TAG,"Queried a new join compass query: " + joinQuery);*/
                 return retCursor;
             // Default exception
             default:
@@ -263,12 +269,37 @@ public class TerraDbContentProvider extends ContentProvider {
                     numRowsDeleted = selectionArgs.length;
                 }
                 break;
+            case COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT:
+                Log.d(TAG,  "delete called in content provider for: "+ Arrays.toString(selectionArgs));
+                if (selectionArgs.length >= 1) {
+                    // Delete relevant data in measurement table (linked as foreign keys)
+                    String delete_comp_sql = "DELETE FROM " + TerraDbContract.CompassMeasurementEntry.TABLE_NAME +
+                            " WHERE " + TerraDbContract.CompassMeasurementEntry._ID + " IN (" +
+                            idList + ");";
+                    String query_comp_sql = "SELECT * FROM " + TerraDbContract.CompassMeasurementEntry.TABLE_NAME + ";";
+                    Cursor testCursor = db.rawQuery(query_comp_sql,null);
+                    String debugCompIds = "SELECT _ID FROM tblCompass : ";
+                    testCursor.moveToFirst();
+                    for (int i = 0; i < testCursor.getCount()-1; i++) {
+                        debugCompIds = debugCompIds = debugCompIds + testCursor.getString(testCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry._ID)) + ",";
+                        testCursor.moveToNext();
+                    }
+                    Log.d(TAG, "delete: " + debugCompIds);
+                    db.beginTransaction();
+                    db.execSQL(delete_comp_sql);
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                    numRowsDeleted = 1;
+
+                }
+                break;
             // Default exception
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         if (numRowsDeleted != 0) {
+            Log.d(TAG, "delete: Notifying change at " + uri);
             getContext().getContentResolver().notifyChange(uri,null);
         }
         return numRowsDeleted;

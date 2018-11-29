@@ -15,12 +15,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.blueridgebinary.terra.adapters.CompassDataCursorAdapter;
 import com.blueridgebinary.terra.adapters.SessionCursorAdapter;
 import com.blueridgebinary.terra.data.TerraDbContract;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DataScreenActvity extends AppCompatActivity implements
@@ -30,9 +33,12 @@ public class DataScreenActvity extends AppCompatActivity implements
 
 
         private static final String TAG = DataScreenActvity.class.getSimpleName();
-        private static final int TEST_LOADER_ID = 696969;
-        RecyclerView mRecyclerView;
+        private static final int COMPASS_DATA_LOADER = 696969;
+        public RecyclerView mRecyclerView;
         private CompassDataCursorAdapter mAdapter;
+        private boolean itemsSelectedInRecyclerView;
+        private Menu mOptionsMenu;
+        private int localityId;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,7 @@ public class DataScreenActvity extends AppCompatActivity implements
             Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_home_activity);
             setSupportActionBar(myToolbar);
 
+            localityId = getIntent().getIntExtra("localityId",0);
 
             // Get the recycler view and hook it up to the Adapter
             mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_data_screen_compass);
@@ -52,7 +59,7 @@ public class DataScreenActvity extends AppCompatActivity implements
 
 
             // Initialize Loader for Session/Project Data
-            getSupportLoaderManager().initLoader(TEST_LOADER_ID, null, this);
+            getSupportLoaderManager().initLoader(COMPASS_DATA_LOADER, null, this);
 
         }
 
@@ -60,7 +67,7 @@ public class DataScreenActvity extends AppCompatActivity implements
         protected void onResume() {
             super.onResume();
             Log.d("LOADER-DEBUG","onResume() called!");
-            getSupportLoaderManager().restartLoader(TEST_LOADER_ID, null, this);
+            getSupportLoaderManager().restartLoader(COMPASS_DATA_LOADER, null, this);
     }
 
         /**
@@ -97,11 +104,14 @@ public class DataScreenActvity extends AppCompatActivity implements
                 // Query and load all task data in the background; sort by priority
                 // [Hint] use a try/catch block to catch any errors in loading data
 
+                String[] localityIdArray = new String[1];
+                localityIdArray[0]=Integer.toString(localityId);
+
                 try {
                     return getContentResolver().query(TerraDbContract.JoinedCompassEntry.CONTENT_URI,
                             null,
                             null,
-                            null,
+                            localityIdArray,
                             null);
 
                 } catch (Exception e) {
@@ -130,6 +140,7 @@ public class DataScreenActvity extends AppCompatActivity implements
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // FROM GOOGLE - Update the data that the adapter uses to create ViewHolders
+            Log.d(TAG, "onLoadFinished: New data loaded from asyncloader...");
         mAdapter.swapCursor(data);
     }
 
@@ -146,32 +157,84 @@ public class DataScreenActvity extends AppCompatActivity implements
     }
 
 
+    // ---------------------------- MENU LOGIC --------------------------------------------
+
         @Override
         public boolean onCreateOptionsMenu(Menu menu) {
+            mOptionsMenu = menu;
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.options_main, menu);
             return true;
         }
 
-        // TODO: Assign onclick for the delete button
-        // This will launch an alert menu with info on the selected stations and a yes/no button
+        @Override
+        public boolean onPrepareOptionsMenu(Menu menu) {
+            MenuItem delete = menu.findItem(R.id.menu_execute_delete);
+            // If there are items selected, show the delete button
+            if (itemsSelectedInRecyclerView) {
+                delete.setVisible(true);
+                delete.setEnabled(true);
+            }
+            // Otherwise hide it
+            else
+            {
+                delete.setVisible(false);
+                delete.setEnabled(false);
+            }
+            // Hide export button
+            MenuItem export = menu.findItem(R.id.menu_export);
+            export.setEnabled(false);
+            export.setVisible(false);
 
-        /*
+            return super.onPrepareOptionsMenu(menu);
+        }
+
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.menu_toggle_delete:
-                    // User chose the "Settings" item, show the app settings UI...
+                case R.id.menu_execute_delete:
+                    // User pressed Delete Button
+                    this.deleteSelectedRows();
                     return true;
 
+                case R.id.menu_export:
+                    // User pressed Export Button
+                    return true;
+                case R.id.menu_settings:
+                    // User pressed Settings Button
+
                 default:
-                    // If we got here, the user's action was not recognized.
-                    // Invoke the superclass to handle it.
                     return super.onOptionsItemSelected(item);
-
             }
+        }
 
-        }*/
+        public void deleteSelectedRows() {
+            Log.d(TAG, "deleteSelectedRows: Tried to delete some stuff. Implement logic here.");
+            // First, get the array of selected ids and convert from int to string array
+            int numIds = mAdapter.selectedRecyclerViewItems.size();
+            String[] measurementIds = new String[numIds];
+            for (int i = 0; i < numIds; i++) {
+                measurementIds[i] = Integer.toString(mAdapter.selectedRecyclerViewItems.get(i));
+            }
+            Log.d(TAG, "deleteSelectedRows: " + measurementIds.toString());
+            // Then, attempt to execute a delete with this selection
+            int nRowsDeleted = getContentResolver().delete(TerraDbContract.JoinedCompassEntry.CONTENT_URI, "",measurementIds);
+            // Once we've deleted the data, update our selection container to reflect changes
+            getSupportLoaderManager().restartLoader(COMPASS_DATA_LOADER, null, this);
+            mAdapter.selectedRecyclerViewItems.clear();
+            mAdapter.notifyDataSetChanged();
+            // And finally, refresh the app bar
+            this.refreshAppBar(false);
+        }
+
+
+        public void refreshAppBar(Boolean isSelected) {
+            Log.d(TAG,  "refreshAppBar: "+ isSelected.toString());
+            this.itemsSelectedInRecyclerView = isSelected;
+            this.onPrepareOptionsMenu(mOptionsMenu);
+            Log.d(TAG, "refreshAppBar: called.");
+            return;
+        }
 
 
 

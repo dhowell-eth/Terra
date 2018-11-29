@@ -133,10 +133,11 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
         mListener = null;
     }
 
+    // Launch a new data screen activity when a row in our recyclerview is clicked
     @Override
     public void onClick(int localityId) {
-        Toast.makeText(this.getActivity(), "Clicked!", Toast.LENGTH_SHORT).show();
         Intent startDataScreenIntent = new Intent(getActivity(), DataScreenActvity.class);
+        startDataScreenIntent.putExtra("localityId",localityId);
         startActivity(startDataScreenIntent);
 
     }

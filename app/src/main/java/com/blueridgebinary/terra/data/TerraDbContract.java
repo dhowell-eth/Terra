@@ -116,7 +116,7 @@ public class TerraDbContract {
     // ----------------------- tblMeasurementCategory-----------------------------
     public static final class JoinedCompassEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
-                TerraDbContract.BASE_CONTENT_URI.buildUpon().appendPath(PATH_JOINEDCOMPASSMEASUREMENTS).build();
+                CompassMeasurementEntry.CONTENT_URI.buildUpon().appendPath(PATH_JOINEDCOMPASSMEASUREMENTS).build();
     }
 
 

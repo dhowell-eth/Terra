@@ -7,11 +7,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blueridgebinary.terra.DataScreenActvity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -33,7 +38,9 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
         private int mAccuracyIndex;
         private int mIdIndex;
 
-        final private CompassDataAdapterOnClickHandler mClickHandler;
+        public ArrayList<Integer> selectedRecyclerViewItems = new ArrayList<Integer>();
+
+    final private CompassDataAdapterOnClickHandler mClickHandler;
 
         public interface CompassDataAdapterOnClickHandler {
             void onClick(int localityId);
@@ -54,11 +61,8 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
         @Override
         public void onBindViewHolder(CompassDataViewHolder holder, int position) {
 
-
-            // TODO: Need to set up content provider that is a joined table before the rest of this
-            // will  work.
-
-            mIdIndex = mCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry._ID);
+            // Note: hardcoded "compassId" column in join to avoid confusion from multiple joined "_id" columns in query result
+            mIdIndex = mCursor.getColumnIndex("compassId");
             mLocalityIdIndex = mCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID);
             mDipIndex = mCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_DIP);
             mAziIndex = mCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_DIPDIRECTION);
@@ -73,15 +77,60 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             String mode = mCursor.getString(mModeIndex);
             String category = mCursor.getString(mCategoryIndex);
 
-            holder.itemView.setTag(id);
-
             Resources res = mContext.getResources();
 
+            // Bind data from our loader to our view holder
+            holder.itemView.setTag(id);
             holder.mTvLocalityName.setText(Integer.toString(localityid));
             holder.mTvAzi.setText(String.format(Locale.US,"%.2f",azi));
             holder.mTvDip.setText(String.format(Locale.US,"%.2f",dip));
             holder.mTvMode.setText(mode);
             holder.mTvCategory.setText(category);
+
+            final CompassDataViewHolder mHolder = holder;
+
+            // Add an onclick listener for selecting rows for deletion
+            holder.mIvRowIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ImageView clickedImage = (ImageView) v;
+                    //LocalityViewHolder holder = (LocalityViewHolder) v.getParent();
+                    // If you click on the icon and it's already checked, deselect it
+                    if (mHolder.isChecked) {
+                        // Swap image to "unselected" icon
+                        clickedImage.setImageResource(R.drawable.baseline_explore_black_48);
+                        // Remove from this activity's selection
+                        Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
+                        while(iterator.hasNext()) {
+                            Integer next = iterator.next();
+                            if(next.equals(id)) {
+                                iterator.remove();
+                            }
+                        }
+                        // Set the view to "unchecked"
+                        mHolder.setChecked(false);
+                    }
+                    // Otherwise, add this to our selection
+                    else {
+                        // Swap image to "unselected" icon
+                        clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
+                        // Remove from this activity's selection
+                        selectedRecyclerViewItems.add(id);
+                        // Set the view to "unchecked"
+                        mHolder.setChecked(true);
+                    }
+                    // Finally, refresh the app bar so the icons displayed a relevant to whether we have
+                    // selected something
+                    if (mContext instanceof DataScreenActvity)
+                    {
+                        DataScreenActvity activity = (DataScreenActvity) mContext;
+                        boolean anythingSelected = !selectedRecyclerViewItems.isEmpty();
+                        activity.refreshAppBar(anythingSelected);
+                        // Then call the method in the activity.
+                    }
+                }
+            });
+
         }
 
         @Override
@@ -107,6 +156,7 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             return temp;
         }
 
+        // View holder for recycler view (holds each individual row's view)
         class CompassDataViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             TextView mTvLocalityName;
@@ -114,6 +164,8 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             TextView mTvDip;
             TextView mTvMode;
             TextView mTvCategory;
+            ImageView mIvRowIcon;
+            private boolean isChecked;
 
             public CompassDataViewHolder(View itemView) {
                 super(itemView);
@@ -122,16 +174,22 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
                 mTvDip = (TextView) itemView.findViewById(R.id.tv_compass_data_dip);
                 mTvMode = (TextView) itemView.findViewById(R.id.tv_compass_data_mode);
                 mTvCategory = (TextView) itemView.findViewById(R.id.tv_compass_data_category);
+                mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_compass_data_icon);
+                isChecked = false;
                 itemView.setOnClickListener(this);
+            }
+
+            public void setChecked(boolean status) {
+                isChecked = status;
             }
 
             @Override
             public void onClick(View v) {
-                itemView.setSelected(true);
+                /*itemView.setSelected(true);
                 int adapterPosition = getAdapterPosition();
                 mCursor.moveToPosition(adapterPosition);
                 int localityId = mCursor.getInt(mIdIndex);
-                mClickHandler.onClick(localityId);
+                mClickHandler.onClick(localityId);*/
             }
         }
 
