@@ -1,6 +1,8 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="TerraDarkTheme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="TerraDarkTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceFixTheme</item>
+    </style>
 
 </resources>

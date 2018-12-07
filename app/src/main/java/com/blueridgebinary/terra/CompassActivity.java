@@ -3,6 +3,7 @@ package com.blueridgebinary.terra;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
@@ -16,6 +17,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.AttributeSet;
@@ -134,13 +136,20 @@ public class CompassActivity extends AppCompatActivity implements
         mLeftAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_left);
         mRightAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_right);
 
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Log.d(TAG, "onCreate: " + Boolean.toString(preferences.contains("compass_mode")));
+        String preferredCompassMode = (preferences.getString("compass_mode", ""));
+        String[] compassModes = getResources().getStringArray(R.array.compass_modes);
+        Log.d(TAG, "onCreate: " + preferredCompassMode + " | " + java.util.Arrays.toString(compassModes));
+
         // Initialize accuracy toast flag
         shouldDisplayedAccuracyToast = true;
 
         // Set edit text input types and default them to off (only populated by compass view)
         mAzimuthEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         mDipEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
-        toggleEditTextEnabled(false);
+
 
         // Start MeasurementCategory loader
         getSupportLoaderManager().initLoader(LoaderIds.COMPASS_MEAS_CATEGORY_LOADER_ID, null, new MeasurementCategoryLoaderListener(this, this, sessionId));
@@ -162,6 +171,8 @@ public class CompassActivity extends AppCompatActivity implements
 
         // Add listener for changes in the compass view enabled status
         isEnabled = mCompassView.isEnabled;
+        toggleEditTextEnabled(!isEnabled.getValue());
+
         isEnabled.addListener(new ListenableBoolean.ChangeListener() {
             @Override
             public void onChange() {
@@ -200,6 +211,7 @@ public class CompassActivity extends AppCompatActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //  Assumes pos 0 = bearing pos 1 = vector pos 2 = plane
+                Log.d(TAG, "onItemSelected: CALLED TO CHANGE COMPASS VIA SPINNER");
                 mCompassView.setNeedleModeId(position + 1);
                 if (position == 0) {
                     mDipEditText.setVisibility(View.GONE);
@@ -223,8 +235,32 @@ public class CompassActivity extends AppCompatActivity implements
             }
         });
 
+
+        // Set compass view mode based on shared preference
+        // Assumes there are three compass modes
+        Log.d(TAG, "onCreate: " + compassModes[0]);
+        if (preferredCompassMode.equalsIgnoreCase(compassModes[0])){
+            mCompassModeSpinner.setSelection(0);
+        }
+        else if (preferredCompassMode.equalsIgnoreCase(compassModes[1])){
+            mCompassModeSpinner.setSelection(1);
+        }
+        else if (preferredCompassMode.equalsIgnoreCase(compassModes[2])){
+            mCompassModeSpinner.setSelection(2);
+        }
+        // otherwise we can just leave the mode as the default according to the xml
+
+
+
     }
 
+    @Override
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        return super.onCreateView(parent, name, context, attrs);
+
+
+
+    }
 
     @Override
     protected void onResume() {

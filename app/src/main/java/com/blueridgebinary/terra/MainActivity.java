@@ -4,6 +4,7 @@ package com.blueridgebinary.terra;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.BottomNavigationView;
 
@@ -175,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.menu_settings:
                 // User pressed Settings Button
+                Intent intent = new Intent(this, PreferencesActivity.class);
+                startActivity(intent);
 
             default:
                 return super.onOptionsItemSelected(item);

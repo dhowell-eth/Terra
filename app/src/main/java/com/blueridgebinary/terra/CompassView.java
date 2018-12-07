@@ -7,6 +7,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -19,6 +20,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.animation.ValueAnimator;
+import android.support.v7.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -115,9 +117,25 @@ public class CompassView extends View implements
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.CompassView, defStyle, 0);
 
+        // The initial needle mode is controlled by the shared preferences of the parent context
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        String preferredCompassMode = (preferences.getString("compass_mode", ""));
+        String[] compassModes = getResources().getStringArray(R.array.compass_modes);
+
+        int defaultNeedleMode = 1;
+        if (preferredCompassMode.equalsIgnoreCase(compassModes[0])){
+            defaultNeedleMode = 1;
+        }
+        else if (preferredCompassMode.equalsIgnoreCase(compassModes[1])){
+            defaultNeedleMode = 2;
+        }
+        else if (preferredCompassMode.equalsIgnoreCase(compassModes[2])){
+            defaultNeedleMode = 3;
+        }
+
         needleModeId = a.getInt(
                 R.styleable.CompassView_needleMode,
-                1);
+                defaultNeedleMode);
 
         // get stroke color
         needleColor = a.getResourceId(R.styleable.CompassView_needleColor, android.R.color.holo_red_light);
@@ -132,8 +150,11 @@ public class CompassView extends View implements
 
         // Orientation mode image defaults to the same one as the compass base
         orientationImageResId = a.getResourceId(R.styleable.CompassView_orientationModeImage, baseImageResId);
+
         // Get whether the view is defaulted to enabled or not
-        isEnabled = new ListenableBoolean(a.getBoolean(R.styleable.CompassView_isEnabled, true));
+        boolean isEnabledDefault = (preferences.getBoolean("is_compass_enabled", true));
+        Log.d(TAG, "init: " + Boolean.toString(isEnabledDefault));
+        isEnabled = new ListenableBoolean(a.getBoolean(R.styleable.CompassView_isEnabled, isEnabledDefault));
 
         a.recycle();
 
