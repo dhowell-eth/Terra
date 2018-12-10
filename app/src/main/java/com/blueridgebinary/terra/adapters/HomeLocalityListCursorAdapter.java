@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.media.Image;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.fragments.HomeScreenDataOverviewFragment;
+import com.github.florent37.shapeofview.shapes.CircleView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -108,6 +110,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
                 if (mHolder.isChecked) {
                     // Swap image to "unselected" icon
                     clickedImage.setImageResource(R.drawable.baseline_location_on_black_48);
+                    mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
                     // Remove from this activity's selection
                     Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
                     while(iterator.hasNext()) {
@@ -123,6 +126,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
                 else {
                     // Swap image to "unselected" icon
                     clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
+                    mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowSelected));
                     // Remove from this activity's selection
                     selectedRecyclerViewItems.add(id);
                     // Set the view to "unchecked"
@@ -175,6 +179,8 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         TextView mTvElev;
         TextView mTvCreated;
         ImageView mIvRowIcon;
+        CircleView mCircleView;
+
         private boolean isChecked;
 
         //TextView mTvUpdated;
@@ -187,6 +193,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
             mTvElev = (TextView) itemView.findViewById(R.id.tv_locality_list_elev);
             mTvCreated = (TextView) itemView.findViewById(R.id.tv_locality_list_created);
             mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_locality_list_icon);
+            mCircleView = (CircleView) itemView.findViewById(R.id.image_locality_list_icon_circleview);
             isChecked = false;
 
             itemView.setOnClickListener(this);

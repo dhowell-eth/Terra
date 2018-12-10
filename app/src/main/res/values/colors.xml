@@ -3,6 +3,7 @@
 
   <!--Main theme colors-->
   <color name="primaryColor">#546e7a</color>
+  <color name="background">#ffffff</color>
   <color name="primaryLightColor">#819ca9</color>
   <color name="primaryDarkColor">#29434e</color>
   <color name="secondaryColor">#90caf9</color>
@@ -14,5 +15,11 @@
   <!--General Colors For Alerts-->
   <color name="alertRed">#f44336</color>
   <color name="alertYellow">#FFEE58</color>
+
+  <color name="recyclerViewRowSelected">#ffd2ce</color>
+  <color name="recyclerViewRowDefault">@color/background</color>
+  <color name="recyclerViewCircleBorder">#000000</color>
+
+  <color name="mapLayerSpinnerBackground">#ffffff</color>
 
 </resources>

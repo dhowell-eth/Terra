@@ -3,6 +3,7 @@ package com.blueridgebinary.terra.adapters;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.blueridgebinary.terra.DataScreenActvity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
+import com.github.florent37.shapeofview.shapes.CircleView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -99,6 +101,7 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
                     if (mHolder.isChecked) {
                         // Swap image to "unselected" icon
                         clickedImage.setImageResource(R.drawable.baseline_explore_black_48);
+                        mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
                         // Remove from this activity's selection
                         Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
                         while(iterator.hasNext()) {
@@ -114,6 +117,7 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
                     else {
                         // Swap image to "unselected" icon
                         clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
+                        mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowSelected));
                         // Remove from this activity's selection
                         selectedRecyclerViewItems.add(id);
                         // Set the view to "unchecked"
@@ -165,6 +169,7 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             TextView mTvMode;
             TextView mTvCategory;
             ImageView mIvRowIcon;
+            CircleView mCircleView;
             private boolean isChecked;
 
             public CompassDataViewHolder(View itemView) {
@@ -175,6 +180,7 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
                 mTvMode = (TextView) itemView.findViewById(R.id.tv_compass_data_mode);
                 mTvCategory = (TextView) itemView.findViewById(R.id.tv_compass_data_category);
                 mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_compass_data_icon);
+                mCircleView = (CircleView) itemView.findViewById(R.id.image_compass_data_icon_circleview);
                 isChecked = false;
                 itemView.setOnClickListener(this);
             }

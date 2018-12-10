@@ -202,7 +202,9 @@ public class DataScreenActvity extends AppCompatActivity implements
                     return true;
                 case R.id.menu_settings:
                     // User pressed Settings Button
-
+                    // User pressed Settings Button
+                    Intent intent = new Intent(this, PreferencesActivity.class);
+                    startActivity(intent);
                 default:
                     return super.onOptionsItemSelected(item);
             }

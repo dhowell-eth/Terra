@@ -11,6 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
@@ -45,7 +48,8 @@ import java.util.Map;
  */
 public class HomeScreenMapFragment extends HomeScreenFragment implements
         OnMapReadyCallback,
-        OnMarkerClickListener {
+        OnMarkerClickListener,
+        Spinner.OnItemSelectedListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
     private static final String TAG = HomeScreenMapFragment.class.getSimpleName();
@@ -61,6 +65,10 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
 
     private GoogleMap mGoogleMap;
     private MapView mMapView;
+    private Spinner mSpinner;
+
+    //private int mapType;
+
     private LocalityLoaderListener mLocalityLoaderListener;
     private Marker[] mMarkers;
 
@@ -102,6 +110,8 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
             }
         });
 
+        //mapType = GoogleMap.MAP_TYPE_NORMAL;
+
     }
 
 
@@ -117,6 +127,15 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         MapsInitializer.initialize(getActivity().getApplicationContext());
         mMapView.getMapAsync(this);
 
+        Spinner mSpinner = view.findViewById(R.id.map_fragment_layer_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.map_modes, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(this);
         return view;
     }
 
@@ -245,7 +264,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
 
     @Override
     public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
-        if (cursor != null) {
+        if (cursor != null && this.mGoogleMap != null) {
             resetMapForNewData();
             this.mMarkers = this.addMapMarkersFromLocalityCursor(this.mGoogleMap, cursor);
             if (mMarkers != null) this.setMapExtentToMarkers(mGoogleMap, mMarkers, mMapView);
@@ -271,4 +290,26 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
     }
 
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, "onItemSelected: " + Integer.toString(position));
+        switch(position) {
+            case 0:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+            case 1:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+            case 2:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            default:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
 }

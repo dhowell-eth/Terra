@@ -95,7 +95,7 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
                                 // RUN DELETE ON ALL RELATED ROWS (MUST IMPLEMENT IN CONTENT RESOLVER
 
                                 // SWAP OVER TO THE WELCOME SCREEN ACTIVITY
-                                
+
                                 Toast.makeText(activityContext, "Yaay", Toast.LENGTH_SHORT).show();
                             }})
                         .setNegativeButton("CANCEL", null).show();
