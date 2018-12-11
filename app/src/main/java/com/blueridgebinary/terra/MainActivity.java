@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    static final int EXPORT_REQUEST_ID = 4756;
+
+
     ViewPager mViewPager;
     HomeScreenPagerAdapter homeScreenPagerAdapter;
     DrawerLayout mDrawerLayout;
@@ -172,16 +175,36 @@ public class MainActivity extends AppCompatActivity implements
 
             case R.id.menu_export:
                 // User pressed Export Button
-
+                Intent exportIntent = new Intent(this, ExportActivity.class);
+                exportIntent.putExtra("session_id",this.sessionId);
+                startActivityForResult(exportIntent,EXPORT_REQUEST_ID);
                 return true;
             case R.id.menu_settings:
                 // User pressed Settings Button
-                Intent intent = new Intent(this, PreferencesActivity.class);
-                startActivity(intent);
+                Intent settingsIntent = new Intent(this, PreferencesActivity.class);
+                startActivity(settingsIntent);
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        switch (requestCode) {
+            case EXPORT_REQUEST_ID:
+                if (data.getBooleanExtra("export_result",true)) {
+                    Toast.makeText(this, "Successfully exported data", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(this, "Error: Export failed", Toast.LENGTH_SHORT).show();
+                }
+            break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void deleteSelectedLocalities() {

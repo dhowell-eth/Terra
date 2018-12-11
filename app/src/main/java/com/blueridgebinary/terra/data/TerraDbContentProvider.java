@@ -149,9 +149,13 @@ public class TerraDbContentProvider extends ContentProvider {
                 break;
             case COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT:
                 String localityId = "";
-                if (selectionArgs.length > 0){
-                    localityId = selectionArgs[0];
+                for (String selectArg : selectionArgs) {
+                    localityId = localityId + selectArg + ",";
                 }
+                if(localityId.endsWith(",")) {
+                    localityId = localityId.substring(0, localityId.length() - 1);
+                }
+
                 String tMain = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
                 String tMainCol1 = TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID;
                 String tMainCol2 = TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID;
@@ -164,7 +168,7 @@ public class TerraDbContentProvider extends ContentProvider {
                         "FROM %s t1 " +
                         "JOIN %s t2 ON t1.%s = t2.%s " +
                         "JOIN %s t3 ON t1.%s = t3.%s " +
-                        "WHERE t2._id == %s;",
+                        "WHERE t2._id IN (%s);",
                         tMain,tJoin1,tMainCol1,tJoin1Col,tJoin2,tMainCol2,tJoinCol2,localityId);
                 /*Log.d(TAG,"Formatted a new join compass query: " + joinQuery);*/
                 retCursor = db.rawQuery(joinQuery,null);

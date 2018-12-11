@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.SwitchPreference;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -62,6 +63,7 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
         compassEnabledPreference.setTitle("Use Device Compass By Default");
         compassEnabledPreference.setSwitchTextOff("No");
         compassEnabledPreference.setSwitchTextOn("Yes");
+        compassEnabledPreference.setDefaultValue("true");
         screen.addPreference(compassEnabledPreference);
 
         PreferenceCategory categoryMap = new PreferenceCategory(contextThemeWrapper);
@@ -107,7 +109,6 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
         });
 
         screen.addPreference(deleteProjectPreference);
-
         // Set the preferences screen to our screen we just created
         setPreferenceScreen(screen);
 

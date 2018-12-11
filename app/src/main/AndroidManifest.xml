@@ -5,6 +5,7 @@
     <!-- Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/TerraDarkTheme">
+
         <provider
             android:name=".data.TerraDbContentProvider"
             android:authorities="com.blueridgebinary.terra"
@@ -59,9 +61,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".PreferencesActivity"
-            android:theme="@style/PreferenceFixTheme.Light">
-        </activity>
+        <activity
+            android:name=".PreferencesActivity"
+            android:theme="@style/PreferenceFixTheme.Light"></activity>
+        <activity
+            android:name=".ExportActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

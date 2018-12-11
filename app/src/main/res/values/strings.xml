@@ -89,4 +89,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+
+    <!-- Export Activity-->
+    <string name="export_title">Export Project Data</string>
+    <string name="export_description">Save data to a csv file.</string>
+    <string name="export_path_default_text">Select a folder...</string>
+    <string name="export_ok_btn_text">Export</string>
+
 </resources>
