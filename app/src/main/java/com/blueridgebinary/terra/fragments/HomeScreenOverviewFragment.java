@@ -247,7 +247,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     private boolean isALocalitySelected() {
         if (this.selectedLocalityId.getValue() == 0) {
-            Toast.makeText(this.getActivity(), "Error: You must create/select a locality to add data!",
+            Toast.makeText(this.getActivity(), "Create a station to start adding data",
                     Toast.LENGTH_LONG).show();
             return false;
         }

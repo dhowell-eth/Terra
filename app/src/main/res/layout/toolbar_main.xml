@@ -9,5 +9,6 @@
     android:minHeight="?attr/actionBarSize"
     android:background="?attr/colorPrimary"
     android:theme="@style/TerraDarkTheme"
-    android:popupTheme="@style/TerraDarkTheme">
+    android:popupTheme="@style/TerraDarkTheme"
+    android:elevation="3dp">
 </android.support.v7.widget.Toolbar>

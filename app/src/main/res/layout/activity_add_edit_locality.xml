@@ -4,37 +4,47 @@
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <RelativeLayout
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map_add_edit_locality"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_add_edit_locality_ok">
+        app:layout_constraintTop_toBottomOf="@+id/btn_add_edit_locality_ok"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:context="com.blueridgebinary.terra.AddEditLocalityActivity" />
 
+    <ImageView
+        android:id="@+id/iv_add_edit_crosshairs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:elevation="3dp"
+        android:src="@drawable/ic_target_50px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/map_add_edit_locality"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" />
 
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:map="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/map_add_edit_locality"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.blueridgebinary.terra.AddEditLocalityActivity" />
+    <Spinner
+        android:id="@+id/edit_locality_layer_spinner"
+        android:layout_width="100dp"
+        android:layout_height="24dp"
+        android:layout_alignTop="@+id/map_add_edit_locality"
+        android:layout_alignEnd="@+id/map_add_edit_locality"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp"
+        android:elevation="3dp"
+        android:gravity="center"
+        android:background="@color/mapLayerSpinnerBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" />
 
-        <ImageView
-            android:id="@+id/iv_add_edit_crosshairs"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_target_50px" />
-
-    </RelativeLayout>
     <TextView
         android:id="@+id/tv_add_edit_locality_title"
         android:layout_width="wrap_content"
