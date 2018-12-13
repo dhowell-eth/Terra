@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -87,6 +88,10 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     private TextView tvAcc;
     private TextView tvNotes;
 
+    public boolean hasShownPopup;
+
+
+
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
     }
@@ -132,6 +137,8 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 setCurrentLocality(newId);
             }
         });
+
+        hasShownPopup = false;
 
     }
 
@@ -308,6 +315,24 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
         // If the cursor queried all localities, it is for the spinner
         if (!isSingleQuery) {
+
+            // If the loader doesn't return any localities, we need to prompt the user (only does this once)
+            if (cursor.getCount() <= 0 && hasShownPopup == false) {
+                AlertDialog.Builder db = new AlertDialog.Builder(getContext());
+                db.setMessage("Welcome! You've opened an empty project. Create a new station to start recording data.");
+                db.setIcon(R.drawable.outline_new_releases_black_24);
+                db.setNegativeButton("Dismiss", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface d, int arg1) {
+                        d.cancel();
+                    }
+                });
+                hasShownPopup = true;
+                db.show();
+            }
+
+
+
             SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this.getContext(),
                     android.R.layout.simple_spinner_item,
                     cursor,
