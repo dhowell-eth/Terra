@@ -16,6 +16,9 @@ import android.util.Log;
  */
 
 
+
+// TODO - DELETE THIS CLASS
+
 // class containing helper methods for querying the content provider
 public class TerraDbOperationsHelper {
 

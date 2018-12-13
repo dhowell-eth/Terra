@@ -244,8 +244,11 @@ public class TerraDbContentProvider extends ContentProvider {
 
         // Write URI match code and set a variable to return a Cursor
         int match = sUriMatcher.match(uri);
-        Cursor retCursor;
-        String idList = TextUtils.join(",",selectionArgs);
+
+        String idList = "";
+        if (selectionArgs != null) {
+            idList = TextUtils.join(",", selectionArgs);
+        }
 
         // Query for the tasks directory and write a default case
         int numRowsDeleted = 0;
@@ -254,6 +257,54 @@ public class TerraDbContentProvider extends ContentProvider {
             case SESSIONS:
                 numRowsDeleted = db.delete(TerraDbContract.SessionEntry.TABLE_NAME, "1", null);
                 break;
+            case SESSION_WITH_ID:
+                String queryTableName = TerraDbContract.SessionEntry.TABLE_NAME;
+                String rowId = uri.getPathSegments().get(1);
+
+                // Need to delete all child tables first
+                // 1. Compass Measurements
+                String delCompassQuery = String.format(Locale.US,
+                         "DELETE FROM %s WHERE %s in " +
+                            "(SELECT c.%s AS %s FROM %s c " +
+                            "JOIN %s l ON c.%s = l.%s " +
+                            "JOIN %s s ON l.%s = s.%s " +
+                            "WHERE s.%s = %s);",
+                        TerraDbContract.CompassMeasurementEntry.TABLE_NAME,
+                        TerraDbContract.CompassMeasurementEntry._ID,
+                        TerraDbContract.CompassMeasurementEntry._ID,
+                        TerraDbContract.CompassMeasurementEntry._ID,
+                        TerraDbContract.CompassMeasurementEntry.TABLE_NAME,
+                        TerraDbContract.LocalityEntry.TABLE_NAME,
+                        TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID,
+                        TerraDbContract.LocalityEntry._ID,
+                        TerraDbContract.SessionEntry.TABLE_NAME,
+                        TerraDbContract.LocalityEntry.COLUMN_SESSIONID,
+                        TerraDbContract.SessionEntry._ID,
+                        TerraDbContract.SessionEntry._ID,
+                        rowId);
+                Log.d(TAG, "delete: " + delCompassQuery);
+                // 2. Localities
+                String delLocalityQuery = String.format(Locale.US,
+                        "DELETE FROM %s WHERE %s = %s;",
+                        TerraDbContract.LocalityEntry.TABLE_NAME,
+                        TerraDbContract.LocalityEntry.COLUMN_SESSIONID,
+                        rowId);
+                // 3. This Session
+                String delSessionQuery = String.format(Locale.US,
+                        "DELETE FROM %s WHERE %s = %s;",
+                        TerraDbContract.SessionEntry.TABLE_NAME,
+                        TerraDbContract.SessionEntry._ID,
+                        rowId);
+                // Execute SQL
+                db.beginTransaction();
+                db.execSQL(delCompassQuery);
+                db.execSQL(delLocalityQuery);
+                db.execSQL(delSessionQuery);
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                numRowsDeleted = 1;
+                break;
+
             case LOCALITIES:
                 Log.d(TAG,  "refreshAppBar: "+ Arrays.toString(selectionArgs));
                 if (selectionArgs.length >= 1) {

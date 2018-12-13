@@ -137,6 +137,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     @Override
     public void onClick(int localityId) {
         Intent startDataScreenIntent = new Intent(getActivity(), DataScreenActvity.class);
+        startDataScreenIntent.putExtra("session_id",this.currentSessionId);
         startDataScreenIntent.putExtra("localityId",localityId);
         startActivity(startDataScreenIntent);
 

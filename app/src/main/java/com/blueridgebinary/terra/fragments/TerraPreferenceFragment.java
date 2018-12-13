@@ -2,12 +2,14 @@ package com.blueridgebinary.terra.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.SwitchPreference;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.SwitchPreferenceCompat;
@@ -24,16 +26,24 @@ import android.support.v7.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import com.blueridgebinary.terra.R;
+import com.blueridgebinary.terra.WelcomeActivity;
+import com.blueridgebinary.terra.data.TerraDbContract;
 
 
 public class TerraPreferenceFragment extends PreferenceFragmentCompat {
 
     final private String TAG = this.getClass().getSimpleName();
+    private int sessionId;
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         final Context activityContext = getActivity();
+
+        // Get the current session id for delete operation
+        sessionId = ((FragmentActivity) activityContext).getIntent().getIntExtra("session_id",0);
+
 
         TypedValue themeTypedValue = new TypedValue();
         activityContext.getTheme().resolveAttribute(R.attr.preferenceTheme, themeTypedValue, true);
@@ -63,7 +73,7 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
         compassEnabledPreference.setTitle("Use Device Compass By Default");
         compassEnabledPreference.setSwitchTextOff("No");
         compassEnabledPreference.setSwitchTextOn("Yes");
-        compassEnabledPreference.setDefaultValue("true");
+        compassEnabledPreference.setDefaultValue(true);
         screen.addPreference(compassEnabledPreference);
 
         PreferenceCategory categoryMap = new PreferenceCategory(contextThemeWrapper);
@@ -95,14 +105,16 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
                         .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 // RUN DELETE ON ALL RELATED ROWS (MUST IMPLEMENT IN CONTENT RESOLVER
-
+                                activityContext.getContentResolver().delete(
+                                        Uri.withAppendedPath(TerraDbContract.SessionEntry.CONTENT_URI,
+                                        Uri.encode(Integer.toString(sessionId))),
+                                        null,null);
                                 // SWAP OVER TO THE WELCOME SCREEN ACTIVITY
-
-                                Toast.makeText(activityContext, "Yaay", Toast.LENGTH_SHORT).show();
+                                Intent homeIntent = new Intent(activityContext,WelcomeActivity.class);
+                                ((FragmentActivity) activityContext).finishAffinity();
+                                startActivity(homeIntent);
                             }})
                         .setNegativeButton("CANCEL", null).show();
-
-
 
                 return true;
             }

@@ -39,6 +39,7 @@ public class DataScreenActvity extends AppCompatActivity implements
         private boolean itemsSelectedInRecyclerView;
         private Menu mOptionsMenu;
         private int localityId;
+        private int sessionId;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class DataScreenActvity extends AppCompatActivity implements
             setSupportActionBar(myToolbar);
 
             localityId = getIntent().getIntExtra("localityId",0);
+            sessionId = getIntent().getIntExtra("session_id",0);
 
             // Get the recycler view and hook it up to the Adapter
             mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_data_screen_compass);
@@ -204,6 +206,7 @@ public class DataScreenActvity extends AppCompatActivity implements
                     // User pressed Settings Button
                     // User pressed Settings Button
                     Intent intent = new Intent(this, PreferencesActivity.class);
+                    intent.putExtra("session_id",this.sessionId);
                     startActivity(intent);
                 default:
                     return super.onOptionsItemSelected(item);

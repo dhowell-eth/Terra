@@ -20,10 +20,13 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +49,7 @@ import java.util.Locale;
 public class AddEditLocalityActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleMap.OnCameraMoveListener,
+        Spinner.OnItemSelectedListener,
         TextWatcher,
         LocalityUi {
 
@@ -164,6 +168,18 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
             }
         }
+
+        Spinner mSpinner = findViewById(R.id.edit_locality_layer_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.map_modes, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        mSpinner.setAdapter(adapter);
+        mSpinner.setOnItemSelectedListener(this);
+
+
     }
 
 
@@ -495,6 +511,37 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     @Override
     public void setCurrentLocality(int localityId) {
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        switch(position) {
+            case 0:
+                if (mMap != null) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }
+                break;
+            case 1:
+                if (mMap != null) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                }
+                break;
+            case 2:
+                if (mMap != null) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                }
+                break;
+            default:
+                if (mMap != null) {
+                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
 

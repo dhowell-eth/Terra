@@ -50,13 +50,13 @@
         android:id="@+id/tv_create_project_name_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:elevation="4dp"
         android:text="@string/new_project_name_label"
         android:textAlignment="viewStart"
         android:textAppearance="@android:style/TextAppearance.Material.Subhead"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/et_create_project_name"
         app:layout_constraintTop_toBottomOf="@+id/tv_create_project_heading" />
 
     <TextView

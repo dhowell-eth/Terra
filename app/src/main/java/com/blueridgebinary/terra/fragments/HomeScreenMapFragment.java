@@ -292,7 +292,6 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Log.d(TAG, "onItemSelected: " + Integer.toString(position));
         switch(position) {
             case 0:
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);

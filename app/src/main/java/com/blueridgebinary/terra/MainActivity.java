@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.menu_settings:
                 // User pressed Settings Button
                 Intent settingsIntent = new Intent(this, PreferencesActivity.class);
+                settingsIntent.putExtra("session_id",this.sessionId);
                 startActivity(settingsIntent);
 
             default:
