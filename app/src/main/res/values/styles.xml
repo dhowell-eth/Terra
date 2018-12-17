@@ -3,6 +3,17 @@
     <!-- Base application theme. -->
     <style name="TerraDarkTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceFixTheme</item>
+        <item name="colorButtonNormal">@color/buttonColor</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:colorControlNormal">#FFFFFF</item>
+        <item name="android:toolbarStyle">@style/MyToolBar</item>
+        <item name="android:statusBarColor">@color/statusBar</item>
+        <item name="android:colorAccent">@color/divider</item>
+        <item name="android:spinnerStyle">@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar</item>
+    </style>
+
+    <style name="MyToolBar" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/appBar</item>
     </style>
 
 </resources>

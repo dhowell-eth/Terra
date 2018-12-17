@@ -103,7 +103,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         etLongitude = (EditText) findViewById(R.id.et_add_edit_locality_long);
         etAccuracy = (EditText) findViewById(R.id.et_add_edit_locality_acc);
         ivCrosshairs = (ImageView) findViewById(R.id.iv_add_edit_crosshairs);
-        tvTitle = (TextView) findViewById(R.id.tv_add_edit_locality_title);
+        //tvTitle = (TextView) findViewById(R.id.tv_add_edit_locality_title);
         tvSubHeading = (TextView) findViewById(R.id.tv_add_edit_locality_subheading);
 
 
@@ -116,7 +116,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         Log.d(TAG,Boolean.toString(isCreateNewLocality));
 
         // Update title with the actual session/project name
-        tvTitle.setText(sessionName);
+        //tvTitle.setText(sessionName);
 
         // Set input type to numeric for edit texts
         etLatitude.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
@@ -211,6 +211,13 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         //mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setRotateGesturesEnabled(true);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            // TODO - Might need to request location here
+        }
     }
 
     public void toggleGpsEnabled(View v) {
@@ -223,7 +230,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             if (isMapEditEnabled) btnEditLocation.performClick();
             startGpsMode();
             btnGps.setImageResource(R.drawable.ic_gps_fixed_white_36dp);
-            btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.secondaryColor), android.graphics.PorterDuff.Mode.MULTIPLY);
+            btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.iconEnabledColor), android.graphics.PorterDuff.Mode.MULTIPLY);
             // call function to enable GPS listeners, etc.
 
         }
@@ -240,7 +247,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             if (isGpsEnabled) btnGps.performClick();
             startMapEditMode();
             // Highlight the button color to indicate you are in this mode
-            btnEditLocation.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.secondaryColor), android.graphics.PorterDuff.Mode.MULTIPLY);
+            btnEditLocation.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.iconEnabledColor), android.graphics.PorterDuff.Mode.MULTIPLY);
             // Call a function that enables the map edit mode
 
         }

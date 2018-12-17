@@ -1,12 +1,16 @@
 package com.blueridgebinary.terra.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.InterpolatorRes;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +58,8 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
     private static final String TAG = HomeScreenMapFragment.class.getSimpleName();
 
+
+    public static final int REQUEST_FINE_PERMISSION = 32323;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -164,7 +170,33 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         settings.setZoomControlsEnabled(true);
         settings.setMapToolbarEnabled(false);
 
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mGoogleMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_FINE_PERMISSION);
+        }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_FINE_PERMISSION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (mGoogleMap != null) {
+                        mGoogleMap.setMyLocationEnabled(true);
+                    }
+                }
+                return;
+            }
+        }
+    }
+
 
     @Override
     public boolean onMarkerClick(final Marker marker) {

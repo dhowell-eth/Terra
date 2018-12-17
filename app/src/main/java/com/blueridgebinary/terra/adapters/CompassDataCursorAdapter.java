@@ -86,6 +86,26 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             holder.mTvLocalityName.setText(Integer.toString(localityid));
             holder.mTvAzi.setText(String.format(Locale.US,"%.2f",azi));
             holder.mTvDip.setText(String.format(Locale.US,"%.2f",dip));
+            String directionLabel = "Dip Direction:";
+            switch (mode) {
+                case "BEARING":
+                    directionLabel = "Azimuth:";
+                    holder.mTvDip.setVisibility(View.GONE);
+                    holder.mTvDipLabel.setVisibility(View.GONE);
+                    break;
+                case "VECTOR":
+                    directionLabel = "Dip Direction:";
+                    holder.mTvDip.setVisibility(View.VISIBLE);
+                    holder.mTvDipLabel.setVisibility(View.VISIBLE);
+                    break;
+                case "PLANE":
+                    directionLabel = "Dip Direction:";
+                    holder.mTvDip.setVisibility(View.VISIBLE);
+                    holder.mTvDipLabel.setVisibility(View.VISIBLE);
+                    break;
+            }
+            holder.mTvAziLabel.setText(directionLabel);
+
             holder.mTvMode.setText(mode);
             holder.mTvCategory.setText(category);
 
@@ -170,6 +190,9 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
             TextView mTvCategory;
             ImageView mIvRowIcon;
             CircleView mCircleView;
+            TextView mTvAziLabel;
+            TextView mTvDipLabel;
+
             private boolean isChecked;
 
             public CompassDataViewHolder(View itemView) {
@@ -181,6 +204,8 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<CompassDataCu
                 mTvCategory = (TextView) itemView.findViewById(R.id.tv_compass_data_category);
                 mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_compass_data_icon);
                 mCircleView = (CircleView) itemView.findViewById(R.id.image_compass_data_icon_circleview);
+                mTvAziLabel = (TextView) itemView.findViewById(R.id.tv_compass_data_azi_label);
+                mTvDipLabel = (TextView) itemView.findViewById(R.id.tv_compass_data_dip_label);
                 isChecked = false;
                 itemView.setOnClickListener(this);
             }

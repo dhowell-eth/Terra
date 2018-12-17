@@ -12,8 +12,8 @@
 
     <!-- Welcome Screen Stuff         -->
     <string name="welcome_header">Welcome! Select an option below to begin.</string>
-    <string name="welcome_new_button_text">New Project…</string>
-    <string name="welcome_open_button_text">Open Existing…</string>
+    <string name="welcome_new_button_text">New Project</string>
+    <string name="welcome_open_button_text">Open Existing</string>
 
     <!-- New Project Screen Stuff         -->
     <string name="new_project_heading">Create a New Project:</string>
@@ -32,9 +32,9 @@
     <string name="home_overview_title">Home:</string>
 
     <!-- Home Screen Bottom Menu Stuff         -->
-    <string name="main_bottom_menu_home">Overview</string>
+    <string name="main_bottom_menu_home">Station</string>
     <string name="main_bottom_menu_map">Map</string>
-    <string name="main_bottom_menu_list">List</string>
+    <string name="main_bottom_menu_list">Data</string>
     <string name="title_activity_testing_bottom_nav_actiity">TestingBottomNavActiity</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -48,7 +48,7 @@
     <string name="add_edit_locality_subheading_lat_label">Lat:</string>
     <string name="add_edit_locality_subheading_long_label">Long:</string>
     <string name="add_edit_locality_subheading_acc_label">Accuracy (m)</string>
-    <string name="add_edit_locality_ok_button_text">OK</string>
+    <string name="add_edit_locality_ok_button_text">Save</string>
 
     <!-- Locality RecyclerView Stuff         -->
     <string name="locality_list_item_base">Station </string>
@@ -60,13 +60,13 @@
 
     <!-- Compass Activity Stuff         -->
     <string name="compass_title">Add Compass Measurement</string>
-    <string name="compass_azi_label">Azimuth:</string>
-    <string name="compass_dip_label">Dip:</string>
+    <string name="compass_azi_label">Azimuth</string>
+    <string name="compass_dip_label">Dip</string>
     <string name="compass_disabled_message">COMPASS DISABLED</string>
     <string name="compass_enabled_message">COMPASS ENABLED</string>
-    <string name="compass_ok_button_text">OK</string>
-    <string name="compass_mode_label">Mode:</string>
-    <string name="compass_category_label">Measurement:</string>
+    <string name="compass_ok_button_text">Save</string>
+    <string name="compass_mode_label">Mode</string>
+    <string name="compass_category_label">Feature</string>
 
     <!-- Add Measurement Category Stuff        -->
     <string name="dialog_add_meas_cat_title">Add Measurement Category:</string>
@@ -83,8 +83,9 @@
     <string name="data_screen_recycler_dip_label">Dip:</string>
     <string name="data_screen_recycler_azi_label">Dip Direction:</string>
     <string name="data_screen_recycler_measurement_mode_label">Measurement:</string>
-    <string name="data_screen_recycler_measurement_category">Category:</string>
-    <string name="data_screen_recycler_locality_label">Station:</string>
+    <string name="data_screen_recycler_measurement_category">Feature:</string>
+    <string name="data_screen_recycler_locality_label">Station</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -93,7 +94,7 @@
     <!-- Export Activity-->
     <string name="export_title">Export Project Data</string>
     <string name="export_description">Save data to a csv file.</string>
-    <string name="export_path_default_text">Select a folder...</string>
+    <string name="export_path_default_text">Select a folder</string>
     <string name="export_ok_btn_text">Export</string>
 
 </resources>

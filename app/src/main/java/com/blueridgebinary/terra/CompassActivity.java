@@ -79,6 +79,7 @@ public class CompassActivity extends AppCompatActivity implements
     private CompassView mCompassView;
     private EditText mAzimuthEditText;
     private EditText mDipEditText;
+    private TextView azmimuthLabelText;
     private Spinner mCompassMeasurementSpinner;
     private Spinner mCompassModeSpinner;
     private Button mOkButton;
@@ -135,7 +136,10 @@ public class CompassActivity extends AppCompatActivity implements
         mNewMeasurementCategoryImageButton = (ImageButton) findViewById(R.id.imbt_compass_add_meas_cat);
         mLeftAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_left);
         mRightAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_right);
+        azmimuthLabelText = (TextView) findViewById(R.id.tv_compass_azi_label);
 
+        // Focus on the text view to avoid resizing issue
+        // azmimuthLabelText.requestFocus();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Log.d(TAG, "onCreate: " + Boolean.toString(preferences.contains("compass_mode")));
@@ -216,9 +220,11 @@ public class CompassActivity extends AppCompatActivity implements
                 if (position == 0) {
                     mDipEditText.setVisibility(View.GONE);
                     mDipTextView.setVisibility(View.GONE);
+                    azmimuthLabelText.setText("Bearing");
                 } else {
                     mDipEditText.setVisibility(View.VISIBLE);
                     mDipTextView.setVisibility(View.VISIBLE);
+                    azmimuthLabelText.setText("Dip Direction");
                 }
             }
 

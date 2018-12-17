@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@color/background" />
+        app:srcCompat="@color/backgroundLight" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view_open_sessions"

@@ -2,8 +2,10 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/boxBackground"
     tools:context=".ExportActivity">
 
     <TextView
@@ -35,22 +37,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_export_title" />
 
-    <TextView
-        android:id="@+id/tv_export_select_folder"
+
+    <android.support.v7.widget.CardView
+        android:elevation="10dp"
+        app:cardBackgroundColor="@color/buttonColorBright"
+        app:cardCornerRadius="4dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:elevation="2dp"
-        android:text="@string/export_path_default_text"
-        android:textAlignment="center"
-        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/et_export_filename"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_export_desc" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_export_desc">
+        <TextView
+            android:id="@+id/tv_export_select_folder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/export_path_default_text"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+    </android.support.v7.widget.CardView>
+
 
     <Button
         android:id="@+id/btn_export_ok"
@@ -59,6 +69,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
+        android:background="@color/buttonColorBright"
         android:text="@string/export_ok_btn_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

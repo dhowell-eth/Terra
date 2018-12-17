@@ -1,8 +1,8 @@
-<android.support.constraint.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
 
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,10 +12,10 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_add_edit_locality_ok"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_add_edit_locality"
         tools:context="com.blueridgebinary.terra.AddEditLocalityActivity" />
 
     <ImageView
@@ -37,37 +37,23 @@
         android:layout_alignTop="@+id/map_add_edit_locality"
         android:layout_alignEnd="@+id/map_add_edit_locality"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="0dp"
+        android:background="@color/mapLayerSpinnerBackground"
         android:elevation="3dp"
         android:gravity="center"
-        android:background="@color/mapLayerSpinnerBackground"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" />
-
-    <TextView
-        android:id="@+id/tv_add_edit_locality_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/add_edit_locality_title"
-        android:textAppearance="@android:style/TextAppearance.Material.Title"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 
     <ImageView
         android:id="@+id/iv_add_edit_location_container"
-        android:layout_width="275dp"
-        android:layout_height="130dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:src="?attr/colorButtonNormal"
-        app:layout_constraintBottom_toTopOf="@+id/btn_add_edit_locality_ok"
-        app:layout_constraintHorizontal_bias="0.52"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/boxBackground"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_add_edit_locality"
         app:layout_constraintLeft_toRightOf="@+id/imbt_add_edit_locality_toggle_gps"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_add_edit_locality_subheading" />
@@ -78,14 +64,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/add_edit_locality_subheading_add"
-        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-        app:layout_constraintHorizontal_bias="0.502"
+        android:textAppearance="@android:style/TextAppearance.Material.Title"
+        android:textColor="@color/secondaryTextColor"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_add_edit_locality_title" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/imbt_add_edit_locality_toggle_gps"
@@ -93,22 +77,29 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/buttonColorBright"
         android:checked="false"
+        android:onClick="toggleGpsEnabled"
+        android:src="@drawable/ic_gps_off_white_36dp"
+        app:layout_constraintBottom_toTopOf="@+id/imbt_add_edit_locality_toggle_edit"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_add_edit_locality_subheading"
-        android:src="@drawable/ic_gps_off_white_36dp"
-        android:onClick="toggleGpsEnabled"/>
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <ImageButton
         android:id="@+id/imbt_add_edit_locality_toggle_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_edit_location_white_36dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/imbt_add_edit_locality_toggle_gps"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/buttonColorBright"
+        android:onClick="toggleMapEditLocation"
+        android:src="@drawable/ic_edit_location_white_36dp"
+        app:layout_constraintBottom_toTopOf="@+id/map_add_edit_locality"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:onClick="toggleMapEditLocation"/>
+        app:layout_constraintTop_toBottomOf="@+id/imbt_add_edit_locality_toggle_gps" />
 
     <Button
         android:id="@+id/btn_add_edit_locality_ok"
@@ -116,12 +107,13 @@
         android:layout_height="48dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/buttonColorBright"
         android:text="@string/add_edit_locality_ok_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imbt_add_edit_locality_toggle_edit"
-        />
+        app:layout_constraintRight_toRightOf="parent" />
 
 
     <TextView
@@ -139,8 +131,8 @@
         android:id="@+id/et_add_edit_locality_lat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="6dp"
+        android:layout_marginRight="8dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:textSize="14sp"
@@ -189,5 +181,20 @@
         android:textSize="14sp"
         app:layout_constraintBaseline_toBaselineOf="@+id/tv_add_edit_locality_acc_label"
         app:layout_constraintRight_toRightOf="@+id/iv_add_edit_location_container" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline_add_edit_locality"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.30" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline_add_edit_locality_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+
 
 </android.support.constraint.ConstraintLayout>

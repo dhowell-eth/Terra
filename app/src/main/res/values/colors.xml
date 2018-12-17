@@ -2,22 +2,36 @@
 <resources>
 
   <!--Main theme colors-->
-  <color name="primaryColor">#546e7a</color>
-  <color name="background">#ffffff</color>
+  <color name="primaryColor">#95c77d</color>
+  <color name="backgroundLight">#ffffff</color>
+  <color name="backgroundDark">#aeaeae</color>
+  <color name="backgroundMedium">#e0e0e0</color>
+  <color name="background">#546e7a</color>
+  <color name="divider">#00766c</color>
   <color name="primaryLightColor">#819ca9</color>
   <color name="primaryDarkColor">#29434e</color>
   <color name="secondaryColor">#90caf9</color>
   <color name="secondaryLightColor">#c3fdff</color>
   <color name="secondaryDarkColor">#5d99c6</color>
-  <color name="primaryTextColor">#ffffff</color>
-  <color name="secondaryTextColor">#000000</color>
+  <color name="primaryTextColor">#000000</color>
+  <color name="secondaryTextColor">#ffffff</color>
+  <color name="buttonColor">#90a4ae</color>
+  <color name="buttonColorBright">#95c77d</color>
+  <color name="bottomNavSelected">#03a9f4</color>
+  <color name="bottomNavDefault">#29434e</color>
+  <color name="appBar">#95c77d</color>
+  <color name="statusBar">#6b8e59</color>
+  <color name="boxBackground">#e0e0e0</color>
+  <color name="iconEnabledColor">#03a9f4</color>
+
+
 
   <!--General Colors For Alerts-->
   <color name="alertRed">#f44336</color>
   <color name="alertYellow">#FFEE58</color>
 
-  <color name="recyclerViewRowSelected">#ffd2ce</color>
-  <color name="recyclerViewRowDefault">@color/background</color>
+  <color name="recyclerViewRowSelected">@color/alertRed</color>
+  <color name="recyclerViewRowDefault">@color/buttonColorBright</color>
   <color name="recyclerViewCircleBorder">#000000</color>
 
   <color name="mapLayerSpinnerBackground">#ffffff</color>

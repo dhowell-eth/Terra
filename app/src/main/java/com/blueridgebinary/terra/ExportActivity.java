@@ -88,6 +88,10 @@ public class ExportActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
         switch (requestCode) {
             case EXPORT_FOLDER_REQUEST_CODE:
                 Uri treeUri = data.getData();
