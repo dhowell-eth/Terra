@@ -14,7 +14,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:baseImage="@drawable/compass_base"
         app:disabledImage="@drawable/compass_disabled"
@@ -46,14 +45,14 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:background="@color/boxBackground"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:layout_constraintBottom_toTopOf="@+id/btn_compass_ok"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
-        android:focusable="true"
-        android:focusableInTouchMode="true">
+        app:layout_constraintTop_toTopOf="@+id/guideline2">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -69,7 +68,10 @@
                 android:layout_marginLeft="8dp"
                 android:text="@string/compass_azi_label"
                 app:layout_constraintBaseline_toBaselineOf="@+id/et_compass_azi"
-                app:layout_constraintLeft_toLeftOf="parent" />
+                app:layout_constraintEnd_toStartOf="@+id/et_compass_azi"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent" />
 
 
             <TextView
@@ -79,7 +81,9 @@
                 android:layout_marginLeft="8dp"
                 android:text="@string/compass_dip_label"
                 app:layout_constraintBaseline_toBaselineOf="@+id/et_compass_dip"
-                app:layout_constraintLeft_toRightOf="@+id/et_compass_azi" />
+                app:layout_constraintEnd_toStartOf="@+id/et_compass_dip"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/et_compass_azi" />
 
             <EditText
                 android:id="@+id/et_compass_azi"
@@ -91,7 +95,9 @@
                 android:inputType="numberSigned"
                 android:textAlignment="center"
                 android:textSize="18sp"
-                app:layout_constraintLeft_toRightOf="@+id/tv_compass_azi_label"
+                app:layout_constraintEnd_toStartOf="@+id/tv_compass_dip_label"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_compass_azi_label"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="22" />
 
@@ -101,56 +107,64 @@
                 android:layout_height="50dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 android:ems="10"
                 android:inputType="numberSigned"
                 android:textAlignment="center"
-                app:layout_constraintLeft_toRightOf="@+id/tv_compass_dip_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_compass_dip_label"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Spinner
                 android:id="@+id/spinner_compass_mode"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="16dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
+                android:background="@color/boxBackground"
+                android:dropDownWidth="200dp"
                 android:entries="@array/compass_modes"
-                app:layout_constraintLeft_toRightOf="@+id/tv_compass_mode_label"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/et_compass_azi" />
+                app:layout_constraintBottom_toBottomOf="@+id/tv_compass_mode_label"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tv_compass_mode_label"
+                app:layout_constraintTop_toTopOf="@+id/tv_compass_mode_label" />
 
             <Spinner
                 android:id="@+id/spinner_compass_measurement"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginRight="82dp"
+                android:background="@color/boxBackground"
+                android:dropDownWidth="200dp"
                 android:entries="@array/compass_modes"
                 android:spinnerMode="dialog"
-                app:layout_constraintLeft_toRightOf="@+id/tv_compass_measurement_label"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinner_compass_mode" />
+                app:layout_constraintBottom_toBottomOf="@+id/tv_compass_measurement_label"
+                app:layout_constraintStart_toStartOf="@+id/spinner_compass_mode"
+                app:layout_constraintTop_toTopOf="@+id/tv_compass_measurement_label"
+                app:layout_constraintVertical_bias="0.0" />
 
             <TextView
                 android:id="@+id/tv_compass_mode_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/compass_mode_label"
-                app:layout_constraintBaseline_toBaselineOf="@+id/spinner_compass_mode"
-                app:layout_constraintLeft_toLeftOf="parent" />
+                app:layout_constraintEnd_toStartOf="@+id/spinner_compass_mode"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/et_compass_azi" />
 
             <TextView
                 android:id="@+id/tv_compass_measurement_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/compass_category_label"
-                app:layout_constraintBaseline_toBaselineOf="@+id/spinner_compass_measurement"
-                app:layout_constraintLeft_toLeftOf="parent" />
+                app:layout_constraintStart_toStartOf="@+id/tv_compass_mode_label"
+                app:layout_constraintTop_toBottomOf="@+id/tv_compass_mode_label" />
 
             <ImageButton
                 android:id="@+id/imbt_compass_add_meas_cat"
@@ -162,12 +176,29 @@
                 android:background="@android:color/transparent"
                 android:enabled="false"
                 android:visibility="gone"
-                app:layout_constraintHorizontal_bias="0.482"
-                app:layout_constraintLeft_toRightOf="@+id/spinner_compass_measurement"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinner_compass_mode"
                 app:srcCompat="@android:drawable/ic_menu_add" />
 
+            <Button
+                android:id="@+id/btn_compass_add_notes"
+                android:layout_width="80dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:background="@color/buttonColorBright"
+                android:elevation="4dp"
+                android:text="@string/compass_notes_button_text"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spinner_compass_measurement" />
+
+
+          <!--  <android.support.constraint.Guideline
+                android:id="@+id/guideline_compass_activity_halfvert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="206dp" />-->
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
@@ -175,14 +206,16 @@
 
     <Button
         android:id="@+id/btn_compass_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="14dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="128dp"
+        android:layout_height="32dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginBottom="16dp"
         android:background="@color/buttonColorBright"
+        android:elevation="4dp"
         android:text="@string/compass_ok_button_text"
+        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.535"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

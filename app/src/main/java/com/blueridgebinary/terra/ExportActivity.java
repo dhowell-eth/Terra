@@ -200,10 +200,17 @@ public class ExportActivity extends AppCompatActivity {
         try {
             OutputStream outputStream = getContentResolver().openOutputStream(stationFile.getUri());
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-            String rowText = "StationId,Lat_WGS84,Long_WGS84,GpsAccuracy_m,Elevation_m,Notes,Created,Updated\n";
+            String rowText = "StationNumber,StationId,Lat_WGS84,Long_WGS84,GpsAccuracy_m,Elevation_m,Notes,Created,Updated\n";
             outputStreamWriter.write(rowText);
             for (int i=0; i<localityCursor.getCount(); i++) {
+                String stationNumber = localityCursor.getString(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
+                if (stationNumber == null) {
+                    stationNumber="";
+                }
+
+
                 rowText = "" +
+                        stationNumber + "," +
                         Integer.toString(localityCursor.getInt(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry._ID))) + "," +
                         Double.toString(localityCursor.getDouble(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT))) + "," +
                         Double.toString(localityCursor.getDouble(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG))) + "," +
@@ -239,11 +246,21 @@ public class ExportActivity extends AppCompatActivity {
         try {
             OutputStream outputStream = getContentResolver().openOutputStream(measurementFile.getUri());
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-            String rowText = "MeasurementId,StationId,Strike,Dip,DipDirection,AndroidCompassReliability,MeasurementMode,MeasurementType,Created\n";
+            String rowText = "MeasurementId,StationNumber,StationId,Strike,Dip,DipDirection,AndroidCompassReliability,MeasurementMode,MeasurementType,Created,Notes\n";
             outputStreamWriter.write(rowText);
             for (int i=0; i<measurementCursor.getCount(); i++) {
+                String notesText = measurementCursor.getString(measurementCursor.getColumnIndex("compassNotes"));
+                if (notesText == null) {
+                    notesText = "";
+                }
+                String stationNumber = measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
+                if (stationNumber == null) {
+                    stationNumber="";
+                }
+
                 rowText = "" +
                         Integer.toString(measurementCursor.getInt(measurementCursor.getColumnIndex("compassId"))) + "," +
+                        stationNumber + "," +
                         Integer.toString(measurementCursor.getInt(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID))) + "," +
                         Double.toString(measurementCursor.getDouble(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_STRIKE))) + "," +
                         Double.toString(measurementCursor.getDouble(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_DIP)))  + "," +
@@ -251,7 +268,8 @@ public class ExportActivity extends AppCompatActivity {
                         measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_COMPASSRELIABILITY)) + "," +
                         measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTMODE)) + "," +
                         measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME)) + "," +
-                        measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED)) + "\n";
+                        measurementCursor.getString(measurementCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED)) + "," +
+                        "\"" + notesText + "\"" + "\n";
                 outputStreamWriter.append(rowText);
                 measurementCursor.moveToNext();
             }

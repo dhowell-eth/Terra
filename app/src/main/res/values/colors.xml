@@ -24,7 +24,11 @@
   <color name="boxBackground">#e0e0e0</color>
   <color name="iconEnabledColor">#03a9f4</color>
 
+  <color name="itemOnSelectedColor">#03a9f4</color>
 
+  <color name="spinnerBorder">#95c77d</color>
+  <color name="spinnerBackground">#ffffff</color>
+  <color name="spinnerListBackground">#ffffff</color>
 
   <!--General Colors For Alerts-->
   <color name="alertRed">#f44336</color>

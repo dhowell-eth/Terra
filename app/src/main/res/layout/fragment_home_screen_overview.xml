@@ -68,43 +68,42 @@
         app:layout_constraintLeft_toLeftOf="@+id/cv_home_overview_heading_container"
         app:layout_constraintTop_toTopOf="@+id/cv_home_overview_heading_container" />
 
-    <TextView
-        android:id="@+id/tv_home_overview_station_label"
+
+    <Spinner
+        android:id="@+id/home_spinner_locality"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:dropDownWidth="200dp"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:spinnerMode="dropdown"
+        android:elevation="10dp"
+        android:gravity="center"
+        android:minWidth="36dp"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineheadingdivider"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="@+id/cv_home_overview_heading_container"
+        app:layout_constraintTop_toBottomOf="@+id/tv_home_overview_title" />
+
+
+    <ImageButton
+        android:id="@+id/imbt_home_overview_new_station"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:elevation="10dp"
-        android:text="Selected Station:"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="@+id/cv_home_overview_heading_container"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tv_home_overview_title"
-        app:layout_constraintTop_toBottomOf="@+id/tv_home_overview_title" />
-
-    <Spinner
-        android:id="@+id/home_spinner_locality"
-        android:layout_width="48dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="28dp"
-        android:elevation="10dp"
-        android:minWidth="36dp"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_home_overview_station_label"
-        app:layout_constraintStart_toEndOf="@+id/tv_home_overview_station_label"
-        app:layout_constraintTop_toTopOf="@+id/tv_home_overview_station_label" />
-
-    <ImageButton
-        android:id="@+id/imbt_home_overview_new_station"
-        android:layout_width="42dp"
-        android:layout_height="36dp"
         android:layout_marginEnd="8dp"
         android:background="@color/buttonColorBright"
         android:elevation="10dp"
-        android:src="@drawable/ic_add_circle_outline_white_18dp"
-        app:layout_constraintBottom_toBottomOf="@+id/home_spinner_locality"
-        app:layout_constraintEnd_toEndOf="@+id/cv_home_overview_heading_container"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/home_spinner_locality" />
+        android:padding="8dp"
+        android:src="@drawable/sharp_add_location_white_36"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineheadingdivider"
+        app:layout_constraintRight_toRightOf="@+id/cv_home_overview_heading_container"
+        app:layout_constraintTop_toBottomOf="@+id/tv_home_overview_title" />
 
 
     <TextView
@@ -165,7 +164,7 @@
         android:background="@color/buttonColorBright"
         android:elevation="10dp"
         android:padding="8dp"
-        android:src="@drawable/ic_update_white_36dp"
+        android:src="@drawable/ic_edit_location_white_36dp"
         app:layout_constraintBottom_toTopOf="@+id/iv_home_overview_divider_lower"
         app:layout_constraintRight_toRightOf="@+id/iv_home_overview_locality_container"
         app:layout_constraintTop_toTopOf="@+id/iv_home_overview_locality_container" />

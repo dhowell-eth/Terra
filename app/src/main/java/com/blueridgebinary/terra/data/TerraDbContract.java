@@ -60,6 +60,7 @@ public class TerraDbContract {
         public static final String COLUMN_NOTES = "notes";
         public static final String COLUMN_CREATED = "createdDatetime";
         public static final String COLUMN_UPDATED = "updatedDatetime";
+        public static final String COLUMN_STATIONNUMBER = "stationNumber";
     }
 
     // ----------------------- tblCompassMeasurement-----------------------------

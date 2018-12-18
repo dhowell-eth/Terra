@@ -26,7 +26,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
         TerraDbContract.MeasurementCategoryEntry.TABLE_NAME));
 
     // If you change the database schema, you must increment the database version
-    private static final int VERSION = 8;
+    private static final int VERSION = 9;
 
     // Constructor
     TerraDbHelper(Context context) {
@@ -61,6 +61,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.LocalityEntry.COLUMN_ISMANUALMEASUREMENT + " INTEGER, " +
                 TerraDbContract.LocalityEntry.COLUMN_NOTES    + " TEXT, " +
                 TerraDbContract.LocalityEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
+                TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER + " Integer NOT NULL, "+
                 TerraDbContract.LocalityEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
         Log.d("DB_DEBUGGING",CREATE_TABLE_LOCALITY);
         db.execSQL(CREATE_TABLE_LOCALITY);

@@ -164,7 +164,7 @@ public class TerraDbContentProvider extends ContentProvider {
                 String tJoin2 = TerraDbContract.MeasurementCategoryEntry.TABLE_NAME;
                 String tJoinCol2 = TerraDbContract.MeasurementCategoryEntry._ID;
                 String joinQuery = String.format(Locale.US,
-                        "SELECT t1._id as compassId, t1.*,t2.*,t3.*" +
+                        "SELECT t1._id as compassId, t1.notes as compassNotes,t1.*,t2.*,t3.*" +
                         "FROM %s t1 " +
                         "JOIN %s t2 ON t1.%s = t2.%s " +
                         "JOIN %s t3 ON t1.%s = t3.%s " +
@@ -211,6 +211,9 @@ public class TerraDbContentProvider extends ContentProvider {
             case LOCALITIES:
                 tableName = TerraDbContract.LocalityEntry.TABLE_NAME;
                 contentUri = TerraDbContract.LocalityEntry.CONTENT_URI;
+                // Need to automatically populate the stationNumber field since it is incremented on a per-session basis
+                String nextStationNumber = getNextStationNumber(values.getAsString(TerraDbContract.LocalityEntry.COLUMN_SESSIONID));
+                values.put(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER,nextStationNumber);
                 break;
             case COMPASS_MEASUREMENTS:
                 tableName = TerraDbContract.CompassMeasurementEntry.TABLE_NAME;
@@ -403,5 +406,35 @@ public class TerraDbContentProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
+
+    private String getNextStationNumber(String sessionId) {
+        final SQLiteDatabase db = mTerraDbHelper.getWritableDatabase();
+        // Query the current highest station number for this session
+        String sqlQuery = String.format(Locale.US,
+                "SELECT %s FROM %s WHERE %s=%s ORDER BY %s desc LIMIT 1;",
+                TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER,
+                TerraDbContract.LocalityEntry.TABLE_NAME,
+                TerraDbContract.LocalityEntry.COLUMN_SESSIONID,
+                sessionId,
+                TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER);
+
+        db.beginTransaction();
+        Cursor result = db.rawQuery(sqlQuery,null);
+        db.endTransaction();
+
+        String nextStationNumber;
+        if (result.getCount() >= 1) {
+            result.moveToFirst();
+             nextStationNumber = Integer.toString(
+                     result.getInt(result.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER)) + 1);
+        }
+        else {
+            nextStationNumber = "1";
+        }
+        return nextStationNumber;
+    }
+
+
+
 
 }

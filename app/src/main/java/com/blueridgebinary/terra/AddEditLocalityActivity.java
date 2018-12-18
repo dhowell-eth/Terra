@@ -75,6 +75,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     private int defaultZoomLevel;
     private int sessionId;
+    private String stationNumber;
     private int localityId;
     private String sessionName;
     private boolean isCreateNewLocality;
@@ -109,6 +110,10 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
         // Get extras
         sessionId = getIntent().getIntExtra("sessionId",0);
+        stationNumber = getIntent().getStringExtra("stationNumber");
+        if (stationNumber == null) {
+            stationNumber = "";
+        }
         sessionName = getIntent().getStringExtra("sessionName");
         localityId = getIntent().getIntExtra("localityId",0);
         isCreateNewLocality = getIntent().getBooleanExtra("isCreateNewLocality",true);
@@ -158,7 +163,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         else {
             if (localityId != 0) {
                 String subheading = getString(R.string.add_edit_locality_subheading_edit);
-                subheading = subheading.replace("?",Integer.toString(localityId));
+                subheading = subheading.replace("?",stationNumber);
                 tvSubHeading.setText(subheading);
 
                 // Call a loader for the current location data
@@ -460,7 +465,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
         // Insert the content values via a ContentResolver
         Uri uri = getContentResolver().insert(TerraDbContract.LocalityEntry.CONTENT_URI, contentValues);
-        Log.d("ADDLOCALITY","Added new locality!: "+ uri.toString());
+        setResult(RESULT_OK);
         finish();
     }
 
@@ -487,7 +492,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         // Insert the content values via a ContentResolver
         Uri updateUri = TerraDbContract.LocalityEntry.CONTENT_URI.buildUpon().appendPath(Integer.toString(localityId)).build();
         getContentResolver().update(updateUri, contentValues,null,null);
-        Log.d("UPDATELOCALITY","Updated locality!: "+ updateUri.toString());
+        setResult(RESULT_OK);
         finish();
     }
 

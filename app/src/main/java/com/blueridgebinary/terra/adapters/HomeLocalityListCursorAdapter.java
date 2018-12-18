@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.media.Image;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +43,9 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
     private int mElevIndex;
     private int mCreatedIndex;
     private int mUpdatedIndex;
+    private int mStationNumberIndex;
+    int mClickedColor;
+
 
     public List<Integer> selectedRecyclerViewItems = new ArrayList<Integer>();
 
@@ -54,6 +58,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
     public HomeLocalityListCursorAdapter(Context mContext, HomeLocalityListCursorAdapter.LocalityAdapterOnClickHandler clickHandler) {
         this.mContext = mContext;
         mClickHandler = clickHandler;
+        mClickedColor = mContext.getResources().getColor(R.color.itemOnSelectedColor);
     }
 
     @Override
@@ -72,6 +77,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         mElevIndex= mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_ELEVATION);
         mCreatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_CREATED);
         mUpdatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_UPDATED);
+        mStationNumberIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER);
 
         mCursor.moveToPosition(position);
 
@@ -81,6 +87,10 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         double elev = mCursor.getDouble(mElevIndex);
         String createdDate = mCursor.getString(mCreatedIndex);
         String updatedDate = mCursor.getString(mUpdatedIndex);
+        String stationNumber = mCursor.getString(mStationNumberIndex);
+        if (stationNumber==null) {
+            stationNumber = "";
+        }
 
         holder.itemView.setTag(id);
 
@@ -96,7 +106,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
 
         final LocalityViewHolder mHolder = holder;
 
-        holder.mTvLocalityName.setText(res.getString(R.string.locality_list_item_base) + " " + Integer.toString(id));
+        holder.mTvLocalityName.setText(res.getString(R.string.locality_list_item_base) + " " + stationNumber);
         holder.mTvLat.setText(res.getString(R.string.locality_list_lat_base) + " " + Double.toString(lat));
         holder.mTvLong.setText(res.getString(R.string.locality_list_long_base) + " " + Double.toString(lon));
         holder.mTvElev.setText(res.getString(R.string.locality_list_elevation_base) + " " + Double.toString(elev));
@@ -180,6 +190,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         TextView mTvCreated;
         ImageView mIvRowIcon;
         CircleView mCircleView;
+        CardView mCardView;
 
         private boolean isChecked;
 
@@ -194,6 +205,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
             mTvCreated = (TextView) itemView.findViewById(R.id.tv_locality_list_created);
             mIvRowIcon = (ImageView) itemView.findViewById(R.id.image_locality_list_icon);
             mCircleView = (CircleView) itemView.findViewById(R.id.image_locality_list_icon_circleview);
+            mCardView = (CardView) itemView.findViewById(R.id.cv_locality_recycler_view);
             isChecked = false;
 
             itemView.setOnClickListener(this);
@@ -206,6 +218,7 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         @Override
         public void onClick(View v) {
             itemView.setSelected(true);
+            //mCardView.setBackgroundColor(mClickedColor);
             int adapterPosition = getAdapterPosition();
             mCursor.moveToPosition(adapterPosition);
             int localityId = mCursor.getInt(mIdIndex);

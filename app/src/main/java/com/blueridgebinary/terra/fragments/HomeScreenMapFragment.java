@@ -201,7 +201,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
     @Override
     public boolean onMarkerClick(final Marker marker) {
         // Parse the ID from the marker title and set it as the current locality
-        int clickedId = Integer.parseInt(marker.getTitle());
+        int clickedId = (Integer) marker.getTag();
         this.selectedLocalityId.setValue(clickedId);
         this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.OVERVIEW_MAP_LOCALITY_LOADER_ID,
                 null,
@@ -249,10 +249,14 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
             Log.d(TAG,"ADDING MARKERS for i=" + Integer.toString(i));
             double lat = localityCursor.getDouble(latIndex);
             double lon = localityCursor.getDouble(longIndex);
+            String stationNumber = localityCursor.getString(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
+            if (stationNumber == null) {
+                stationNumber = "";
+            }
             int  id = localityCursor.getInt(idIndex);
 
             MarkerOptions options = new MarkerOptions();
-            options.position(new LatLng(lat,lon)).title(Integer.toString(id));
+            options.position(new LatLng(lat,lon)).title("Station "+stationNumber);
             Log.d(TAG, "addMapMarkersFromLocalityCursor: " + selectedLocalityId.toString());
             if (id == selectedLocalityId.getValue()) {
 
@@ -260,6 +264,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
             }
 
             markers[i] = googleMap.addMarker(options);
+            markers[i].setTag(id);
             if (id == selectedLocalityId.getValue()) {
                 markers[i].showInfoWindow();
             }

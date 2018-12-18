@@ -30,19 +30,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" />
 
+    <RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:background="@color/backgroundLight"
+        android:elevation="3dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" >
     <Spinner
         android:id="@+id/edit_locality_layer_spinner"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="24dp"
-        android:layout_alignTop="@+id/map_add_edit_locality"
-        android:layout_alignEnd="@+id/map_add_edit_locality"
         android:layout_alignParentStart="true"
-        android:background="@color/mapLayerSpinnerBackground"
-        android:elevation="3dp"
-        android:gravity="center"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/map_add_edit_locality" />
-
+        android:gravity="center" />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/iv_add_edit_location_container"

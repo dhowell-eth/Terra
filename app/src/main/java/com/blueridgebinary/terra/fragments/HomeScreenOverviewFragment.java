@@ -5,16 +5,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
@@ -24,11 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +28,7 @@ import com.blueridgebinary.terra.AddEditLocalityActivity;
 import com.blueridgebinary.terra.CompassActivity;
 import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
-import com.blueridgebinary.terra.data.CurrentDataset;
+import com.blueridgebinary.terra.adapters.TerraLocalitySpinnerArrayAdapter;
 import com.blueridgebinary.terra.data.CurrentLocality;
 import com.blueridgebinary.terra.data.CurrentSession;
 import com.blueridgebinary.terra.data.TerraDbContract;
@@ -45,8 +37,9 @@ import com.blueridgebinary.terra.loaders.LocalityLoaderListener;
 import com.blueridgebinary.terra.loaders.SessionLoaderListener;
 import com.blueridgebinary.terra.utils.ListenableInteger;
 
-import java.util.ArrayList;
 import java.util.Locale;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,6 +55,8 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     private static final String ARG_CURRENTSESSIONNAME = "currentSessionName";
     private static final String ARG_CURRENTSESSIONID = "currentSessionId";
     private static final String TAG = HomeScreenOverviewFragment.class.getSimpleName();
+    public static final int ADD_STATION_INTENT_CODE = 2228;
+    public static final int EDIT_STATION_INTENT_CODE = 3339;
 
     // TODO: Rename and change types of parameters
     private String currentSessionName;
@@ -69,6 +64,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 //    private Integer currentLocalityId;
 
     public ListenableInteger selectedLocalityId;
+    public String currentStationNumber = "";
 
     CurrentSession currentSession;
     CurrentLocality currentLocality;
@@ -82,6 +78,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
     private ImageButton imbtEditLocality;
     private ImageButton imbtCompass;
 
+    boolean goToLastSpinnerItem;
 
     private TextView tvLat;
     private TextView tvLong;
@@ -104,6 +101,24 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         fragment.setArguments(args);
         return fragment;
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        switch (requestCode) {
+            case ADD_STATION_INTENT_CODE:
+                // If we've added a new station, we want the spinner on the new one
+                this.goToLastSpinnerItem=true;
+                break;
+            case EDIT_STATION_INTENT_CODE:
+                // If we've edited a station, we want the spinner on the same one
+                this.goToLastSpinnerItem=false;
+                break;
+        }
+    }
+
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -139,6 +154,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         });
 
         hasShownPopup = false;
+        goToLastSpinnerItem = true;
 
     }
 
@@ -171,9 +187,10 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
                 intent.putExtra("sessionId",currentSessionId);
                 intent.putExtra("sessionName",currentSessionName);
+                intent.putExtra("stationNumber",currentStationNumber);
                 intent.putExtra("localityId",selectedLocalityId.getValue());
                 intent.putExtra("isCreateNewLocality",true);
-                startActivity(intent);
+                startActivityForResult(intent,ADD_STATION_INTENT_CODE);
             }
         });
 
@@ -185,9 +202,10 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 Intent intent = new Intent(getActivity(), AddEditLocalityActivity.class);
                 intent.putExtra("sessionId",currentSessionId);
                 intent.putExtra("sessionName",currentSessionName);
+                intent.putExtra("stationNumber",currentStationNumber);
                 intent.putExtra("localityId",selectedLocalityId.getValue());
                 intent.putExtra("isCreateNewLocality",false);
-                startActivity(intent);
+                startActivityForResult(intent,EDIT_STATION_INTENT_CODE);
             }
         });
 
@@ -261,18 +279,6 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         else {return true;}
     }
 
-    // TODO: Remove this function and all references to it (use the one below)
-/*
-    private void updateLocalityUiComponents() {
-        if (currentLocality != null) {
-            tvLat.setText(String.format(Locale.US,"%.6f",currentLocality.getLatitude()));
-            tvLong.setText(String.format(Locale.US,"%.6f",currentLocality.getLongitude()));
-            tvAcc.setText(String.format(Locale.US,"%.6f",currentLocality.getAccuracy()));
-            tvNotes.setText(currentLocality.getLocalityNotes());
-        }
-    }
-*/
-
     @Override
     public void updateLocalityUI() {
         if (currentLocality != null) {
@@ -304,11 +310,29 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         }
     }
 
+    public void setSpinnerToLastItem(Spinner spinner)
+    {
+        if (spinner.getCount() <1) {
+            return;
+        }
+        // Determine how many items are in this spinner
+        int lastPosition = spinner.getCount()-1;
+        // Get the id of the last spinner row
+        Cursor value = (Cursor) spinner.getItemAtPosition(lastPosition);
+        int id = value.getInt(value.getColumnIndex("_id"));
+        // Update our current selection to this value
+        selectedLocalityId.setValue(id);
+        spinner.setSelection(lastPosition);
+    }
+
+
+
     @Override
     public void handleNewLocalityData(Cursor cursor,boolean isSingleQuery) {
 
         // If cursor is null, data is no longer available and you need to disconnect any adapters, etc
         if (cursor == null) {
+            Log.d(TAG, "handleNewLocalityData: null cursor");
             mSpinner.setAdapter(null);
             return;
         }
@@ -327,33 +351,44 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                         d.cancel();
                     }
                 });
-                hasShownPopup = true;
                 db.show();
             }
+            hasShownPopup = true;
 
-
-
-            SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this.getContext(),
+            TerraLocalitySpinnerArrayAdapter spinnerAdapter = new TerraLocalitySpinnerArrayAdapter(
+                    this.getContext(),
                     android.R.layout.simple_spinner_item,
                     cursor,
-                    new String[]{TerraDbContract.LocalityEntry._ID},
-                    new int[] {android.R.id.text1},
                     0); // Not sure about this
-            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSpinner.setAdapter(spinnerAdapter);
 
-            // If there is already a locality selected in the UI, set the spinner to that
-            if (selectedLocalityId != null) {
-                setSpinnerItemById(mSpinner,selectedLocalityId.getValue());
-            } // Otherwise the default item is the last one (i.e. most recently added station)
-            else {
-                mSpinner.setSelection(mSpinner.getAdapter().getCount()-1);
+            // Logic for which spinner row is selected when data is loaded
+            if (selectedLocalityId != null){
+                if (this.goToLastSpinnerItem){
+                    setSpinnerToLastItem(mSpinner);
+                }
+                else {
+                    setSpinnerItemById(mSpinner,this.selectedLocalityId.getValue());
+                }
             }
 
+            if (mSpinner.getAdapter().getCount() > 0) {
+                Cursor selectedItem = (Cursor) mSpinner.getSelectedItem();
+                currentStationNumber = selectedItem.getString(
+                        selectedItem.getColumnIndex(
+                                TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
+            }
+
+
+            // Configure listener for when spinner items are selected
             mSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     selectedLocalityId.setValue((int) id);
+                    Cursor selectedItem = (Cursor) mSpinner.getSelectedItem();
+                    currentStationNumber = selectedItem.getString(
+                            selectedItem.getColumnIndex(
+                                    TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
@@ -361,8 +396,6 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             });
         }
         else {
-
-            Log.d(TAG,"Received data for a single Locality query, current locality = " + Integer.toString(selectedLocalityId.getValue()));
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 // Otherwise it is the data for the current locality
@@ -375,7 +408,6 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 tvLong.setText(String.format(Locale.US, "%.6f", cursor.getDouble(lonIndex)));
                 tvAcc.setText(String.format(Locale.US, "%.1f", cursor.getDouble(accIndex)));
                 tvNotes.setText(cursor.getString(notesIndex));
-
 
                 // If there is already a locality selected in the UI, set the spinner to that when our selection has changed
                 if (selectedLocalityId != null) {
@@ -410,7 +442,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     }
 
-    // --------------- Class for each Spinner Entry-----------------------
+    /*// --------------- Class for each Spinner Entry-----------------------
     private class LocalitySpinnerItem {
         private String localityName;
         private int localityId;
@@ -443,7 +475,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         public String toString() {
             return localityName;
         }
-    }
+    }*/
 
     public AlertDialog.Builder createEnterNotesDialog() {
 

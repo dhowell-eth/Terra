@@ -1,0 +1,41 @@
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <TextView
+        android:id="@+id/tv_terra_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textAppearance="@android:style/TextAppearance.Material.Title"
+        app:layout_constraintEnd_toStartOf="@+id/iv_terra_spinner_triangle"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Station 10" />
+
+    <View
+        android:id="@+id/terra_spinner_bottom_line"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:background="@drawable/spinner_background"
+        app:layout_constraintEnd_toEndOf="@+id/iv_terra_spinner_triangle"
+        app:layout_constraintStart_toStartOf="@+id/tv_terra_spinner"
+        app:layout_constraintTop_toBottomOf="@+id/tv_terra_spinner" />
+
+    <ImageView
+        android:id="@+id/iv_terra_spinner_triangle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_terra_spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/tv_terra_spinner"
+        app:layout_constraintTop_toTopOf="@+id/tv_terra_spinner"
+        app:srcCompat="@drawable/sharp_arrow_drop_down_black_24" />
+</android.support.constraint.ConstraintLayout>

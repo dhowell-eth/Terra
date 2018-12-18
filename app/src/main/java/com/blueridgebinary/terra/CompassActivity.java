@@ -36,6 +36,8 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blueridgebinary.terra.adapters.TerraCompassModeArrayAdapter;
+import com.blueridgebinary.terra.adapters.TerraMeasurementCategoryCursorResourceAdapter;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.fragments.MeasurementCategoryUi;
 import com.blueridgebinary.terra.loaders.LoaderIds;
@@ -45,7 +47,9 @@ import com.blueridgebinary.terra.utils.util;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 /*
@@ -83,6 +87,7 @@ public class CompassActivity extends AppCompatActivity implements
     private Spinner mCompassMeasurementSpinner;
     private Spinner mCompassModeSpinner;
     private Button mOkButton;
+    private Button mNotesButton;
     private ImageButton mNewMeasurementCategoryImageButton;
     private ImageView mLeftAlertBarImageView;
     private ImageView mRightAlertBarImageView;
@@ -113,6 +118,8 @@ public class CompassActivity extends AppCompatActivity implements
     public float aziDeg;
     public float dipDeg;
     public float apparentAziDeg;
+    public String measurementNotes = "";
+
 
     private boolean shouldDisplayedAccuracyToast;
 
@@ -137,10 +144,9 @@ public class CompassActivity extends AppCompatActivity implements
         mLeftAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_left);
         mRightAlertBarImageView = (ImageView) findViewById(R.id.iv_alertbar_right);
         azmimuthLabelText = (TextView) findViewById(R.id.tv_compass_azi_label);
+        mNotesButton = (Button) findViewById(R.id.btn_compass_add_notes);
 
         // Focus on the text view to avoid resizing issue
-        // azmimuthLabelText.requestFocus();
-
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Log.d(TAG, "onCreate: " + Boolean.toString(preferences.contains("compass_mode")));
         String preferredCompassMode = (preferences.getString("compass_mode", ""));
@@ -205,10 +211,15 @@ public class CompassActivity extends AppCompatActivity implements
         });
 
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        /*ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.compass_modes, android.R.layout.simple_spinner_item);
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        */
+        String[] modeResArray = getResources().getStringArray(R.array.compass_modes);
+        List<String> modeArrayList = Arrays.asList(modeResArray);
+        TerraCompassModeArrayAdapter adapter = new TerraCompassModeArrayAdapter(this,modeArrayList);
+
         // Apply the adapter to the spinner
         mCompassModeSpinner.setAdapter(adapter);
         mCompassModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -241,10 +252,16 @@ public class CompassActivity extends AppCompatActivity implements
             }
         });
 
+        mNotesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = createEnterNotesDialog();
+                builder.show();
+            }
+        });
 
         // Set compass view mode based on shared preference
         // Assumes there are three compass modes
-        Log.d(TAG, "onCreate: " + compassModes[0]);
         if (preferredCompassMode.equalsIgnoreCase(compassModes[0])){
             mCompassModeSpinner.setSelection(0);
         }
@@ -501,13 +518,10 @@ public class CompassActivity extends AppCompatActivity implements
         }
 
         // Otherwise populate the spinner with the entries from the DB
-        SimpleCursorAdapter spinnerAdapter = new SimpleCursorAdapter(this,
+        TerraMeasurementCategoryCursorResourceAdapter spinnerAdapter = new TerraMeasurementCategoryCursorResourceAdapter(this,
                 android.R.layout.simple_spinner_item,
                 data,
-                new String[]{TerraDbContract.MeasurementCategoryEntry.COLUMN_NAME},
-                new int[]{android.R.id.text1},
                 0);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCompassMeasurementSpinner.setAdapter(spinnerAdapter);
         // Set current item to preferred
         attemptToSetPreferredMeasurementCategory();
@@ -695,11 +709,45 @@ public class CompassActivity extends AppCompatActivity implements
         contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID, currentMeasurementCategoryId);
         contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED, dateTimestamp);
         contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_UPDATED, dateTimestamp);
+        contentValues.put(TerraDbContract.CompassMeasurementEntry.COLUMN_NOTES,measurementNotes);
 
         // Insert the content values via a ContentResolver
         Uri uri = getContentResolver().insert(TerraDbContract.CompassMeasurementEntry.CONTENT_URI, contentValues);
         Log.d(TAG, "Added new compass measurement!: " + uri.toString());
         finish();
     }
+
+
+    public AlertDialog.Builder createEnterNotesDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add/Edit Notes");
+
+        // Set up the input
+        final EditText input = new EditText(this);
+        input.setText(this.measurementNotes);
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        builder.setView(input);
+        // Set up the buttons
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+
+            // TODO: Set the below onClick to write to the DB
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                measurementNotes = input.getText().toString();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return builder;
+    }
+
 
 }

@@ -5,15 +5,30 @@
         <item name="preferenceTheme">@style/PreferenceFixTheme</item>
         <item name="colorButtonNormal">@color/buttonColor</item>
         <item name="android:colorBackground">@color/background</item>
-        <item name="android:colorControlNormal">#FFFFFF</item>
         <item name="android:toolbarStyle">@style/MyToolBar</item>
         <item name="android:statusBarColor">@color/statusBar</item>
         <item name="android:colorAccent">@color/divider</item>
-        <item name="android:spinnerStyle">@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar</item>
+        <item name="android:spinnerDropDownItemStyle">@style/mySpinnerDropDownItemStyle</item>
     </style>
 
     <style name="MyToolBar" parent="@style/Widget.AppCompat.Toolbar">
         <item name="android:background">@color/appBar</item>
     </style>
+
+  <!--  <style name="TerraSpinner" parent="@style/Widget.AppCompat.Spinner.DropDown">
+        <item name="android:textColor">@color/primaryTextColor</item>
+        <item name="android:spinnerDropDownItemStyle">@style/Widget.AppCompat.Spinner.DropDown</item>
+    </style>-->
+<!--
+    <style name="spinnerItemStyle" parent="android:Widget.TextView.SpinnerItem">
+    </style>-->
+
+    <style name="mySpinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+        <item name="android:background">@color/backgroundLight</item>
+    </style>
+
+<!--    <style name="mySpinnerDropDownItemStyle" parent="android:TextAppearance.Widget.TextView.SpinnerItem">
+        <item name="android:background">@</item>
+    </style>-->
 
 </resources>

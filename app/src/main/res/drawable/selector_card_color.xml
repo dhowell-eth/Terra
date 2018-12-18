@@ -4,6 +4,6 @@
         android:state_pressed="true" />
     <item android:drawable="@color/itemOnSelectedColor"
         android:state_selected="true" />
-    <item android:drawable="@color/backgroundLight"
+    <item android:drawable="@color/boxBackground"
         android:state_pressed="false"/>
 </selector>

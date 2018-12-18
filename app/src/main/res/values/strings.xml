@@ -67,6 +67,7 @@
     <string name="compass_ok_button_text">Save</string>
     <string name="compass_mode_label">Mode</string>
     <string name="compass_category_label">Feature</string>
+    <string name="compass_notes_button_text">Notes</string>
 
     <!-- Add Measurement Category Stuff        -->
     <string name="dialog_add_meas_cat_title">Add Measurement Category:</string>
@@ -96,5 +97,11 @@
     <string name="export_description">Save data to a csv file.</string>
     <string name="export_path_default_text">Select a folder</string>
     <string name="export_ok_btn_text">Export</string>
+
+    <string name="rv_empty_card_message">No data to display for this entry</string>
+    <string name="rv_empty_card_message_projects">No projects to display</string>
+    <string name="rv_empty_card_message_stations">No stations to display</string>
+    <string name="rv_empty_card_message_compass">No compass data for this station</string>
+
 
 </resources>
