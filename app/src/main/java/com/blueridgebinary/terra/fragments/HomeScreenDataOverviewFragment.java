@@ -45,7 +45,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     private static final String TAG = HomeScreenDataOverviewFragment.class.getSimpleName();
 
     private OnTerraFragmentInteractionListener mListener;
-    private RecyclerView mRecyclerView;
+    public RecyclerView mRecyclerView;
     public HomeLocalityListCursorAdapter mAdapter;
     private LocalityLoaderListener mLocalityLoaderListener;
 

@@ -10,12 +10,13 @@ import android.widget.TextView;
 
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
+import com.blueridgebinary.terra.utils.AdapterViewTypes;
 
 /**
  * Created by dorra on 8/23/2017.
  */
 
-public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdapter.SessionViewHolder> {
+public class SessionCursorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Cursor mCursor;
     private Context mContext;
@@ -37,40 +38,79 @@ public class SessionCursorAdapter extends RecyclerView.Adapter<SessionCursorAdap
     }
 
     @Override
-    public SessionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.session_layout, parent, false);
-        return new SessionViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view;
+        switch(viewType){
+            case AdapterViewTypes.FULL_VIEW:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.session_layout, parent, false);
+                return new SessionViewHolder(view);
+            case AdapterViewTypes.EMPTY_VIEW:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.empty_recyclerview, parent, false);
+                return new EmptyViewHolder(view);
+            default:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.empty_recyclerview, parent, false);
+                return new EmptyViewHolder(view);
+        }
     }
+
 
     @Override
-    public void onBindViewHolder(SessionViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder plainHolder, int position) {
+        if (getItemViewType(position) == AdapterViewTypes.EMPTY_VIEW){
+            EmptyViewHolder holder = (EmptyViewHolder) plainHolder;
+            String message = mContext.getResources().getString(R.string.rv_empty_card_message_projects);
+            holder.mTvMessage.setText(message);
+        }
+        else if (getItemViewType(position) == AdapterViewTypes.FULL_VIEW) {
+            SessionViewHolder holder = (SessionViewHolder) plainHolder;
+            idIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
+            nameIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
+            notesIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
+            updatedIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
 
-        idIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry._ID);
-        nameIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_SESSIONNAME);
-        notesIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES);
-        updatedIndex = mCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_UPDATED);
+            mCursor.moveToPosition(position);
 
-        mCursor.moveToPosition(position);
+            final int id = mCursor.getInt(idIndex);
+            String name = mCursor.getString(nameIndex);
+            String notes = mCursor.getString(notesIndex);
+            String updatedDate = mCursor.getString(updatedIndex);
 
-        final int id = mCursor.getInt(idIndex);
-        String name = mCursor.getString(nameIndex);
-        String notes = mCursor.getString(notesIndex);
-        String updatedDate = mCursor.getString(updatedIndex);
-
-        holder.itemView.setTag(id);
-        holder.tvSessionName.setText("Project: " + name);
-        holder.tvSessionDate.setText("Last Accessed: " + updatedDate);
-        holder.tvSessionNotes.setText("Description: " + notes);
-
+            holder.itemView.setTag(id);
+            holder.tvSessionName.setText("Project: " + name);
+            holder.tvSessionDate.setText("Last Accessed: " + updatedDate);
+            holder.tvSessionNotes.setText("Description: " + notes);
+        }
     }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mCursor == null) {
+            return AdapterViewTypes.EMPTY_VIEW;
+        }
+        if (mCursor.getCount()<1) {
+            return AdapterViewTypes.EMPTY_VIEW;
+        }
+        else{
+            return AdapterViewTypes.FULL_VIEW;
+        }
+    }
+
 
     @Override
     public int getItemCount() {
         if (mCursor == null) {
             return 0;
         }
-        return mCursor.getCount();
+        else if (mCursor.getCount()==0) {
+            return 1; // still need to render something if our cursor is empty
+        }
+        else {
+            return mCursor.getCount();
+        }
     }
 
     public Cursor swapCursor(Cursor c) {

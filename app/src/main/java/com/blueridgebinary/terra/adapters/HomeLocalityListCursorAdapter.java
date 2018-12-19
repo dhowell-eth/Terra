@@ -21,6 +21,7 @@ import com.blueridgebinary.terra.MainActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.data.TerraDbContract;
 import com.blueridgebinary.terra.fragments.HomeScreenDataOverviewFragment;
+import com.blueridgebinary.terra.utils.AdapterViewTypes;
 import com.github.florent37.shapeofview.shapes.CircleView;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.List;
  * Created by dorra on 8/29/2017.
  */
 
-public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLocalityListCursorAdapter.LocalityViewHolder> {
+public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public final String TAG = HomeLocalityListCursorAdapter.class.getSimpleName();
     private Cursor mCursor;
@@ -62,106 +63,145 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
     }
 
     @Override
-    public HomeLocalityListCursorAdapter.LocalityViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.locality_layout, parent, false);
-        return new HomeLocalityListCursorAdapter.LocalityViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(HomeLocalityListCursorAdapter.LocalityViewHolder holder, int position) {
-
-        mIdIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry._ID);
-        mLatIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
-        mLongIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
-        mElevIndex= mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_ELEVATION);
-        mCreatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_CREATED);
-        mUpdatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_UPDATED);
-        mStationNumberIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER);
-
-        mCursor.moveToPosition(position);
-
-        final int id = mCursor.getInt(mIdIndex);
-        double lat = mCursor.getDouble(mLatIndex);
-        double lon = mCursor.getDouble(mLongIndex);
-        double elev = mCursor.getDouble(mElevIndex);
-        String createdDate = mCursor.getString(mCreatedIndex);
-        String updatedDate = mCursor.getString(mUpdatedIndex);
-        String stationNumber = mCursor.getString(mStationNumberIndex);
-        if (stationNumber==null) {
-            stationNumber = "";
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view;
+        switch(viewType){
+            case AdapterViewTypes.FULL_VIEW:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.locality_layout, parent, false);
+                return new LocalityViewHolder(view);
+            case AdapterViewTypes.EMPTY_VIEW:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.empty_recyclerview_card, parent, false);
+                return new EmptyCardViewHolder(view);
+            default:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.empty_recyclerview_card, parent, false);
+                return new EmptyCardViewHolder(view);
         }
-
-        holder.itemView.setTag(id);
-
-        // Reset our viewholder to defaults each time our recyclerview is recreated
-        this.selectedRecyclerViewItems.clear();
-        holder.setChecked(false);
-        holder.mIvRowIcon.setImageResource(R.drawable.baseline_location_on_black_48);
-        MainActivity activity = (MainActivity) mContext;
-        activity.refreshAppBar(false);
-
-
-        Resources res = mContext.getResources();
-
-        final LocalityViewHolder mHolder = holder;
-
-        holder.mTvLocalityName.setText(res.getString(R.string.locality_list_item_base) + " " + stationNumber);
-        holder.mTvLat.setText(res.getString(R.string.locality_list_lat_base) + " " + Double.toString(lat));
-        holder.mTvLong.setText(res.getString(R.string.locality_list_long_base) + " " + Double.toString(lon));
-        holder.mTvElev.setText(res.getString(R.string.locality_list_elevation_base) + " " + Double.toString(elev));
-        holder.mTvCreated.setText(res.getString(R.string.locality_list_created_date_base) + " " + createdDate);
-        holder.mIvRowIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ImageView clickedImage = (ImageView) v;
-                //LocalityViewHolder holder = (LocalityViewHolder) v.getParent();
-                // If you click on the icon and it's already checked, deselect it
-                if (mHolder.isChecked) {
-                    // Swap image to "unselected" icon
-                    clickedImage.setImageResource(R.drawable.baseline_location_on_black_48);
-                    mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
-                    // Remove from this activity's selection
-                    Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
-                    while(iterator.hasNext()) {
-                        Integer next = iterator.next();
-                        if(next.equals(id)) {
-                            iterator.remove();
-                        }
-                    }
-                    // Set the view to "unchecked"
-                    mHolder.setChecked(false);
-                }
-                // Otherwise, add this to our selection
-                else {
-                    // Swap image to "unselected" icon
-                    clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
-                    mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowSelected));
-                    // Remove from this activity's selection
-                    selectedRecyclerViewItems.add(id);
-                    // Set the view to "unchecked"
-                    mHolder.setChecked(true);
-                }
-                // Finally, refresh the app bar so the icons displayed a relevant to whether we have
-                // selected something
-                if (mContext instanceof MainActivity)
-                {
-                    MainActivity activity = (MainActivity) mContext;
-                    boolean anythingSelected = !selectedRecyclerViewItems.isEmpty();
-                    activity.refreshAppBar(anythingSelected);
-                    // Then call the method in the activity.
-                }
-            }
-        });
     }
 
     @Override
-    public int getItemCount() {
+    public int getItemViewType(int position) {
         if (mCursor == null) {
-            return 0;
+            return AdapterViewTypes.EMPTY_VIEW;
         }
-        return mCursor.getCount();
+        if (mCursor.getCount()<1) {
+            return AdapterViewTypes.EMPTY_VIEW;
+        }
+        else{
+            return AdapterViewTypes.FULL_VIEW;
+        }
     }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder plainHolder, int position) {
+
+        if (getItemViewType(position) == AdapterViewTypes.EMPTY_VIEW){
+            EmptyCardViewHolder holder = (EmptyCardViewHolder) plainHolder;
+            String message = mContext.getResources().getString(R.string.rv_empty_card_message_stations);
+            holder.mTvMessage.setText(message);
+        }
+        else if (getItemViewType(position) == AdapterViewTypes.FULL_VIEW) {
+            LocalityViewHolder holder = (LocalityViewHolder) plainHolder;
+
+            mIdIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry._ID);
+            mLatIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LAT);
+            mLongIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_LONG);
+            mElevIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_ELEVATION);
+            mCreatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_CREATED);
+            mUpdatedIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_UPDATED);
+            mStationNumberIndex = mCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER);
+
+            mCursor.moveToPosition(position);
+
+            final int id = mCursor.getInt(mIdIndex);
+            double lat = mCursor.getDouble(mLatIndex);
+            double lon = mCursor.getDouble(mLongIndex);
+            double elev = mCursor.getDouble(mElevIndex);
+            String createdDate = mCursor.getString(mCreatedIndex);
+            String updatedDate = mCursor.getString(mUpdatedIndex);
+            String stationNumber = mCursor.getString(mStationNumberIndex);
+            if (stationNumber == null) {
+                stationNumber = "";
+            }
+
+            holder.itemView.setTag(id);
+
+            // Reset our viewholder to defaults each time our viewholder is recreated
+            holder.setChecked(false);
+            holder.mIvRowIcon.setImageResource(R.drawable.baseline_location_on_black_48);
+            holder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
+
+            MainActivity activity = (MainActivity) mContext;
+            activity.refreshAppBar(false);
+
+
+            Resources res = mContext.getResources();
+
+            final LocalityViewHolder mHolder = holder;
+
+            holder.mTvLocalityName.setText(res.getString(R.string.locality_list_item_base) + " " + stationNumber);
+            holder.mTvLat.setText(res.getString(R.string.locality_list_lat_base) + " " + Double.toString(lat));
+            holder.mTvLong.setText(res.getString(R.string.locality_list_long_base) + " " + Double.toString(lon));
+            holder.mTvElev.setText(res.getString(R.string.locality_list_elevation_base) + " " + Double.toString(elev));
+            holder.mTvCreated.setText(res.getString(R.string.locality_list_created_date_base) + " " + createdDate);
+            holder.mIvRowIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ImageView clickedImage = (ImageView) v;
+                    //LocalityViewHolder holder = (LocalityViewHolder) v.getParent();
+                    // If you click on the icon and it's already checked, deselect it
+                    if (mHolder.isChecked) {
+                        // Swap image to "unselected" icon
+                        clickedImage.setImageResource(R.drawable.baseline_location_on_black_48);
+                        mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
+                        // Remove from this activity's selection
+                        Iterator<Integer> iterator = selectedRecyclerViewItems.iterator();
+                        while (iterator.hasNext()) {
+                            Integer next = iterator.next();
+                            if (next.equals(id)) {
+                                iterator.remove();
+                            }
+                        }
+                        // Set the view to "unchecked"
+                        mHolder.setChecked(false);
+                    }
+                    // Otherwise, add this to our selection
+                    else {
+                        // Swap image to "unselected" icon
+                        clickedImage.setImageResource(R.drawable.baseline_delete_black_48);
+                        mHolder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowSelected));
+                        // Remove from this activity's selection
+                        selectedRecyclerViewItems.add(id);
+                        // Set the view to "unchecked"
+                        mHolder.setChecked(true);
+                    }
+                    // Finally, refresh the app bar so the icons displayed a relevant to whether we have
+                    // selected something
+                    if (mContext instanceof MainActivity) {
+                        MainActivity activity = (MainActivity) mContext;
+                        boolean anythingSelected = !selectedRecyclerViewItems.isEmpty();
+                        activity.refreshAppBar(anythingSelected);
+                        // Then call the method in the activity.
+                    }
+                }
+            });
+        }
+    } // end onBindViewHolder()
+
+        @Override
+        public int getItemCount() {
+            if (mCursor == null) {
+                return 0;
+            }
+            else if (mCursor.getCount()==0) {
+                return 1; // still need to render something if our cursor is empty
+            }
+            else {
+                return mCursor.getCount();
+            }
+        }
 
     public Cursor swapCursor(Cursor c) {
         // check if this cursor is the same as the previous cursor (mCursor)
@@ -178,11 +218,8 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         return temp;
     }
 
-
-
-    // TODO: add onclick listener logic here
-
     class LocalityViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        // ViewHolder for a station in our recycler view
         TextView mTvLocalityName;
         TextView mTvLat;
         TextView mTvLong;
@@ -193,8 +230,6 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
         CardView mCardView;
 
         private boolean isChecked;
-
-        //TextView mTvUpdated;
 
         public LocalityViewHolder(View itemView) {
             super(itemView);
@@ -225,12 +260,6 @@ public class HomeLocalityListCursorAdapter extends RecyclerView.Adapter<HomeLoca
             mClickHandler.onClick(localityId);
         }
     }
-
-
-
-
-
-
 
 
 }

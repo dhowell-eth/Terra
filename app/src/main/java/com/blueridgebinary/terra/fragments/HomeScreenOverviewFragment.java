@@ -87,7 +87,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     public boolean hasShownPopup;
 
-
+    public AlertDialog needsDataAlertDialog;
 
     public HomeScreenOverviewFragment() {
         // Required empty public constructor
@@ -190,6 +190,9 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 intent.putExtra("stationNumber",currentStationNumber);
                 intent.putExtra("localityId",selectedLocalityId.getValue());
                 intent.putExtra("isCreateNewLocality",true);
+                if (needsDataAlertDialog !=null) {
+                    needsDataAlertDialog.dismiss();
+                }
                 startActivityForResult(intent,ADD_STATION_INTENT_CODE);
             }
         });
@@ -343,15 +346,24 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
             // If the loader doesn't return any localities, we need to prompt the user (only does this once)
             if (cursor.getCount() <= 0 && hasShownPopup == false) {
                 AlertDialog.Builder db = new AlertDialog.Builder(getContext());
-                db.setMessage("Welcome! You've opened an empty project. Create a new station to start recording data.");
-                db.setIcon(R.drawable.outline_new_releases_black_24);
+                View alertView = LayoutInflater.from(getContext()).inflate(R.layout.alert_need_data, null);
+                ImageButton alertCreateButton = (ImageButton) alertView.findViewById(R.id.imbt_alert_need_data);
+                if (alertCreateButton!=null) {
+                    alertCreateButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            imbtToggleGps.callOnClick();
+                        }
+                    });
+                }
+                db.setView(alertView);
                 db.setNegativeButton("Dismiss", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface d, int arg1) {
                         d.cancel();
                     }
                 });
-                db.show();
+                needsDataAlertDialog = db.show();
             }
             hasShownPopup = true;
 

@@ -77,8 +77,8 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<RecyclerView.
                     return new EmptyDataViewHolder(view);
                 default:
                     view = LayoutInflater.from(mContext)
-                            .inflate(R.layout.compass_data_layout, parent, false);
-                    return new CompassDataViewHolder(view);
+                            .inflate(R.layout.empty_recyclerview_card, parent, false);
+                    return new EmptyDataViewHolder(view);
             }
         }
 
@@ -135,6 +135,11 @@ public class CompassDataCursorAdapter extends RecyclerView.Adapter<RecyclerView.
 
                 // Bind data from our loader to our view holder
                 holder.itemView.setTag(id);
+
+                holder.setChecked(false);
+                holder.mIvRowIcon.setImageResource(R.drawable.baseline_explore_black_48);
+                holder.mCircleView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.recyclerViewRowDefault));
+
                 holder.mTvLocalityName.setText(stationNumber);
                 holder.mTvAzi.setText(String.format(Locale.US, "%.2f", azi));
                 holder.mTvDip.setText(String.format(Locale.US, "%.2f", dip));

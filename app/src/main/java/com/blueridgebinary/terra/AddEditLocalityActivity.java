@@ -48,7 +48,9 @@ import java.util.Locale;
 
 public class AddEditLocalityActivity extends FragmentActivity implements
         OnMapReadyCallback,
-        GoogleMap.OnCameraMoveListener,
+        GoogleMap.OnCameraIdleListener,
+        GoogleMap.OnCameraMoveStartedListener,
+        ActivityCompat.OnRequestPermissionsResultCallback,
         Spinner.OnItemSelectedListener,
         TextWatcher,
         LocalityUi {
@@ -65,20 +67,25 @@ public class AddEditLocalityActivity extends FragmentActivity implements
     TextView tvSubHeading;
 
 
+    private boolean hasMoved;
+
     private boolean isGpsEnabled;
     private boolean isMapEditEnabled;
     private boolean displayCoordsInDms;
 
+    private boolean hasExecutedFirstZoom = false;
+
+
     private AddEditActivityLocationListener locationListener;
     private LocationManager locationManager;
-    private Marker currentLocationMarker;
 
-    private int defaultZoomLevel;
+    private int defaultZoomLevel = 16;
     private int sessionId;
     private String stationNumber;
     private int localityId;
     private String sessionName;
     private boolean isCreateNewLocality;
+    private Marker currentLocationMarker;
 
     private final String TAG = AddEditActivityLocationListener.class.getSimpleName();
 
@@ -88,7 +95,6 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_locality);
 
-        defaultZoomLevel = 16;
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -196,11 +202,9 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             case PermissionIds.FINE_LOCATION_PERMISSION_ID:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    listenForLocation();
-                    toggleEditTextEnabled(false);
+                    btnGps.callOnClick();
                 }
                 else {
-                    permissionsDenied();
                 }
                 break;
         };
@@ -215,8 +219,11 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         //mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setRotateGesturesEnabled(true);
+        mMap.getUiSettings().setRotateGesturesEnabled(false);
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
 
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(defaultZoomLevel));
+        Log.d(TAG, "onMapReady: default zoom");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
@@ -230,33 +237,44 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             stopGpsMode();
             btnGps.setImageResource(R.drawable.ic_gps_off_white_36dp);
             btnGps.setColorFilter(null);
+            isGpsEnabled=false;
         }
         else {
-            if (isMapEditEnabled) btnEditLocation.performClick();
-            startGpsMode();
-            btnGps.setImageResource(R.drawable.ic_gps_fixed_white_36dp);
-            btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.iconEnabledColor), android.graphics.PorterDuff.Mode.MULTIPLY);
-            // call function to enable GPS listeners, etc.
-
+            boolean gpsStarted = startGpsMode();
+            Log.d(TAG, "toggleGpsEnabled: Trying to start gps with result=" + Boolean.toString(gpsStarted));
+            if (gpsStarted) {
+                if (isMapEditEnabled) btnEditLocation.performClick();
+                btnGps.setImageResource(R.drawable.ic_gps_fixed_white_36dp);
+                btnGps.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.iconEnabledColor), android.graphics.PorterDuff.Mode.MULTIPLY);
+                isGpsEnabled = true;
+                toggleEditTextEnabled(false);
+            }
+            else {
+                // failed to start the gps, keep our edit text enabled
+                toggleEditTextEnabled(true);
+                isGpsEnabled = false;
+            }
         }
-        isGpsEnabled = !isGpsEnabled;
+
     }
 
     public void toggleMapEditLocation(View v) {
         if (isMapEditEnabled) {
             stopMapEditMode();
             btnEditLocation.setColorFilter(null);
+            isMapEditEnabled = false;
         }
         else {
             // if the GPS is on, shut it off to enter manual mode
-            if (isGpsEnabled) btnGps.performClick();
+            if (isGpsEnabled) {
+                btnGps.performClick(); // toggle the gps
+            }
             startMapEditMode();
             // Highlight the button color to indicate you are in this mode
             btnEditLocation.setColorFilter(ContextCompat.getColor(getBaseContext(), R.color.iconEnabledColor), android.graphics.PorterDuff.Mode.MULTIPLY);
             // Call a function that enables the map edit mode
-
+            isMapEditEnabled=true;
         }
-        isMapEditEnabled = !isMapEditEnabled;
     }
 
     public boolean startGpsMode() {
@@ -264,23 +282,18 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.d("GPS","I dont have permission so I am going to request it");
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PermissionIds.FINE_LOCATION_PERMISSION_ID);
+                Log.d("GPS","I dont have permission so I am going to request it");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PermissionIds.FINE_LOCATION_PERMISSION_ID);
             return false;
             }
         else {
             listenForLocation();
-            toggleEditTextEnabled(false);
             return true;
         }
     }
 
-
-    public void permissionsDenied() {} {
-        //Toast.makeText(this, "LOCATION PERMISSIONS DENIED!", Toast.LENGTH_LONG).show();
-    }
 
     public boolean stopGpsMode() {
         locationManager.removeUpdates(locationListener);
@@ -290,13 +303,18 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     public boolean startMapEditMode() {
         if (mMap != null) {
-            if (currentLocationMarker != null) {
+            if (currentLocationMarker !=null) {
+                Log.d(TAG, "startMapEditMode: started and hid marker");
                 currentLocationMarker.setVisible(false);
             }
             ivCrosshairs.setVisibility(View.VISIBLE);
-            mMap.setOnCameraMoveListener(this);
+            mMap.setOnCameraIdleListener(this);
+            mMap.setOnCameraMoveStartedListener(this);
             toggleEditTextEnabled(false);
             updateEntryFieldsWithMapCenter();
+            if (currentLocationMarker != null) {
+                currentLocationMarker.setVisible(false);
+            }
             return true;
         }
         else {return false;}
@@ -304,13 +322,11 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     public boolean stopMapEditMode() {
         if (mMap != null) {
-            mMap.setOnCameraMoveListener(null);
+            mMap.setOnCameraIdleListener(null);
+            mMap.setOnCameraMoveStartedListener(null);
             toggleEditTextEnabled(true);
+            currentLocationMarker.setVisible(true);
             ivCrosshairs.setVisibility(View.INVISIBLE);
-            // set Marker as visible
-            if (currentLocationMarker != null) {
-                currentLocationMarker.setVisible(true);
-            }
             return true;
         }
         else {return false;}
@@ -374,17 +390,31 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             String[] formattedCoords = formatGpsText(displayCoordsInDms, new double[]{center.latitude, center.longitude, 0.0});
             updateEntryFields(formattedCoords);
             if (currentLocationMarker == null) {
-                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(center).title("NEW LOCATION").visible(false));
+                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(center).title("New Station").visible(false));
             } else {
                 currentLocationMarker.setPosition(center);
             }
+            Log.d(TAG, "updateEntryFieldsWithMapCenter: updated map marker with visibility="+Boolean.toString(currentLocationMarker.isVisible()));
         }
     }
 
     @Override
-    public void onCameraMove() {
-        updateEntryFieldsWithMapCenter();
+    public void onCameraIdle() {
+        if (hasMoved) {
+            hasMoved=false;
+            updateEntryFieldsWithMapCenter();
+        }
     }
+    @Override
+    public void onCameraMoveStarted(int i) {
+        if (i== REASON_DEVELOPER_ANIMATION) {
+            return;
+        }
+        hasMoved=true;
+        updateEntryFields(new String[]{"...","...","..."});
+
+    }
+
 
     public void updateEntryFields(String[] formattedCoords) {
         etLatitude.setText(formattedCoords[0], TextView.BufferType.EDITABLE);
@@ -400,18 +430,37 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     @Override
     public void afterTextChanged(Editable s) {
-        Log.d("EDIT_TEXT","TEXT CHANGED!");
         double[] currentCoordinates = getCurrentCoordinates();
         if (currentCoordinates == null) {return;}
         if (mMap == null) {return;}
+        if (hasMoved) {return;} // don't want to update location if we are in the process of panning in edit mode
+
         LatLng currentLocation = new LatLng(currentCoordinates[0],currentCoordinates[1]);
+
         if (currentLocationMarker == null) {
-            currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("NEW LOCATION"));
+            currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("New Station"));
         } else {
             currentLocationMarker.setPosition(currentLocation);
         }
-        // Center the camera over the current location
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, defaultZoomLevel));
+        if (isMapEditEnabled) {
+            currentLocationMarker.setVisible(false);
+        }
+        else {
+            currentLocationMarker.setVisible(true);
+        }
+        if (!isMapEditEnabled) {
+            // Center the camera over the current location
+            // Only do this if we aren't manually dragging out position around
+            if (!hasExecutedFirstZoom){
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, defaultZoomLevel));
+                hasExecutedFirstZoom=true;
+            }
+            else{
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, mMap.getCameraPosition().zoom));
+            }
+
+        }
+
     }
 
     // TODO: implement this method for validating the data entered into the edit texts
@@ -557,6 +606,8 @@ public class AddEditLocalityActivity extends FragmentActivity implements
     }
 
 
+
+
     // For testing purposes, create an internal class to use as a location listener
     public class AddEditActivityLocationListener implements LocationListener {
 
@@ -574,12 +625,18 @@ public class AddEditLocalityActivity extends FragmentActivity implements
                 // Add a marker at the current location, or update the current marker if it exists
                 LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 if (currentLocationMarker == null) {
-                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("NEW LOCATION"));
+                    currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("New Station"));
                 } else {
                     currentLocationMarker.setPosition(currentLocation);
                 }
                 // Center the camera over the current location
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, defaultZoomLevel));
+                if (hasExecutedFirstZoom) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, mMap.getCameraPosition().zoom));
+                }
+                else {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, defaultZoomLevel));
+                    hasExecutedFirstZoom=true;
+                }
             }
         }
 

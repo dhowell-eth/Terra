@@ -211,6 +211,9 @@ public class MainActivity extends AppCompatActivity implements
     public void deleteSelectedLocalities() {
         // First, get the array of selected ids and convert from int to string array
         HomeScreenDataOverviewFragment dataOverviewFragment = (HomeScreenDataOverviewFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.vp_home + ":" + "2");
+        if (dataOverviewFragment==null) {
+            return;
+        }
         int numIds = dataOverviewFragment.mAdapter.selectedRecyclerViewItems.size();
         String[] localityIds = new String[numIds];
         for (int i = 0; i < numIds; i++) {
@@ -221,9 +224,12 @@ public class MainActivity extends AppCompatActivity implements
         int nRowsDeleted = getContentResolver().delete(TerraDbContract.LocalityEntry.CONTENT_URI, "",localityIds);
         // Once we've deleted the data, update our selection container to reflect changes
         dataOverviewFragment.mAdapter.selectedRecyclerViewItems.clear();
+        // We want to recreate the recyclerview, removing any cached items
+        //dataOverviewFragment.mRecyclerView.getRecycledViewPool().clear();
         dataOverviewFragment.mAdapter.notifyDataSetChanged();
         // And finally, refresh the app bar
         this.refreshAppBar(false);
+        this.selectedLocality.setValue(0); // clear our selection to make sure the rest of the UI works
     }
 
     // TODO:

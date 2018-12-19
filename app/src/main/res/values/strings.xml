@@ -16,11 +16,11 @@
     <string name="welcome_open_button_text">Open Existing</string>
 
     <!-- New Project Screen Stuff         -->
-    <string name="new_project_heading">Create a New Project:</string>
-    <string name="new_project_name_label">Project Name:</string>
-    <string name="new_project_name_hint">Enter name…</string>
-    <string name="new_project_description_label">Description:</string>
-    <string name="new_project_description_hint">Enter a description… (Optional)</string>
+    <string name="new_project_heading">Create a New Project</string>
+    <string name="new_project_name_label">Project Name</string>
+    <string name="new_project_name_hint">(Required)</string>
+    <string name="new_project_description_label">Description</string>
+    <string name="new_project_description_hint">(Optional)</string>
     <string name="new_project_button_text">Create</string>
 
     <!-- Open Existing Project Screen Stuff         -->
@@ -85,7 +85,7 @@
     <string name="data_screen_recycler_azi_label">Dip Direction:</string>
     <string name="data_screen_recycler_measurement_mode_label">Measurement:</string>
     <string name="data_screen_recycler_measurement_category">Feature:</string>
-    <string name="data_screen_recycler_locality_label">Station</string>
+    <string name="data_screen_recycler_locality_label">Measurement at Station</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -102,6 +102,8 @@
     <string name="rv_empty_card_message_projects">No projects to display</string>
     <string name="rv_empty_card_message_stations">No stations to display</string>
     <string name="rv_empty_card_message_compass">No compass data for this station</string>
+
+    <string name="alert_need_data_message">Welcome! You opened an empty project. Create a new station to start recording data.</string>
 
 
 </resources>

@@ -166,7 +166,9 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         // Set a listener for marker click.
         mGoogleMap.setOnMarkerClickListener(this);
         UiSettings settings =  mGoogleMap.getUiSettings();
-        settings.setRotateGesturesEnabled(true);
+        settings.setRotateGesturesEnabled(false);
+        settings.setTiltGesturesEnabled(false);
+
         settings.setZoomControlsEnabled(true);
         settings.setMapToolbarEnabled(false);
 
