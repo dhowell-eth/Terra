@@ -153,7 +153,7 @@ public class CompassView extends View implements
 
         // Get whether the view is defaulted to enabled or not
         boolean isEnabledDefault = (preferences.getBoolean("is_compass_enabled", true));
-        Log.d(TAG, "init: " + Boolean.toString(isEnabledDefault));
+
         isEnabled = new ListenableBoolean(a.getBoolean(R.styleable.CompassView_isEnabled, isEnabledDefault));
 
         a.recycle();
@@ -193,8 +193,7 @@ public class CompassView extends View implements
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        //Log.d(TAG,"onSizeChanged() called!");
-        //Log.d(TAG,String.format("%d %d %d %d",w,h,oldw,oldh));
+
         mPaddingLeft = getPaddingLeft();
         mPaddingTop = getPaddingTop();
         mPaddingRight = getPaddingRight();
@@ -531,20 +530,20 @@ public class CompassView extends View implements
         float scalingFactor;
         // Get scaled dimensions for bitmap
 
-        //Log.d(TAG,String.format("BITMAP DIMS: %d %d",bitmap.getWidth(),bitmap.getHeight()));
+
         if ((drawingRect.width() < bitmap.getWidth()) && (bitmap.getWidth() >= bitmap.getHeight()) ) {
             scalingFactor =  (float) drawingRect.width() / (float) bitmap.getWidth();
-           // Log.d(TAG,"Bitmap is wider than view.");
+
         }
         else if ((drawingRect.height() < bitmap.getHeight()) && (bitmap.getHeight() >= bitmap.getWidth())){
             scalingFactor = (float) drawingRect.height() / (float) bitmap.getHeight();
-            //Log.d(TAG,"Bitmap is taller than view.");
+
         }
         else {
             return bitmap;
         }
 
-        //Log.d(TAG,String.format("Scaling Factor: %f",scalingFactor));
+
         // creates matrix for the manipulation
         Matrix matrix = new Matrix();
         // resize the bit map
@@ -617,13 +616,13 @@ public class CompassView extends View implements
 
         // find smallest dimension and shrink the larger dimension to make the box roughly square (+- 1px)
         if (mContentWidth > mContentHeight) {
-            //Log.d(TAG,"Creating Rect!   Detected that the content width is greater than height");
+
             int delta = (mContentWidth - mContentHeight)/2;
             l = l + delta;
             r = r - delta;
         }
         else if (mContentHeight > mContentWidth) {
-            //Log.d(TAG,"Creating Rect!   Detected that the content height is greater than width");
+
             int delta = ( mContentHeight-mContentWidth)/2;
             t = t + delta;
             b = b - delta;

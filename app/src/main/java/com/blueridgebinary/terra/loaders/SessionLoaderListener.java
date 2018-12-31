@@ -50,7 +50,7 @@ public class SessionLoaderListener implements LoaderManager.LoaderCallbacks<Curs
             // Pass new data back to the HomeScreenFragment for it to do stuff with it
             mContext.handleNewSessionData(data);
 
-            Log.d(TAG,"Successfully Ran a Session Loader with " + Integer.toString(data.getCount()) +" rows and passed it back to the fragment. :)");
+
         }
 
         @Override

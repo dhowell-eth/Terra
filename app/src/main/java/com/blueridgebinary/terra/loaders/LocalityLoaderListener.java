@@ -64,7 +64,7 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             // Pass new data back to the HomeScreenFragment for it to do stuff with it
-            Log.d(TAG,data.toString());
+
             mUi.handleNewLocalityData(data,mIsSingleQuery);
 
 
@@ -76,7 +76,7 @@ public class LocalityLoaderListener implements LoaderManager.LoaderCallbacks<Cur
             else {
                 debugLocalityText = mLocalityId.toString();
             }
-            Log.d(TAG,"Successfully Locality Loader for (SESSION/LOCALITY) (" + mSessionId.toString() +"/" + debugLocalityText+ ") with " + Integer.toString(data.getCount()) +" rows and passed it back to the fragment. :)");
+
         }
 
     @Override

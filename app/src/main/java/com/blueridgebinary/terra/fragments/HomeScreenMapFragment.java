@@ -94,7 +94,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"onCreate() called!");
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
@@ -128,7 +128,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
 
-        Log.d(TAG,"onCreateView() called!");
+
 
         MapsInitializer.initialize(getActivity().getApplicationContext());
         mMapView.getMapAsync(this);
@@ -208,7 +208,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         this.getActivity().getSupportLoaderManager().restartLoader(LoaderIds.OVERVIEW_MAP_LOCALITY_LOADER_ID,
                 null,
                 mLocalityLoaderListener);
-        Log.d(TAG, "onMarkerClick: clicked a marker" + Integer.toString(clickedId));
+
         // Return false to indicate that we have not consumed the event and that we wish
         // for the default behavior to occur (which is for the camera to move such that the
         // marker is centered and for the marker's info window to open, if it has one).
@@ -248,7 +248,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
         localityCursor.moveToFirst();
         int i = 0;
         while (!localityCursor.isAfterLast()) {
-            Log.d(TAG,"ADDING MARKERS for i=" + Integer.toString(i));
+
             double lat = localityCursor.getDouble(latIndex);
             double lon = localityCursor.getDouble(longIndex);
             String stationNumber = localityCursor.getString(localityCursor.getColumnIndex(TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER));
@@ -259,7 +259,7 @@ public class HomeScreenMapFragment extends HomeScreenFragment implements
 
             MarkerOptions options = new MarkerOptions();
             options.position(new LatLng(lat,lon)).title("Station "+stationNumber);
-            Log.d(TAG, "addMapMarkersFromLocalityCursor: " + selectedLocalityId.toString());
+
             if (id == selectedLocalityId.getValue()) {
 
                  options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));

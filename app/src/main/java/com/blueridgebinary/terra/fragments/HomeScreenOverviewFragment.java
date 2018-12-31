@@ -164,7 +164,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_home_screen_overview, container, false);
 
-        Log.d(TAG,"onCreateView() called!");
+
 
         //  Get UI Components
         tvSessionName = (TextView) v.findViewById(R.id.tv_home_overview_title);
@@ -335,7 +335,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
         // If cursor is null, data is no longer available and you need to disconnect any adapters, etc
         if (cursor == null) {
-            Log.d(TAG, "handleNewLocalityData: null cursor");
+
             mSpinner.setAdapter(null);
             return;
         }
@@ -515,7 +515,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
                 // Execute Update statement
                 int rowsUpdated = getActivity().getContentResolver().update(idUri, contentValues,null,null);
 
-                Log.d(TAG,"UPDATED NOTES #ROWS = " + Integer.toString(rowsUpdated));
+
             }
         });
 
@@ -531,8 +531,7 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
 
     public void sessionCursorToCurrentSession(Cursor sessionCursor) {
 
-        Log.d("NewURIDEBUG",Integer.toString(sessionCursor.getCount()) + "Records in Cursor");
-        Log.d("NewURIDEBUG","Got cursor and am trying to retrieve data");
+
         if (sessionCursor.getCount() != 1) return;
         sessionCursor.moveToFirst();
 
@@ -549,13 +548,12 @@ public class HomeScreenOverviewFragment extends HomeScreenFragment {
         String created = sessionCursor.getString(createdIndex);
 
         currentSession = new CurrentSession(id,name,notes,updated,created);
-        Log.d("NewURIDEBUG","Loaded Session:" + currentSession.getSessionName());
+
     }
 
     public void localityCursorToCurrentLocality(Cursor localityCursor) {
 
-        Log.d("NewURIDEBUG",Integer.toString(localityCursor.getCount()) + "Records in Cursor");
-        Log.d("NewURIDEBUG","Got cursor and am trying to retrieve data");
+
 
         if (localityCursor.getCount() != 1) return;
         localityCursor.moveToFirst();

@@ -105,5 +105,12 @@
 
     <string name="alert_need_data_message">Welcome! You opened an empty project. Create a new station to start recording data.</string>
 
+    <string name="about_heading">About Terra</string>
+    <string name="about_text_main">
+        For more information on Terra, visit http://faulted.io\n\n
+        Terra\'s icon, Pin, is by Kokota from the Noun Project.\n\n
+        Home screen artwork was provided by Vecteezy.\n\n
+        Terra also uses ShapeOfView (https://github.com/florent37/ShapeOfView)\n
+    </string>
 
 </resources>

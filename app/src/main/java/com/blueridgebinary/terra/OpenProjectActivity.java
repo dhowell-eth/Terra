@@ -54,7 +54,7 @@ public class OpenProjectActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("LOADER-DEBUG","onResume() called!");
+
         getSupportLoaderManager().restartLoader(SESSION_LOADER_ID, null, this);
     }
 

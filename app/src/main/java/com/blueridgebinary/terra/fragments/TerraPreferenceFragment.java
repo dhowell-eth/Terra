@@ -25,6 +25,7 @@ import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.PreferenceScreen;
 import android.widget.Toast;
 
+import com.blueridgebinary.terra.AboutActivity;
 import com.blueridgebinary.terra.R;
 import com.blueridgebinary.terra.WelcomeActivity;
 import com.blueridgebinary.terra.data.TerraDbContract;
@@ -91,6 +92,18 @@ public class TerraPreferenceFragment extends PreferenceFragmentCompat {
         PreferenceCategory categoryAdmin = new PreferenceCategory(contextThemeWrapper);
         categoryAdmin.setTitle("Admin");
         screen.addPreference(categoryAdmin);
+
+        Preference aboutTerraPreference = new Preference(contextThemeWrapper);
+        aboutTerraPreference.setTitle("About");
+        aboutTerraPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent aboutIntent = new Intent(getActivity(),AboutActivity.class);
+                startActivity(aboutIntent);
+                return true;
+            }
+        });
+        screen.addPreference(aboutTerraPreference);
 
         Preference deleteProjectPreference = new Preference(contextThemeWrapper);
         deleteProjectPreference.setTitle("DELETE PROJECT");

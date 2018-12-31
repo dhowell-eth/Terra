@@ -48,7 +48,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.SessionEntry.COLUMN_NOTES    + " TEXT, " +
                 TerraDbContract.SessionEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
                 TerraDbContract.SessionEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
-        Log.d("DB_DEBUGGING",CREATE_TABLE_SESSION);
+
         db.execSQL(CREATE_TABLE_SESSION);
         // Create Locality Table
         final String CREATE_TABLE_LOCALITY = "CREATE TABLE "  + TerraDbContract.LocalityEntry.TABLE_NAME + " (" +
@@ -63,7 +63,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.LocalityEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
                 TerraDbContract.LocalityEntry.COLUMN_STATIONNUMBER + " Integer NOT NULL, "+
                 TerraDbContract.LocalityEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
-        Log.d("DB_DEBUGGING",CREATE_TABLE_LOCALITY);
+
         db.execSQL(CREATE_TABLE_LOCALITY);
         // Create compassMeasurement Table
         final String CREATE_TABLE_COMPASSMEASUREMENT = "CREATE TABLE "  + TerraDbContract.CompassMeasurementEntry.TABLE_NAME + " (" +
@@ -79,7 +79,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 TerraDbContract.CompassMeasurementEntry.COLUMN_CREATED + " DATETIME NOT NULL, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_MEASUREMENTCATEGORYID + " INTEGER, " +
                 TerraDbContract.CompassMeasurementEntry.COLUMN_UPDATED + " DATETIME NOT NULL);";
-        Log.d("DB_DEBUGGING",CREATE_TABLE_COMPASSMEASUREMENT);
+
         db.execSQL(CREATE_TABLE_COMPASSMEASUREMENT);
         // Create compassMeasurement Table
         final String CREATE_TABLE_PICTURE = "CREATE TABLE "  + TerraDbContract.PictureEntry.TABLE_NAME + " (" +
@@ -114,7 +114,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
                 "('3D Plane', 'DEFAULT CATEGORY', datetime(), datetime())," +
                 "('3D Line', 'DEFAULT CATEGORY', datetime(), datetime())," +
                 "('Bearing', 'DEFAULT CATEGORY', datetime(), datetime());";
-        Log.d("DB",INSERT_DEFAULT_MEAS_CATS);
+
         db.execSQL(CREATE_TABLE_MEAS_CAT);
         db.execSQL(INSERT_DEFAULT_MEAS_CATS);
     }
@@ -126,7 +126,7 @@ public class TerraDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         for( String tableName : tableNames) {
-            Log.d("DB_DEBUGGING","DELETING TABLE: " + tableName);
+
             db.execSQL("DROP TABLE IF EXISTS " + tableName);
         }
         onCreate(db);

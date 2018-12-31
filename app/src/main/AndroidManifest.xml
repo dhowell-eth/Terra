@@ -9,12 +9,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_terra"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_terra_round"
         android:supportsRtl="true"
         android:theme="@style/TerraDarkTheme">
-
         <provider
             android:name=".data.TerraDbContentProvider"
             android:authorities="com.blueridgebinary.terra"
@@ -63,11 +62,13 @@
 
         <activity
             android:name=".PreferencesActivity"
-            android:theme="@style/PreferenceFixTheme.Light"></activity>
+            android:theme="@style/PreferenceFixTheme.Light" />
         <activity
             android:name=".ExportActivity"
             android:screenOrientation="portrait" />
-
+        <activity
+            android:name=".AboutActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

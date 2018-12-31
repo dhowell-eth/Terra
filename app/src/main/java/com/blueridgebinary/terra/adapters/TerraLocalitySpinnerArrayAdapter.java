@@ -32,7 +32,7 @@ public class TerraLocalitySpinnerArrayAdapter extends ResourceCursorAdapter {
         // Inflate the view
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View row=inflater.inflate(R.layout.terra_main_spinner, parent, false);
-        Log.d(TAG, "newView: called!");
+
         return row;
     }
 

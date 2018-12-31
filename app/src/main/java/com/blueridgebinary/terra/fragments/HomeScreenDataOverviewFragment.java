@@ -75,14 +75,14 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Log.d(TAG,"CALLED onActivityCreated!");
+
 
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG,"CALLED onViewCreated!");
+
         View v = inflater.inflate(R.layout.fragment_home_screen_data_overview, container, false);
 
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view_home_list_localities);
@@ -95,7 +95,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG,"CALLED onCreate!");
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             currentSessionId = getArguments().getInt(ARG_CURRENTSESSIONID);
@@ -107,7 +107,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG,"CALLED onResume!");
+
         if (this.getView() != null) {
             mLocalityLoaderListener = new LocalityLoaderListener(this,this.getActivity(), currentSessionId, null);
             this.getActivity().getSupportLoaderManager().initLoader(LoaderIds.LOCALITY_HOME_LIST_LOADER_ID,
@@ -145,7 +145,7 @@ public class HomeScreenDataOverviewFragment extends HomeScreenFragment implement
 
     @Override
     public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
-        Log.d(TAG,"Called handleNewLocalityData in List Fragment, isnull? " + Boolean.toString(mAdapter==null));
+
         mAdapter.swapCursor(cursor);
     }
 

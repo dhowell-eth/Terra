@@ -170,12 +170,12 @@ public class TerraDbContentProvider extends ContentProvider {
                         "JOIN %s t3 ON t1.%s = t3.%s " +
                         "WHERE t2._id IN (%s);",
                         tMain,tJoin1,tMainCol1,tJoin1Col,tJoin2,tMainCol2,tJoinCol2,localityId);
-                /*Log.d(TAG,"Formatted a new join compass query: " + joinQuery);*/
+
                 retCursor = db.rawQuery(joinQuery,null);
                 // Notifications have to happen for all joined tables, so the observer is pointed at the base_content_uri
                 retCursor.setNotificationUri(getContext().getContentResolver(), uri);
-                Log.d(TAG, "query: set notifcation uri at " + uri);
-                /*Log.d(TAG,"Queried a new join compass query: " + joinQuery);*/
+
+
                 return retCursor;
             // Default exception
             default:
@@ -285,7 +285,7 @@ public class TerraDbContentProvider extends ContentProvider {
                         TerraDbContract.SessionEntry._ID,
                         TerraDbContract.SessionEntry._ID,
                         rowId);
-                Log.d(TAG, "delete: " + delCompassQuery);
+
                 // 2. Localities
                 String delLocalityQuery = String.format(Locale.US,
                         "DELETE FROM %s WHERE %s = %s;",
@@ -309,9 +309,9 @@ public class TerraDbContentProvider extends ContentProvider {
                 break;
 
             case LOCALITIES:
-                Log.d(TAG,  "refreshAppBar: "+ Arrays.toString(selectionArgs));
+
                 if (selectionArgs.length >= 1) {
-                    Log.d(TAG,  "refreshAppBar: we have some selections to delete.");
+
                     // Delete relevant data in measurement table (linked as foreign keys)
                     String delete_comp_sql = "DELETE FROM " + TerraDbContract.CompassMeasurementEntry.TABLE_NAME +
                             " WHERE " + TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID + " IN (" +
@@ -328,7 +328,7 @@ public class TerraDbContentProvider extends ContentProvider {
                 }
                 break;
             case COMPASS_JOINED_LOCALITIES_JOINED_MEAS_CAT:
-                Log.d(TAG,  "delete called in content provider for: "+ Arrays.toString(selectionArgs));
+
                 if (selectionArgs.length >= 1) {
                     // Delete relevant data in measurement table (linked as foreign keys)
                     String delete_comp_sql = "DELETE FROM " + TerraDbContract.CompassMeasurementEntry.TABLE_NAME +
@@ -342,7 +342,7 @@ public class TerraDbContentProvider extends ContentProvider {
                         debugCompIds = debugCompIds = debugCompIds + testCursor.getString(testCursor.getColumnIndex(TerraDbContract.CompassMeasurementEntry._ID)) + ",";
                         testCursor.moveToNext();
                     }
-                    Log.d(TAG, "delete: " + debugCompIds);
+
                     db.beginTransaction();
                     db.execSQL(delete_comp_sql);
                     db.setTransactionSuccessful();
@@ -357,7 +357,7 @@ public class TerraDbContentProvider extends ContentProvider {
         }
 
         if (numRowsDeleted != 0) {
-            Log.d(TAG, "delete: Notifying change at " + uri);
+
             getContext().getContentResolver().notifyChange(uri,null);
         }
         return numRowsDeleted;

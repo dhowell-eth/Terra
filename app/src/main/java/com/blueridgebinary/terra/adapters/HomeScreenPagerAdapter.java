@@ -52,13 +52,13 @@ public class HomeScreenPagerAdapter extends FragmentPagerAdapter {
     public int getItemPosition(Object object) {
         HomeScreenFragment f = (HomeScreenFragment) object;
         if (f != null) {
-            Log.d("Loader-DEBUG","Attempting to refresh Fragment");
+
             f.refreshFragmentData(currentSession);
             f.refreshFragmentData(currentLocality);
         }
         // debug
         else {
-            Log.d("Loader-DEBUG","Fragment in Page Viewer has not yet been created...");
+
         }
 
         return super.getItemPosition(object);

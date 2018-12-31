@@ -52,6 +52,8 @@ public class DataScreenActvity extends AppCompatActivity implements
             // Initialize the toolbar/app bar
             Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar_home_activity);
             setSupportActionBar(myToolbar);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
             localityId = getIntent().getIntExtra("localityId",0);
             sessionId = getIntent().getIntExtra("session_id",0);
@@ -89,7 +91,6 @@ public class DataScreenActvity extends AppCompatActivity implements
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            Log.d(TAG, "onLoadFinished: called! with cursor length=" + Integer.toString(data.getCount()));
             mAdapter.swapCursor(data);
         }
 
@@ -149,20 +150,21 @@ public class DataScreenActvity extends AppCompatActivity implements
                     Intent intent = new Intent(this, PreferencesActivity.class);
                     intent.putExtra("session_id",this.sessionId);
                     startActivity(intent);
+                case android.R.id.home:
+                    this.onBackPressed();
                 default:
                     return super.onOptionsItemSelected(item);
             }
         }
 
         public void deleteSelectedRows() {
-            Log.d(TAG, "deleteSelectedRows: Tried to delete some stuff. Implement logic here.");
             // First, get the array of selected ids and convert from int to string array
             int numIds = mAdapter.selectedRecyclerViewItems.size();
             String[] measurementIds = new String[numIds];
             for (int i = 0; i < numIds; i++) {
                 measurementIds[i] = Integer.toString(mAdapter.selectedRecyclerViewItems.get(i));
             }
-            Log.d(TAG, "deleteSelectedRows: " + measurementIds.toString());
+
             // Then, attempt to execute a delete with this selection
             int nRowsDeleted = getContentResolver().delete(TerraDbContract.JoinedCompassEntry.CONTENT_URI, "",measurementIds);
             // Once we've deleted the data, update our selection container to reflect changes
@@ -175,10 +177,10 @@ public class DataScreenActvity extends AppCompatActivity implements
 
 
         public void refreshAppBar(Boolean isSelected) {
-            Log.d(TAG,  "refreshAppBar: "+ isSelected.toString());
+
             this.itemsSelectedInRecyclerView = isSelected;
             this.onPrepareOptionsMenu(mOptionsMenu);
-            Log.d(TAG, "refreshAppBar: called.");
+
             return;
         }
 

@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements
         for (int i = 0; i < numIds; i++) {
             localityIds[i] = Integer.toString(dataOverviewFragment.mAdapter.selectedRecyclerViewItems.get(i));
         }
-        Log.d(TAG,  "refreshAppBar: "+ Arrays.toString(localityIds));
+
         // Then, attempt to execute a delete with this selection
         int nRowsDeleted = getContentResolver().delete(TerraDbContract.LocalityEntry.CONTENT_URI, "",localityIds);
         // Once we've deleted the data, update our selection container to reflect changes
@@ -247,10 +247,10 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public void refreshAppBar(Boolean isSelected) {
-        Log.d(TAG,  "refreshAppBar: "+ isSelected.toString());
+
         this.itemsSelectedInRecyclerView = isSelected;
         this.onPrepareOptionsMenu(mOptionsMenu);
-        Log.d(TAG, "refreshAppBar: called.");
+
         return;
     }
 

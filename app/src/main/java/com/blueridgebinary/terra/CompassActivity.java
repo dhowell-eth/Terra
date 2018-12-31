@@ -148,10 +148,10 @@ public class CompassActivity extends AppCompatActivity implements
 
         // Focus on the text view to avoid resizing issue
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Log.d(TAG, "onCreate: " + Boolean.toString(preferences.contains("compass_mode")));
+
         String preferredCompassMode = (preferences.getString("compass_mode", ""));
         String[] compassModes = getResources().getStringArray(R.array.compass_modes);
-        Log.d(TAG, "onCreate: " + preferredCompassMode + " | " + java.util.Arrays.toString(compassModes));
+
 
         // Initialize accuracy toast flag
         shouldDisplayedAccuracyToast = true;
@@ -226,7 +226,7 @@ public class CompassActivity extends AppCompatActivity implements
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //  Assumes pos 0 = bearing pos 1 = vector pos 2 = plane
-                Log.d(TAG, "onItemSelected: CALLED TO CHANGE COMPASS VIA SPINNER");
+
                 mCompassView.setNeedleModeId(position + 1);
                 if (position == 0) {
                     mDipEditText.setVisibility(View.GONE);
@@ -713,7 +713,7 @@ public class CompassActivity extends AppCompatActivity implements
 
         // Insert the content values via a ContentResolver
         Uri uri = getContentResolver().insert(TerraDbContract.CompassMeasurementEntry.CONTENT_URI, contentValues);
-        Log.d(TAG, "Added new compass measurement!: " + uri.toString());
+
         finish();
     }
 

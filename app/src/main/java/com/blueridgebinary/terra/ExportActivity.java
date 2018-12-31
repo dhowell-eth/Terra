@@ -127,7 +127,7 @@ public class ExportActivity extends AppCompatActivity {
         DocumentFile existingDir = exportDirectory.findFile(dataDirName);
         if (existingDir != null) {
             boolean deleteExistDirResult = existingDir.delete();
-            Log.d(TAG, "getAndProcessFile: tried to delete existing dir" + Boolean.toString(deleteExistDirResult));
+
         }
 
         // Try to create output directory, if there is an error show a toast
@@ -167,7 +167,7 @@ public class ExportActivity extends AppCompatActivity {
                 "Description: " + projectCursor.getString(projectCursor.getColumnIndex(TerraDbContract.SessionEntry.COLUMN_NOTES)) + "\n" +
                 "Export Date: " + DateFormat.getDateTimeInstance().format(new Date()) + "\n";
 
-        Log.d(TAG, "exportData: " + infoString);
+
 
         // 1. Write info file
         try {
@@ -178,7 +178,7 @@ public class ExportActivity extends AppCompatActivity {
             outputStreamWriter.close();
         }
         catch (IOException e) {
-            Log.d(TAG, "exportData: Couldn't find export_info.txt file.");
+
             return false;
         }
 
@@ -227,7 +227,7 @@ public class ExportActivity extends AppCompatActivity {
             outputStreamWriter.close();
         }
         catch (IOException e) {
-            Log.d(TAG, "exportData: Couldn't find locality csv file.");
+
             return false;
         }
 
@@ -240,7 +240,7 @@ public class ExportActivity extends AppCompatActivity {
                 localityIds,
                 TerraDbContract.CompassMeasurementEntry.COLUMN_LOCALITYID + " ASC, " + TerraDbContract.CompassMeasurementEntry._ID + " ASC");
 
-        Log.d(TAG, "exportData: " + DatabaseUtils.dumpCursorToString(measurementCursor));
+
         measurementCursor.moveToFirst();
 
         try {
@@ -277,7 +277,7 @@ public class ExportActivity extends AppCompatActivity {
             outputStreamWriter.close();
         }
         catch (IOException e) {
-            Log.d(TAG, "exportData: Couldn't find locality csv file.");
+
             return false;
         }
 

@@ -124,7 +124,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         localityId = getIntent().getIntExtra("localityId",0);
         isCreateNewLocality = getIntent().getBooleanExtra("isCreateNewLocality",true);
 
-        Log.d(TAG,Boolean.toString(isCreateNewLocality));
+
 
         // Update title with the actual session/project name
         //tvTitle.setText(sessionName);
@@ -196,7 +196,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d("GPS", "called onRequestPermissionsResult...");
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PermissionIds.FINE_LOCATION_PERMISSION_ID:
@@ -223,7 +223,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         mMap.getUiSettings().setTiltGesturesEnabled(false);
 
         mMap.animateCamera(CameraUpdateFactory.zoomTo(defaultZoomLevel));
-        Log.d(TAG, "onMapReady: default zoom");
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
@@ -241,7 +241,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         }
         else {
             boolean gpsStarted = startGpsMode();
-            Log.d(TAG, "toggleGpsEnabled: Trying to start gps with result=" + Boolean.toString(gpsStarted));
+
             if (gpsStarted) {
                 if (isMapEditEnabled) btnEditLocation.performClick();
                 btnGps.setImageResource(R.drawable.ic_gps_fixed_white_36dp);
@@ -282,7 +282,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-                Log.d("GPS","I dont have permission so I am going to request it");
+
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         PermissionIds.FINE_LOCATION_PERMISSION_ID);
@@ -304,7 +304,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
     public boolean startMapEditMode() {
         if (mMap != null) {
             if (currentLocationMarker !=null) {
-                Log.d(TAG, "startMapEditMode: started and hid marker");
+
                 currentLocationMarker.setVisible(false);
             }
             ivCrosshairs.setVisibility(View.VISIBLE);
@@ -377,9 +377,9 @@ public class AddEditLocalityActivity extends FragmentActivity implements
         locationListener = new AddEditActivityLocationListener();
         try {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
-            Log.d("GPS","Requested Location Updates.");
+
         } catch (SecurityException e) {
-            Log.e("PERMISSIONS",e.toString());
+
         }
     }
 
@@ -394,7 +394,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
             } else {
                 currentLocationMarker.setPosition(center);
             }
-            Log.d(TAG, "updateEntryFieldsWithMapCenter: updated map marker with visibility="+Boolean.toString(currentLocationMarker.isVisible()));
+
         }
     }
 
@@ -552,7 +552,7 @@ public class AddEditLocalityActivity extends FragmentActivity implements
 
     @Override
     public void handleNewLocalityData(Cursor cursor, boolean isSingleQuery) {
-        Log.d(TAG,"Received data for a single Locality query, current locality = " + Integer.toString(localityId));
+
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             // Otherwise it is the data for the current locality
