@@ -12,3 +12,9 @@
 shapeofview
 TODO.txt
 app/release
+
+# Bazel local dirs
+bazel-bin
+bazel-out
+bazel-Terra
+bazel-testlogs
