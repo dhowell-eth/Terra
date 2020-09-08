@@ -7,3 +7,8 @@
 /build
 /captures
 .externalNativeBuild
+.idea
+**/google_maps_api.xml
+shapeofview
+TODO.txt
+app/release
